@@ -11,6 +11,7 @@ import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
+import io.github.jarethjaziel.abyssbattle.AbyssBattle;
 import io.github.jarethjaziel.abyssbattle.util.Constants;
 
 public class GameScreen implements Screen{
@@ -22,8 +23,12 @@ public class GameScreen implements Screen{
     // Variable para guardar la capa lógica de colisión
     private TiledMapTileLayer collisionLayer;
 
+    private AbyssBattle game;
 
 
+    public GameScreen(AbyssBattle game) {
+        this.game = game;
+    }
 
     @Override
     public void show() {
@@ -53,8 +58,7 @@ public class GameScreen implements Screen{
         
         mapRenderer.setView(camera); 
 
-        mapRenderer.render(); 
-
+        mapRenderer.render();
     }
 
     @Override
