@@ -1,4 +1,4 @@
-package io.github.jarethjaziel.abyssbattle;
+package io.github.jarethjaziel.abyssbattle.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
@@ -29,15 +29,14 @@ public class GameScreen implements Screen{
     public void show() {
         camera = new OrthographicCamera();
         viewport = new FitViewport(WORLD_WIDTH, WORLD_HEIGHT, camera);
-        map = new TmxMapLoader().load("game_bg_1.tmx");
+        map = new TmxMapLoader().load("maps/game_bg_1.tmx");
         mapRenderer = new OrthogonalTiledMapRenderer(map, 1);  
 
-        collisionLayer = (TiledMapTileLayer) map.getLayers().get("Collision");
+        collisionLayer = (TiledMapTileLayer) map.getLayers().get("collision");
         
         if (collisionLayer == null) {
-            // Imprime un error si no la encuentra
-            Gdx.app.error("GameScreen", "¡No se pudo encontrar la capa de Tiled llamada 'Collision'!");
-        }  
+            Gdx.app.error("GameScreen", "¡No se pudo encontrar la capa de Tiled llamada 'collision'!");
+        }
     }
 
     @Override

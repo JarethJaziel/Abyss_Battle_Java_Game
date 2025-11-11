@@ -1,4 +1,4 @@
-package io.github.jarethjaziel.abyssbattle;
+package io.github.jarethjaziel.abyssbattle.screens;
 
 import com.badlogic.gdx.Screen;
 
