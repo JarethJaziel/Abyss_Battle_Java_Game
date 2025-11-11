@@ -11,6 +11,8 @@ import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
+import io.github.jarethjaziel.abyssbattle.util.Constants;
+
 public class GameScreen implements Screen{
 
     private TiledMap map;
@@ -20,15 +22,13 @@ public class GameScreen implements Screen{
     // Variable para guardar la capa lógica de colisión
     private TiledMapTileLayer collisionLayer;
 
-    public static final float WORLD_WIDTH = 736;  // Ancho del mundo en píxeles
-    public static final float WORLD_HEIGHT = 1104; // Alto del mundo en píxeles
-    public static final int TILE_SIZE = 32;
+
 
 
     @Override
     public void show() {
         camera = new OrthographicCamera();
-        viewport = new FitViewport(WORLD_WIDTH, WORLD_HEIGHT, camera);
+        viewport = new FitViewport(Constants.WORLD_WIDTH, Constants.WORLD_HEIGHT, camera);
         map = new TmxMapLoader().load("maps/game_bg_1.tmx");
         mapRenderer = new OrthogonalTiledMapRenderer(map, 1);  
 
