@@ -1,41 +1,89 @@
 package io.github.jarethjaziel.abyssbattle.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import com.badlogic.gdx.math.Vector2;
+
 public class Board {
 
-    private final int width;
-    private final int height;
-    private Entity[][] grid;
+    private float width;
+    private float height;
 
-    public Board(int width, int height) {
+    private List<Troop> troops;
+
+    public Board(float width, float height) {
         this.width = width;
         this.height = height;
-        this.grid = new Entity[width][height];
+        this.troops = new ArrayList<>();
     }
 
-    public boolean isInside(int x, int y) {
-        return x >= 0 && x < width && y >= 0 && y < height;
+    public float getWidth() {
+        return width;
     }
 
-    public void placeEntity(Entity e) {
-        int x = (int) e.getX();
-        int y = (int) e.getY();
+    public float getHeight() {
+        return height;
+    }
 
-        if (isInside(x, y)) {
-            grid[x][y] = e;
+    /**
+     * Verifica si una posición está fuera de los límites del mapa.
+     */
+    public boolean isOutOfBounds(float x, float y) {
+        return x < 0 || y < 0 || x > width || y > height;
+    }
+
+    /**
+     * Agrega una tropa al tablero.
+     */
+    public void addTroop(Troop troop) {
+        troops.add(troop);
+    }
+
+    /**
+     * Devuelve todas las tropas (si quieres mostrarlas o contarlas).
+     */
+    public List<Troop> getTroops() {
+        return troops;
+    }
+
+    /**
+     * Busca si hay una tropa cerca de la posición dada.
+     * Esto se usa para detectar colisiones simples.
+     * 
+     * @param x posición X del proyectil
+     * @param y posición Y del proyectil
+     * @param radius rango de colisión
+     */
+    public Troop getTroopAt(float x, float y, float radius) {
+
+        for (Troop t : troops) {
+            if (!t.isActive()) continue;
+
+            Vector2 pos = t.getBody().getPosition();
+
+            float dx = pos.x - x;
+            float dy = pos.y - y;
+
+            if ((dx * dx + dy * dy) <= (radius * radius)) {
+                return t;
+            }
         }
+
+        return null;
     }
 
-    public Entity getEntityAt(int x, int y) {
-        if (!isInside(x, y)) return null;
-        return grid[x][y];
-    }
+    /**
+     * Cuenta cuántas tropas siguen vivas.
+     */
+    public int getAliveTroops() {
+        int count = 0;
 
-    public void removeEntity(int x, int y) {
-        if (isInside(x, y)) {
-            grid[x][y] = null;
+        for (Troop t : troops) {
+            if (t.isActive()) count++;
         }
-    }
 
-    public int getWidth() { return width; }
-    public int getHeight() { return height; }
+        return count;
+    }
 }
+

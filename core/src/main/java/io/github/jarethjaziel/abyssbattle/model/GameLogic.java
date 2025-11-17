@@ -3,102 +3,109 @@ package io.github.jarethjaziel.abyssbattle.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.World;
+
 public class GameLogic {
+
+    private static final float GRAVITY = 9.88f;
+
     private World world;
     private Board board;
+
     private Player player1;
     private Player player2;
     private Player activePlayer;
+
     private DamageSystem damageSystem;
-    private Projectile physics;
+    private ProjectilePhysics physics;
+
     private boolean gameOver;
 
-    private final List<Projectile> activeProjectiles;
+    private List<Projectile> activeProjectiles;
 
-    public GameLogic(World world, Board board, Player player1, Player player2) {
+    public GameLogic(World world, Board board, Player p1, Player p2) {
         this.world = world;
         this.board = board;
-        this.player1 = player1;
-        this.player2 = player2;
-        this.activePlayer = player1;
-        this.physics = new ProjectilePhysics();
+
+        this.player1 = p1;
+        this.player2 = p2;
+        this.activePlayer = p1;
+
         this.damageSystem = new DamageSystem();
+        this.physics = new ProjectilePhysics(GRAVITY);
+
         this.activeProjectiles = new ArrayList<>();
         this.gameOver = false;
-    }
-
-    public Player getActivePlayer() {
-        return activePlayer;
     }
 
     public void switchTurn() {
         activePlayer = (activePlayer == player1 ? player2 : player1);
     }
 
-    /**
-     * Crear y disparar un proyectil.
-     */
-    public void shoot(Cannon cannon, float angle, float power) {
-        Trajectory trajectory = physics.computeTrajectory(angle, power);
+    public void shoot(float angle, float power) {
 
-        Projectile projectile = ProjectileFactory.createProjectile(world, angle, power);
-        activeProjectiles.add(projectile);
+        Cannon cannon = activePlayer.getCannon();
+        Vector2 pos = cannon.getBody().getPosition();
+
+        Projectile p = physics.createProjectile(
+                world,
+                pos.x, pos.y,
+                angle, power
+        );
+
+        activeProjectiles.add(p);
     }
 
-    /**
-     * Llamado cada frame desde el motor del juego.
-     */
     public void update(float deltaTime) {
+
         if (gameOver) return;
 
         List<Projectile> toRemove = new ArrayList<>();
 
         for (Projectile p : activeProjectiles) {
+
             if (!p.isActive()) {
                 toRemove.add(p);
                 continue;
             }
 
-            // Revisar si golpeó algo
-            checkProjectileCollisions(p);
+            checkProjectileCollision(p);
         }
 
         activeProjectiles.removeAll(toRemove);
     }
 
-    /**
-     * Revisa colisiones del proyectil contra tropas y terreno.
-     */
-    private void checkProjectileCollisions(Projectile projectile) {
+    private void checkProjectileCollision(Projectile p) {
 
-        Vector2 pos = projectile.getBody().getPosition();
+    Vector2 pos = p.getBody().getPosition();
 
-        Tile tile = board.getTileAtWorld(pos.x, pos.y);
-        if (tile == null) {
-            // Fuera del área → destruir
-            projectile.destroy();
-            return;
-        }
-
-        // Colisión con tropa
-        if (tile.getTroop() != null && tile.getTroop().isActive()) {
-            damageSystem.applyDirectHit(tile.getTroop());
-            projectile.destroy();
-            return;
-        }
-
-        // Área de daño
-        if (!projectile.isActive()) {
-            damageSystem.applyAreaDamage(board, pos.x, pos.y, 2);
-        }
+    // 1. Fuera del tablero
+    if (board.isOutOfBounds(pos.x, pos.y)) {
+        p.destroy();
+        return;
     }
 
+    // 2. Colisión contra tropas
+    Troop hitTroop = board.getTroopAt(pos.x, pos.y, 0.5f);
+    if (hitTroop != null) {
+        damageSystem.applyDirectHit(hitTroop, p.getDamage());
+        p.destroy();
+        return;
+    }
+
+    // 3. Daño en área si el proyectil ya está destruido
+    if (!p.isActive()) {
+        damageSystem.applyAreaDamage(board, pos.x, pos.y, 2f);
+    }
+}
+
+
     public boolean checkVictory() {
-        if (player1.getAliveTroops() == 0 || player2.getAliveTroops() == 0) {
+        if (!player1.isAlive() || !player2.isAlive()) {
             gameOver = true;
             return true;
         }
         return false;
     }
-
 }

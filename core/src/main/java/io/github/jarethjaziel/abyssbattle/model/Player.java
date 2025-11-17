@@ -5,50 +5,41 @@ import java.util.List;
 
 public class Player {
 
-    private final String name;
-    private int gold;
-    private int elixir;
+    private String name;
+    private List<Troop> troops;
+    private Cannon cannon;
 
-    // Por ejemplo, tropas que posee en el mapa
-    private List<Entity> units;
-
-    public Player(String name, int gold, int elixir) {
+    public Player(String name, Cannon cannon) {
         this.name = name;
-        this.gold = gold;
-        this.elixir = elixir;
-        this.units = new ArrayList<>();
+        this.cannon = cannon;
+        this.troops = new ArrayList<>();
     }
 
-    public String getName() { 
-        return name; 
-        }
-    public int getGold() { 
-        return gold; 
-        }
-    public int getElixir() { 
-        return elixir; 
-        }
+    public String getName() {
+        return name;
+    }
 
-    public void addGold(int amount) { 
-        this.gold += amount; 
-        }
-    public void spendGold(int amount) { 
-        this.gold -= amount; 
-        }
+    public Cannon getCannon() {
+        return cannon;
+    }
 
-    public void addElixir(int amount) { 
-        this.elixir += amount; 
-        }
-    public void spendElixir(int amount) { 
-        this.elixir -= amount; 
-        }
+    public void addTroop(Troop troop) {
+        troops.add(troop);
+    }
 
-    public void addUnit(Entity e) { 
-        units.add(e); 
-        }
-    public void removeUnit(Entity e) { 
-        units.remove(e); 
-        }
+    public List<Troop> getTroops() {
+        return troops;
+    }
 
-    public List<Entity> getUnits() { return units; }
+    public int getAliveTroops() {
+        int alive = 0;
+        for (Troop t : troops) {
+            if (t.isActive()) alive++;
+        }
+        return alive;
+    }
+
+    public boolean isAlive() {
+        return getAliveTroops() > 0;
+    }
 }
