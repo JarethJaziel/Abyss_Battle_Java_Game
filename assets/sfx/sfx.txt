@@ -1,2 +1,0 @@
-Aqui se pondrán los archivos de sonidos que sean cortos y no vayan a ser 
-usados como música (sonidos < 10s)
