@@ -1,0 +1,10 @@
+.gitkeep
+fonts/fonts.txt
+images/collision.jpg
+images/game_bg_1.png
+maps/collision.tsx
+maps/game_bg_1.tmx
+music/music.txt
+sfx/sfx.txt
+sprites/sprites.txt
+ui/ui.txt

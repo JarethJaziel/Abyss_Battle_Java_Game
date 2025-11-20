@@ -1,0 +1,2 @@
+Aquí se pondrán todos los archivos que se usarán como música y que sean "largos"
+(sonidos > 10s)
