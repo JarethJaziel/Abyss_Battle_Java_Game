@@ -24,8 +24,8 @@ public class Cannon extends Entity {
      * Necesita una referencia al 'World' de Box2D para poder
      * crear el 'Body' del nuevo proyectil.
      */
-    public void shoot(World box2DWorld, float angulo, float potencia) {
+    public void shoot(World box2DWorld, float angle, float power) {
         
-        System.out.println("¡Disparando con ángulo " + angulo + "!");
+        System.out.println("¡Disparando con ángulo " + angle + "!");
     }
 }
