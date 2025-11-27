@@ -67,6 +67,7 @@ public class MainMenuScreen implements Screen{
             public void changed(ChangeEvent event, Actor actor) {
                 // TODO: Ir a la pantalla de la tienda
                 Gdx.app.log("MENU", "Ir a la Tienda de Skins");
+                game.setScreen(new ShopSkinsScreen(game));
             }
         });
 
@@ -75,6 +76,7 @@ public class MainMenuScreen implements Screen{
             public void changed(ChangeEvent event, Actor actor) {
                 // TODO: Ir a la pantalla de "Mis Skins"
                 Gdx.app.log("MENU", "Ir a Mis Skins");
+                game.setScreen(new MySkinsScreen(game));
             }
         });
 
