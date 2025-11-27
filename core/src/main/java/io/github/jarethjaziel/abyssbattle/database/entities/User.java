@@ -19,6 +19,9 @@ public class User {
     @DatabaseField
     private Date createdAt;
 
+    @DatabaseField(defaultValue = "0")
+    private int coins;
+
     // RELACIÓN UNO A UNO:
     @DatabaseField(foreign = true, foreignAutoRefresh = true, foreignAutoCreate = true)
     private Stats stats;
@@ -30,8 +33,13 @@ public class User {
         this.passwordHash = passwordHash;
         this.createdAt = new Date();
         this.stats = new Stats(); // Stats vacías al inicio
+        final int INITIAL_COINS = 100;
+        this.coins = INITIAL_COINS;
     }
     
     public void setStats(Stats stats) { this.stats = stats; }
     public Stats getStats() { return stats; }
+
+    public int getCoins(){ return coins;  }
+    public void addCoins(int amount){ this.coins += amount; }
 }

@@ -18,6 +18,13 @@ public abstract class Entity {
         this.body = body;
     }
 
+    public float getX(){
+        return body.getPosition().x;
+    }
+
+    public float getY(){
+        return body.getPosition().y;
+    }
     // El GameLogic revisará esto en cada frame
     public abstract boolean isActive();
 

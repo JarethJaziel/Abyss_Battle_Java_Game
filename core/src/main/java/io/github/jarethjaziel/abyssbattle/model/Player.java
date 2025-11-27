@@ -3,23 +3,27 @@ package io.github.jarethjaziel.abyssbattle.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.badlogic.gdx.physics.box2d.World;
-
 public class Player {
 
     private int id;
-    private String name;
+    private Cannon cannon;
     private List<Troop> troopList;
 
-    public Player(int id, String name) {
+    public Player(int id) {
         this.id = id;
-        this.name = name;
         this.troopList = new ArrayList<>();
     }
 
     public int getId() { return id; }
-    public String getName() { return name; }
     public List<Troop> getTroopList() { return troopList; }
+
+    public void setCannon(Cannon cannon) {
+        this.cannon = cannon;
+    }
+
+    public Cannon getCannon() {
+        return cannon;
+    }
 
     public void placeTroop(Troop troop, float px, float py) {
         float x = px / 100f;  
@@ -28,8 +32,8 @@ public class Player {
         troopList.add(troop);
     }
 
-    public void shoot(Cannon cannon, World world, float angle, float power) {
-        cannon.shoot(world, angle, power);
+    public void shoot(PhysicsFactory factory, float power, int damage) {
+        cannon.shoot(factory, power, damage);
     }
 
     public void finishTurn() {

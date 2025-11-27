@@ -10,20 +10,24 @@ public class Skin {
     private int id;
 
     @DatabaseField(unique = true)
-    private String nombre;
+    private String name;
+
+    @DatabaseField
+    private int price;
 
     public Skin() {}
 
-    public Skin(String nombre) {
-        this.nombre = nombre;
+    public Skin(String name, int price) {
+        this.name = name;
+        this.price = price;
     }
 
     public int getId() {
         return id;
     }
 
-    public String getNombre() {
-        return nombre;
+    public String getName() {
+        return name;
     }
     
 }
