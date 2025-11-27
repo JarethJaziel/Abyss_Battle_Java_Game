@@ -77,12 +77,12 @@ public class GameScreen implements Screen{
     public void dispose() {
         map.dispose();
         mapRenderer.dispose();
+        
     }
 
     @Override
     public void hide() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'hide'");
+        dispose();
     }
  
 }
