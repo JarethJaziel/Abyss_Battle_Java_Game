@@ -105,6 +105,14 @@ public class GameLogic {
         return state;
     }
 
+    public List<Projectile> getActiveProjectiles() {
+        return activeProjectiles;
+    }
+
+    public List<Player> getPlayers() {
+        return players;
+    }
+
     public void registerShoot(Projectile p) {
         activeProjectiles.add(p);
         state = GAME_STATE.WAITING; 
