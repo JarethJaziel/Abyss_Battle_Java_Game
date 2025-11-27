@@ -3,6 +3,8 @@ package io.github.jarethjaziel.abyssbattle.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.github.jarethjaziel.abyssbattle.util.GAME_STATE;
+
 public class GameLogic {
 
     private List<Player> players;

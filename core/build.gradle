@@ -25,6 +25,12 @@ dependencies {
   if(enableGraalNative == 'true') {
     implementation "io.github.berstanio:gdx-svmhelper-annotations:$graalHelperVersion"
   }
+
+  // https://mvnrepository.com/artifact/org.xerial/sqlite-jdbc
+  implementation("org.xerial:sqlite-jdbc:3.50.3.0")
+
+  implementation 'com.j256.ormlite:ormlite-core:6.1'
+  implementation 'com.j256.ormlite:ormlite-jdbc:6.1'
 }
 
 // Configuración de JUnit 5 (JUnit Platform)

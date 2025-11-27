@@ -1,4 +1,4 @@
-package io.github.jarethjaziel.abyssbattle.model;
+package io.github.jarethjaziel.abyssbattle.util;
 
 public enum GAME_STATE {
     INITIATED,
