@@ -3,6 +3,7 @@ package io.github.jarethjaziel.abyssbattle.screens;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.kotcrab.vis.ui.widget.VisLabel;
@@ -15,10 +16,12 @@ public class MySkinsScreen extends ScreenAdapter {
 
     private AbyssBattle game;
     private Stage stage;
+    private Texture background;
 
     public MySkinsScreen(AbyssBattle game) {
         this.game = game;
         stage = new Stage(new ScreenViewport());
+        background = new Texture("images/SkinsStock.png");
     }
 
     @Override
@@ -51,11 +54,15 @@ public class MySkinsScreen extends ScreenAdapter {
 
     @Override
     public void render(float delta) {
-        Gdx.gl.glClearColor(0, 0, 0, 1);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+       Gdx.gl.glClearColor(0, 0, 0, 1);
+    Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        stage.act(delta);
-        stage.draw();
+    stage.getBatch().begin();
+    stage.getBatch().draw(background, 0, 0, stage.getWidth(), stage.getHeight());
+    stage.getBatch().end();
+
+    stage.act(delta);
+    stage.draw();
     }
 
     @Override

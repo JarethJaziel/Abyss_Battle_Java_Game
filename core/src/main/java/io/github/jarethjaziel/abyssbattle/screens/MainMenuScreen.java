@@ -3,6 +3,7 @@ package io.github.jarethjaziel.abyssbattle.screens;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
@@ -17,12 +18,14 @@ public class MainMenuScreen implements Screen{
 
     private AbyssBattle game;
     private Stage stage;
+    private Texture background;
 
     public MainMenuScreen(AbyssBattle game) {
         this.game = game;
         
         //Crear el 'Stage' para que la UI se ajuste al tamaño de la ventana
         stage = new Stage(new ScreenViewport());
+        background = new Texture("images/MenuBackGround.png");
     }
 
     @Override
@@ -92,13 +95,15 @@ public class MainMenuScreen implements Screen{
 
     @Override
     public void render(float delta) {
-        // Limpiar la pantalla
-        Gdx.gl.glClearColor(0.1f, 0.1f, 0.1f, 1); // Un fondo gris oscuro
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        Gdx.gl.glClearColor(0, 0, 0, 1);
+    Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        // Actualizar y dibujar el Stage (la UI)
-        stage.act(delta);
-        stage.draw();
+    stage.getBatch().begin();
+    stage.getBatch().draw(background, 0, 0, stage.getWidth(), stage.getHeight());
+    stage.getBatch().end();
+
+    stage.act(delta);
+    stage.draw();
     }
 
     @Override
