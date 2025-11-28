@@ -80,5 +80,11 @@ public class Stats {
     public Date getLastPlayed() {
         return lastPlayed;
     }
+
+    @Override
+    public String toString() {
+        return "Stats [played=" + played + ", won=" + won + ", lost=" + lost + ", hits=" + hits + ", misses=" + misses
+                + ", damageTotal=" + damageTotal + ", lastPlayed=" + lastPlayed + "]";
+    }
     
 }

@@ -3,6 +3,7 @@ package io.github.jarethjaziel.abyssbattle;
 import java.sql.SQLException;
 
 import com.badlogic.gdx.Game;
+import com.badlogic.gdx.Gdx;
 import com.j256.ormlite.dao.Dao;
 import com.kotcrab.vis.ui.VisUI;
 
@@ -17,6 +18,7 @@ import io.github.jarethjaziel.abyssbattle.screens.MainMenuScreen;
 public class AbyssBattle extends Game {
 
     private DatabaseManager dbManager;
+    private User user;
 
     @Override
     public void create() {
@@ -27,6 +29,13 @@ public class AbyssBattle extends Game {
         } catch (SQLException e) {
             System.out.println("Error al conectar a la base de datos: " + e.getMessage());
         }
+        
+        try {
+            user = getUserDao().queryForId(1);
+        } catch (SQLException e) {
+            user = null;
+        }
+        Gdx.app.log("DB", "Usuario cargado: " + user);
         setScreen(new MainMenuScreen(this));
     }
 
@@ -51,6 +60,10 @@ public class AbyssBattle extends Game {
 
     public Dao<UserSkin, Integer> getUserSkinDao() {
         return dbManager.getUserSkinDao();
+    }
+
+    public User getUser() {
+        return user;
     }
 
 }
