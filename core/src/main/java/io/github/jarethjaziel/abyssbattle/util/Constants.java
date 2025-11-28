@@ -7,10 +7,10 @@ public class Constants {
     public static final int TILE_SIZE = 32;
 
     //Physics constants
-    public static final float PIXELS_PER_METER = 100f; // Pixels Per Meter
-    public static final float BULLET_SIZE = 0.01f * PIXELS_PER_METER;
-    public static final float TROOP_SIZE = 0.8f * PIXELS_PER_METER;
-    public static final float CANNON_SIZE = 1.0f * PIXELS_PER_METER;
+    public static final float PIXELS_PER_METER = 32f; // Pixels Per Meter
+    public static final float BULLET_SIZE = 0.5f * PIXELS_PER_METER;
+    public static final float TROOP_SIZE = 1.2f * PIXELS_PER_METER;
+    public static final float CANNON_SIZE = 1.8f * PIXELS_PER_METER;
 
     //Game constants
     public static final int TROOP_INITIAL_HEALTH = 100;

@@ -150,7 +150,7 @@ public class GameLogic {
             for (Troop t : p.getTroopList()) {
                 
                 if (t.isActive()) {
-                    Vector2 posTropa = new Vector2(t.getX(), t.getY());
+                    Vector2 posTropa = new Vector2(t.getPosX(), t.getPosY());
                     float distancia = posTropa.dst(explosionCenter);
 
                     if (distancia <= radioPixeles) {

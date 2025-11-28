@@ -19,10 +19,12 @@ public class Cannon extends Entity {
 
     public void setAngle(float angle) {
         this.angle = angle;
+        /* 
         if(this.angle < Constants.MIN_SHOOT_ANGLE) 
             this.angle = Constants.MIN_SHOOT_ANGLE;
         if(this.angle > Constants.MAX_SHOOT_ANGLE) 
             this.angle = Constants.MAX_SHOOT_ANGLE;
+        */
     }
 
     public float getAngle() {

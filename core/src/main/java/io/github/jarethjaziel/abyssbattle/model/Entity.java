@@ -18,11 +18,11 @@ public abstract class Entity {
         this.body = body;
     }
 
-    public float getX(){
+    public float getPosX(){
         return body.getPosition().x;
     }
 
-    public float getY(){
+    public float getPosY(){
         return body.getPosition().y;
     }
     // El GameLogic revisará esto en cada frame
