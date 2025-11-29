@@ -40,7 +40,7 @@ public class PhysicsFactory {
         return body;
     }
 
-    public Cannon createCannon(World world, float px, float py) {
+    public Cannon createCannon(float px, float py) {
         
         Body cannonBody = createBody(px, py, Constants.CANNON_SIZE, Constants.CANNON_SIZE, BodyType.StaticBody);
         Cannon cannon = new Cannon(cannonBody);
@@ -48,7 +48,7 @@ public class PhysicsFactory {
         return cannon;
     }
 
-    public Troop createTroop(World world, float px, float py) {
+    public Troop createTroop(float px, float py) {
         Body troopBody = createBody(px, py, Constants.TROOP_SIZE, Constants.TROOP_SIZE, BodyType.DynamicBody);
         Troop troop = new Troop(troopBody, Constants.TROOP_INITIAL_HEALTH);
         troopBody.setUserData(troop);

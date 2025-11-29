@@ -42,4 +42,27 @@ public class User {
 
     public int getCoins(){ return coins;  }
     public void addCoins(int amount){ this.coins += amount; }
+
+    public int getId() {
+        return id;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public String getPasswordHash() {
+        return passwordHash;
+    }
+
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    @Override
+    public String toString() {
+        return "User ID: "+ id + "\nusername: " + username + "\npasswordHash: " + passwordHash + "\ncreatedAt: "
+                + createdAt + "\ncoins: " + coins + "\nstats:" + stats;
+    }
+    
 }

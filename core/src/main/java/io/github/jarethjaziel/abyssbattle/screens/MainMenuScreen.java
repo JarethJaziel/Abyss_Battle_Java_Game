@@ -23,7 +23,6 @@ public class MainMenuScreen implements Screen{
     public MainMenuScreen(AbyssBattle game) {
         this.game = game;
         
-        //Crear el 'Stage' para que la UI se ajuste al tamaño de la ventana
         stage = new Stage(new ScreenViewport());
         background = new Texture("images/MenuBackGround.png");
     }
@@ -68,8 +67,6 @@ public class MainMenuScreen implements Screen{
         shopButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                // TODO: Ir a la pantalla de la tienda
-                Gdx.app.log("MENU", "Ir a la Tienda de Skins");
                 game.setScreen(new ShopSkinsScreen(game));
             }
         });
@@ -77,8 +74,6 @@ public class MainMenuScreen implements Screen{
         mySkinsButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                // TODO: Ir a la pantalla de "Mis Skins"
-                Gdx.app.log("MENU", "Ir a Mis Skins");
                 game.setScreen(new MySkinsScreen(game));
             }
         });
