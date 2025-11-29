@@ -10,7 +10,36 @@ dependencies {
   api "com.badlogicgames.gdx:gdx:$gdxVersion"
   api "com.kotcrab.vis:vis-ui:$visUiVersion"
 
+  // Dependencia principal para escribir pruebas
+  testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.1' 
+        
+  // El motor de ejecución (Engine)
+  testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.1'
+        
+  // Opcional: Si usas pruebas con parámetros (@ParameterizedTest)
+  testImplementation 'org.junit.jupiter:junit-jupiter-params:5.10.1'
+
+  //Mockito
+  testImplementation 'org.mockito:mockito-core:4.11.0'
+
+  testImplementation 'org.mockito:mockito-inline:4.11.0'
+
+  testImplementation "com.badlogicgames.gdx:gdx-backend-headless:$gdxVersion"
+  testImplementation "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
+  testImplementation "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-desktop"
+
   if(enableGraalNative == 'true') {
     implementation "io.github.berstanio:gdx-svmhelper-annotations:$graalHelperVersion"
   }
+
+  // https://mvnrepository.com/artifact/org.xerial/sqlite-jdbc
+  implementation("org.xerial:sqlite-jdbc:3.50.3.0")
+
+  implementation 'com.j256.ormlite:ormlite-core:6.1'
+  implementation 'com.j256.ormlite:ormlite-jdbc:6.1'
+}
+
+// Configuración de JUnit 5 (JUnit Platform)
+test {
+  useJUnitPlatform()
 }

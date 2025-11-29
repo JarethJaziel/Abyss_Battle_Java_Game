@@ -20,14 +20,6 @@ public class WorldContactListener implements ContactListener {
             troop.receiveDamage(proj.getDamage());
             proj.destroy();
         }
-
-        if (b instanceof Projectile && a instanceof Troop) {
-            Troop troop = (Troop) a;
-            Projectile proj = (Projectile) b;
-
-            troop.receiveDamage(proj.getDamage());
-            proj.destroy();
-        }
     }
 
     @Override 

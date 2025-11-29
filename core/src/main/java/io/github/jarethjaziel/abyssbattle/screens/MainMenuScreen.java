@@ -30,7 +30,7 @@ public class MainMenuScreen implements Screen{
 
     @Override
     public void show() {
-        //Hacer que el Stage pueda recibir input (clics, etc.)
+        //Hacer que el Stage pueda recibir input
         Gdx.input.setInputProcessor(stage);
 
         VisTable mainTable = new VisTable();

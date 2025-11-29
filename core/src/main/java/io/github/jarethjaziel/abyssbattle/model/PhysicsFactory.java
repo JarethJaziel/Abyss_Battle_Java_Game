@@ -1,77 +1,81 @@
 package io.github.jarethjaziel.abyssbattle.model;
 
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
+import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
+
+import io.github.jarethjaziel.abyssbattle.util.Constants;
 
 public class PhysicsFactory {
 
-    public static final float PPM = 100f;
+    private World world = null;
 
-    public static Cannon createCannon(World world, float px, float py) {
-        BodyDef def = new BodyDef();
-        def.type = BodyDef.BodyType.StaticBody;
-        def.position.set(px / PPM, py / PPM);
+    public PhysicsFactory(World world) {
+        this.world = world;
+    }
 
-        Body body = world.createBody(def);
+    private Body createBody(float centralPosX, float centralPosY, float width, float height, BodyType bodyType) {
+        BodyDef bodyBuilder = new BodyDef();
+        
+        bodyBuilder.position.set(centralPosX / Constants.PIXELS_PER_METER,
+                                centralPosY / Constants.PIXELS_PER_METER);
+        
+        bodyBuilder.type = bodyType;
+
+        Body body = world.createBody(bodyBuilder);
 
         PolygonShape shape = new PolygonShape();
-        shape.setAsBox(0.5f, 0.5f);
+        
+        shape.setAsBox((width / 2) / Constants.PIXELS_PER_METER, (height / 2) / Constants.PIXELS_PER_METER);
 
-        FixtureDef fdef = new FixtureDef();
-        fdef.shape = shape;
-        fdef.density = 1;
+        FixtureDef fixtureDef = new FixtureDef();
+        fixtureDef.shape = shape;
+        fixtureDef.density = 1.0f;
+        fixtureDef.friction = 0.3f;
 
-        body.createFixture(fdef);
+        body.createFixture(fixtureDef);
         shape.dispose();
 
-        return new Cannon(body);
+        return body;
     }
 
-    public static Troop createTroop(World world, float px, float py, int health) {
-        BodyDef def = new BodyDef();
-        def.type = BodyDef.BodyType.DynamicBody;
-        def.position.set(px / PPM, py / PPM);
-
-        Body body = world.createBody(def);
-
-        CircleShape shape = new CircleShape();
-        shape.setRadius(0.35f);
-
-        FixtureDef fdef = new FixtureDef();
-        fdef.shape = shape;
-        fdef.density = 1;
-        fdef.restitution = 0.2f;
-
-        body.createFixture(fdef);
-        shape.dispose();
-
-        return new Troop(body, health);
+    public Cannon createCannon(World world, float px, float py) {
+        
+        Body cannonBody = createBody(px, py, Constants.CANNON_SIZE, Constants.CANNON_SIZE, BodyType.StaticBody);
+        Cannon cannon = new Cannon(cannonBody);
+        cannonBody.setUserData(cannon);
+        return cannon;
     }
 
-    public static Projectile createProjectile(World world, float px, float py, float angle, float power, int damage) {
+    public Troop createTroop(World world, float px, float py) {
+        Body troopBody = createBody(px, py, Constants.TROOP_SIZE, Constants.TROOP_SIZE, BodyType.DynamicBody);
+        Troop troop = new Troop(troopBody, Constants.TROOP_INITIAL_HEALTH);
+        troopBody.setUserData(troop);
+        return troop;
+    }
 
-        BodyDef def = new BodyDef();
-        def.type = BodyDef.BodyType.DynamicBody;
-        def.position.set(px / PPM, py / PPM);
+    public Projectile createProjectile(float px, float py, float angleDegrees, float power, int damage) {
 
-        Body body = world.createBody(def);
+        Body projectileBody = createBody(px, py, Constants.BULLET_SIZE, Constants.BULLET_SIZE, BodyType.DynamicBody);
+        
+        projectileBody.setBullet(true);
+        projectileBody.getFixtureList().first().setSensor(true);
+        
+        // Ajuste de grados a radianes
+        float angleRad = MathUtils.degreesToRadians * angleDegrees;
 
-        CircleShape shape = new CircleShape();
-        shape.setRadius(0.15f);
+        // Calculamos cuánto se mueve en X y cuánto en Y
+        float velX = MathUtils.cos(angleRad) * power;
+        float velY = MathUtils.sin(angleRad) * power;
 
-        FixtureDef fdef = new FixtureDef();
-        fdef.shape = shape;
-        fdef.density = 1;
-        fdef.restitution = 0.1f;
+        Vector2 velocity = new Vector2(velX, velY);
+        
+        float initialVerticalSpeed = power * 0.5f; 
 
-        body.createFixture(fdef);
-        shape.dispose();
-
-        float velX = (float) (Math.cos(Math.toRadians(angle)) * power);
-        float velY = (float) (Math.sin(Math.toRadians(angle)) * power);
-
-        body.setLinearVelocity(new Vector2(velX, velY));
-
-        return new Projectile(body, damage);
+        Projectile projectile = new Projectile(projectileBody, damage, velocity, initialVerticalSpeed);
+        projectileBody.setUserData(projectile);
+        
+        return projectile;
     }
 }
