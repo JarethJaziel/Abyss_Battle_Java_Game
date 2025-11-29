@@ -2,6 +2,8 @@ package io.github.jarethjaziel.abyssbattle.util;
 
 public enum GAME_STATE {
     INITIATED,
+    PLACEMENT_P1,
+    PLACEMENT_P2,
     PLAYING,
     PAUSED,
     FINISHED,
@@ -9,7 +11,8 @@ public enum GAME_STATE {
     PLAYER_2_TURN,
     WAITING,
     TURN_TRANSITION,
+    LAST_CHANCE,
     PLAYER_1_WIN,
     PLAYER_2_WIN,
-    DRAW
+    DRAW 
 }

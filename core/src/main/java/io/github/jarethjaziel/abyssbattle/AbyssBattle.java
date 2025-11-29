@@ -56,6 +56,9 @@ public class AbyssBattle extends Game {
         assets.load("sprites/shadow.png", Texture.class);
         assets.load("sprites/troop_blue.png", Texture.class); // P1
         assets.load("sprites/troop_red.png", Texture.class);  // P2
+        assets.load("vfx/explosion1.png", Texture.class);
+        assets.load("vfx/explosion2.png", Texture.class);
+        assets.load("vfx/explosion3.png", Texture.class);
         
         // 2. Cargar Sonidos y Música
         assets.load("music/game_music.mp3", Music.class);

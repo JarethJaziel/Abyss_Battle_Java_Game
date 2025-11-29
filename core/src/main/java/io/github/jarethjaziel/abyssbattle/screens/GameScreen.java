@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -30,6 +31,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Slider;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
@@ -62,6 +64,7 @@ public class GameScreen implements Screen {
     // --- UI Scene2D ---
     private Stage stage;
     private Label statusLabel; // Para decir "Turno Jugador 1"
+    private Texture blankTexture;
 
     // Variables para la mecánica de Drag-and-Shoot
     private boolean isDragging = false;
@@ -72,6 +75,10 @@ public class GameScreen implements Screen {
     private ShapeRenderer shapeRenderer;
     // Variable para la animación de la cámara
     private float currentCameraAngle = 0f;
+
+    // --- Animation ---
+    private Animation<TextureRegion> explosionAnim;
+    private float explosionTimer = 0;
 
     // --- Audio ---
     private Music bgMusic;
@@ -141,6 +148,24 @@ public class GameScreen implements Screen {
 
         Gdx.input.setInputProcessor(multiplexer);
 
+        Texture t1 = game.assets.get("vfx/explosion1.png"); // O la ruta que tengas
+        Texture t2 = game.assets.get("vfx/explosion2.png");
+        Texture t3 = game.assets.get("vfx/explosion3.png");
+
+        Array<TextureRegion> frames = new Array<>();
+        frames.add(new TextureRegion(t1));
+        frames.add(new TextureRegion(t2));
+        frames.add(new TextureRegion(t3));
+
+        // 0.15f es la velocidad (cambia de imagen cada 0.15 segundos)
+        explosionAnim = new Animation<>(0.25f, frames, Animation.PlayMode.NORMAL);
+
+        Pixmap pixmap = new Pixmap(1, 1, com.badlogic.gdx.graphics.Pixmap.Format.RGBA8888);
+        pixmap.setColor(Color.WHITE);
+        pixmap.fill();
+        blankTexture = new Texture(pixmap);
+        pixmap.dispose();
+
         sfxShoot = game.assets.get("sfx/shoot.mp3", Sound.class);
         sfxBoom = game.assets.get("sfx/boom.mp3", Sound.class);
         bgMusic = game.assets.get("music/game_music.mp3", Music.class);
@@ -182,7 +207,7 @@ public class GameScreen implements Screen {
             shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
             // Color: Rojo si está al máximo, Amarillo si es suave
-            shapeRenderer.setColor(Color.RED);
+            shapeRenderer.setColor(Color.YELLOW);
 
             Cannon cannon = gameLogic.getCurrentPlayer().getCannon();
             float clampedAngle = cannon.getAngle(); // Este ángulo YA respeta los límites (min/max)
@@ -191,10 +216,12 @@ public class GameScreen implements Screen {
             float visualLength = dragStart.dst(dragCurrent);
 
             // Opcional: Limitar visualmente el largo para que no sea infinita
-            if (visualLength > 300)
-                visualLength = 300;
+            if (visualLength > Constants.MAX_AIM_VISION) {
+                shapeRenderer.setColor(Color.RED);
+                visualLength = Constants.MAX_AIM_VISION;
+            }
 
-            //CONVERTIR ÁNGULO + LARGO A COORDENADAS (X, Y)
+            // CONVERTIR ÁNGULO + LARGO A COORDENADAS (X, Y)
             float endX = dragStart.x + com.badlogic.gdx.math.MathUtils.cosDeg(clampedAngle) * visualLength;
             float endY = dragStart.y + com.badlogic.gdx.math.MathUtils.sinDeg(clampedAngle) * visualLength;
 
@@ -219,13 +246,15 @@ public class GameScreen implements Screen {
         p1.setCannon(c1);
         p2.setCannon(c2);
 
-        Troop t1 = physicsFactory.createTroop(8 * Constants.TILE_SIZE,
-                Constants.WORLD_HEIGHT / 2 - Constants.TILE_SIZE * 8);
-        Troop t2 = physicsFactory.createTroop(8 * Constants.TILE_SIZE,
-                Constants.WORLD_HEIGHT - Constants.TILE_SIZE * 5);
-
-        p1.addTroop(t1);
-        p2.addTroop(t2);
+        /*
+         * Troop t1 = physicsFactory.createTroop(Constants.CANNON_X,
+         * Constants.PLAYER_1_CANNON_Y - Constants.TILE_SIZE * 3);
+         * Troop t2 = physicsFactory.createTroop(Constants.CANNON_X,
+         * Constants.PLAYER_2_CANNON_Y + Constants.TILE_SIZE * 3);
+         * 
+         * p1.addTroop(t1);
+         * p2.addTroop(t2);
+         */
 
         gameLogic.addPlayer(p1);
         gameLogic.addPlayer(p2);
@@ -312,11 +341,45 @@ public class GameScreen implements Screen {
             Texture troopTex = (p.getId() == 1) ? troopBlue : troopRed;
             for (Troop t : p.getTroopList()) {
                 if (t.isActive()) {
+                    float troopX = t.getPosX() * Constants.PIXELS_PER_METER - Constants.TROOP_SIZE / 2;
+                    float troopY = t.getPosY() * Constants.PIXELS_PER_METER - Constants.TROOP_SIZE / 2;
+
                     game.batch.draw(troopTex,
-                            t.getPosX() * Constants.PIXELS_PER_METER - Constants.TROOP_SIZE / 2,
-                            t.getPosY() * Constants.PIXELS_PER_METER - Constants.TROOP_SIZE / 2,
+                            troopX - Constants.TROOP_SIZE / 2,
+                            troopY - Constants.TROOP_SIZE / 2,
                             Constants.TROOP_SIZE, Constants.TROOP_SIZE);
+
+                    float barWidth = Constants.TROOP_SIZE; // Mismo ancho que la tropa
+                    float barHeight = 5; // 5 pixeles de alto
+                    float yOffset = Constants.TROOP_SIZE / 2 + 10; // 10 de márgen
+
+                    float healthBarY = (gameLogic.getState() == GAME_STATE.PLAYER_1_TURN) ? troopY + yOffset
+                            : troopY - yOffset;
+
+                    float healthPct = t.getHealth() / (float) Constants.TROOP_INITIAL_HEALTH;
+
+                    game.batch.setColor(Color.RED);
+                    game.batch.draw(blankTexture, troopX, healthBarY, barWidth, barHeight);
+
+                    game.batch.setColor(Color.GREEN);
+                    game.batch.draw(blankTexture, troopX, healthBarY, barWidth * healthPct, barHeight);
+
+                    game.batch.setColor(Color.WHITE);
                 }
+            }
+            if (gameLogic.getState() == GAME_STATE.TURN_TRANSITION) {
+
+                explosionTimer += Gdx.graphics.getDeltaTime();
+                TextureRegion currentFrame = explosionAnim.getKeyFrame(explosionTimer, false);
+                Vector2 pos = gameLogic.getLastImpactPosition();
+
+                float size = Constants.EXPLOSION_SIZE;
+                game.batch.draw(currentFrame,
+                        pos.x - size / 2,
+                        pos.y - size / 2,
+                        size, size);
+            } else {
+                explosionTimer = 0;
             }
         }
 
@@ -392,9 +455,23 @@ public class GameScreen implements Screen {
         } else if (state == GAME_STATE.PLAYER_2_WIN) {
             statusLabel.setText("¡GANÓ JUGADOR 2!");
             statusLabel.setColor(Color.GREEN);
+        } else if (state == GAME_STATE.DRAW) {
+            statusLabel.setText("¡EMPATE!");
+            statusLabel.setColor(Color.YELLOW);
         } else if (state == GAME_STATE.TURN_TRANSITION) {
             statusLabel.setText("¡IMPACTO!");
             statusLabel.setColor(Color.CORAL);
+        } else if (state == GAME_STATE.PLACEMENT_P1) {
+            statusLabel.setText("COLOCA TUS TROPAS, JUGADOR 1: " +
+                    "(" + gameLogic.getTroopsToPlace() + " restantes)");
+            statusLabel.setColor(Color.DARK_GRAY);
+        } else if (state == GAME_STATE.PLACEMENT_P2) {
+            statusLabel.setText("COLOCA TUS TROPAS, JUGADOR 2: " +
+                    "(" + gameLogic.getTroopsToPlace() + " restantes)");
+            statusLabel.setColor(Color.DARK_GRAY);
+        } else if (state == GAME_STATE.LAST_CHANCE) {
+            statusLabel.setText("¡ÚLTIMA OPORTUNIDAD JUGADOR 2!");
+            statusLabel.setColor(Color.BLACK);
         }
 
     }
@@ -410,32 +487,37 @@ public class GameScreen implements Screen {
     }
 
     private boolean handleTouchDown(int screenX, int screenY) {
-        // Solo permitir si es turno de alguien
+        Vector2 worldCoords = viewport.unproject(new Vector2(screenX, screenY));
+
         GAME_STATE state = gameLogic.getState();
+
+        if (state == GAME_STATE.PLACEMENT_P1 || state == GAME_STATE.PLACEMENT_P2) {
+
+            if (isValidPlacement(worldCoords.x, worldCoords.y)) {
+                gameLogic.tryPlaceTroop(worldCoords.x, worldCoords.y);
+                return true;
+            } else {
+                System.out.println("¡No puedes colocar tropas en el agua u obstáculos!");
+                return false;
+            }
+        }
+
         if (state != GAME_STATE.PLAYER_1_TURN && state != GAME_STATE.PLAYER_2_TURN)
             return false;
-
-        // Convertir click de pantalla a coordenadas del mundo (Metros o Pixeles según
-        // tu cámara)
-        Vector2 worldCoordinates = viewport.unproject(new Vector2(screenX, screenY));
 
         Player currentPlayer = gameLogic.getCurrentPlayer();
         Cannon cannon = currentPlayer.getCannon();
 
-        // Posición del cañón (Asegúrate de que esté en las mismas unidades que la
-        // cámara)
-        // Si tu cámara está en PIXELES:
         float cannonX = cannon.getPosX() * Constants.PIXELS_PER_METER;
         float cannonY = cannon.getPosY() * Constants.PIXELS_PER_METER;
 
-        // Calcular distancia del click al cañón
-        float dist = Vector2.dst(worldCoordinates.x, worldCoordinates.y, cannonX, cannonY);
+        float dist = Vector2.dst(worldCoords.x, worldCoords.y, cannonX, cannonY);
 
         // Si hizo click cerca del cañón (ej. 50 pixeles de radio), iniciamos arrastre
         if (dist < 50) {
             isDragging = true;
             dragStart.set(cannonX, cannonY);
-            dragCurrent.set(worldCoordinates.x, worldCoordinates.y);
+            dragCurrent.set(worldCoords.x, worldCoords.y);
             return true;
         }
         return false;
@@ -478,19 +560,39 @@ public class GameScreen implements Screen {
         float maxDragDistance = 300f;
         float power = (distance / maxDragDistance) * 100;
 
-        // Limitar potencia (Clamp)
-        if (power > Constants.MAX_AIM_POWER)
-            power = Constants.MAX_AIM_POWER;
-        if (power < 0)
-            power = 0;
-
-        // ¡FUEGO!
-        // Solo disparar si arrastró un poquito (para evitar disparos accidentales)
-        if (power > 10) {
-            gameLogic.playerShoot(power);
-            sfxShoot.play();
+        if (power < Constants.AIM_DEADZONE) {
+            return true;
         }
+
+        if (power < Constants.MIN_AIM_POWER) {
+            power = Constants.MIN_AIM_POWER;
+        }
+
+        if (power > Constants.MAX_AIM_POWER) {
+            power = Constants.MAX_AIM_POWER;
+        }
+
+        gameLogic.playerShoot(power);
+        sfxShoot.play();
+
         return true;
+    }
+
+    private boolean isValidPlacement(float x, float y) {
+        TiledMapTileLayer layer = (TiledMapTileLayer) map.getLayers().get("collision");
+        if (layer == null)
+            return true;
+
+        int cellX = (int) (x / layer.getTileWidth());
+        int cellY = (int) (y / layer.getTileHeight());
+
+        if (cellX < 0 || cellX >= layer.getWidth() || cellY < 0 || cellY >= layer.getHeight()) {
+            return false;
+        }
+
+        boolean thereIsObstacle = (layer.getCell(cellX, cellY) != null);
+
+        return !thereIsObstacle;
     }
 
     private void updateCamera(float delta) {

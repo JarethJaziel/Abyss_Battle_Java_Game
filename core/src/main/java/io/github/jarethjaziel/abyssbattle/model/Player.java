@@ -29,13 +29,6 @@ public class Player {
         troopList.add(troop);
     }
 
-    public void placeTroop(Troop troop, float px, float py) {
-        float x = px / 100f;  
-        float y = py / 100f;
-        troop.getBody().setTransform(x, y, 0); 
-        troopList.add(troop);
-    }
-
     public void shoot(PhysicsFactory factory, float power, int damage) {
         cannon.shoot(factory, power, damage);
     }
