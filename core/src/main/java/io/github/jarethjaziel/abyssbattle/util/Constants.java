@@ -17,5 +17,10 @@ public class Constants {
     public static final float MIN_SHOOT_ANGLE = 30f;
     public static final float MAX_SHOOT_ANGLE = 180f - MIN_SHOOT_ANGLE;
     public static final int BULLET_DAMAGE = 100;
+    public static final float TRANSITION_TIME_TO_WAIT = 2.0f;
+    public static final int CANNON_X = (int) (12*PIXELS_PER_METER);
+    public static final int PLAYER_1_CANNON_Y = (int) (4*PIXELS_PER_METER);
+    public static final int PLAYER_2_CANNON_Y = (int) (WORLD_HEIGHT - PLAYER_1_CANNON_Y);
+    public static final float MAX_AIM_POWER = 40;
 
 }

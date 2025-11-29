@@ -19,6 +19,8 @@ public class GameLogic {
     private List<Projectile> activeProjectiles;
     private World world; 
     private PhysicsFactory physicsFactory;
+
+    private float turnTimer = 0f; 
     
     public GameLogic(World world) {
         this.world = world;
@@ -35,6 +37,19 @@ public class GameLogic {
     public void startGame() {
         if (players.size() != 2)
             return;
+
+        //Configurar dirección del cañón del segundo jugador.
+        players.get(1)
+            .getCannon()
+            .setMinAngle(180 + Constants.MIN_SHOOT_ANGLE);
+
+        players.get(1)
+            .getCannon()
+            .setMaxAngle(180 + Constants.MAX_SHOOT_ANGLE);
+
+        players.get(1)
+            .getCannon()
+            .setAngle(270);
 
         currentPlayer = players.get(0);
         state = GAME_STATE.PLAYER_1_TURN;
@@ -57,6 +72,9 @@ public class GameLogic {
     }
 
     public void playerAim(float angle) {
+        if (state == GAME_STATE.WAITING || isGameOver()) {
+            return; 
+        }
         Cannon cannon = currentPlayer.getCannon();
         cannon.setAngle(angle);
     }
@@ -119,6 +137,15 @@ public class GameLogic {
     }
 
     public void update(float delta) {
+
+        if (state == GAME_STATE.TURN_TRANSITION) {
+            turnTimer -= delta;
+            
+            if (turnTimer <= 0) {
+                changeTurn();
+            }
+            return;
+        }
         
         Iterator<Projectile> iter = activeProjectiles.iterator();
         
@@ -136,11 +163,20 @@ public class GameLogic {
                 
                 iter.remove();
 
-                if (!checkWinner()) {
-                    changeTurn();
+                if (checkWinner()) {
+                    return;
                 }
+                state = GAME_STATE.TURN_TRANSITION;
+                turnTimer = Constants.TRANSITION_TIME_TO_WAIT;
             }
+            
         }
+    }
+
+    public boolean isGameOver() {
+        return state == GAME_STATE.PLAYER_1_WIN || 
+               state == GAME_STATE.PLAYER_2_WIN || 
+               state == GAME_STATE.DRAW;
     }
 
     private void applyAreaDamage(Vector2 explosionCenter, float radioMeters, int maxDamage) {

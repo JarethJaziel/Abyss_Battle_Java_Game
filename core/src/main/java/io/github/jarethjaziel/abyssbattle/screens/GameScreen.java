@@ -1,6 +1,7 @@
 package io.github.jarethjaziel.abyssbattle.screens;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
@@ -8,9 +9,12 @@ import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
@@ -21,13 +25,11 @@ import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
-import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Slider;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
-import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
@@ -39,11 +41,12 @@ import io.github.jarethjaziel.abyssbattle.model.Player;
 import io.github.jarethjaziel.abyssbattle.model.Projectile;
 import io.github.jarethjaziel.abyssbattle.model.Troop;
 import io.github.jarethjaziel.abyssbattle.util.Constants;
+import io.github.jarethjaziel.abyssbattle.util.GAME_STATE;
 
-public class GameScreen implements Screen{
+public class GameScreen implements Screen {
 
     private AbyssBattle game;
-    
+
     // --- Lógica y Física ---
     private World world;
     private GameLogic gameLogic;
@@ -55,18 +58,25 @@ public class GameScreen implements Screen{
     private Viewport viewport;
     private TiledMap map;
     private OrthogonalTiledMapRenderer mapRenderer;
-    
+
     // --- UI Scene2D ---
     private Stage stage;
-    private Slider angleSlider;
-    private Slider powerSlider;
-    
+    private Label statusLabel; // Para decir "Turno Jugador 1"
+
+    // Variables para la mecánica de Drag-and-Shoot
+    private boolean isDragging = false;
+    private Vector2 dragStart = new Vector2(); // Donde está el cañón
+    private Vector2 dragCurrent = new Vector2(); // Donde está el mouse
+
+    // Para dibujar la línea de mira
+    private ShapeRenderer shapeRenderer;
+    // Variable para la animación de la cámara
+    private float currentCameraAngle = 0f;
+
     // --- Audio ---
     private Music bgMusic;
     private Sound sfxShoot;
     private Sound sfxBoom;
-    
-
 
     public GameScreen(AbyssBattle game) {
         this.game = game;
@@ -77,14 +87,15 @@ public class GameScreen implements Screen{
         camera = new OrthographicCamera();
         viewport = new FitViewport(Constants.WORLD_WIDTH, Constants.WORLD_HEIGHT, camera);
         map = new TmxMapLoader().load("maps/game_bg_1.tmx");
-        mapRenderer = new OrthogonalTiledMapRenderer(map, 1);  
+        mapRenderer = new OrthogonalTiledMapRenderer(map, 1);
+        shapeRenderer = new ShapeRenderer();
 
         TiledMapTileLayer layer = (TiledMapTileLayer) map.getLayers().get(0);
         float mapWidth = layer.getWidth() * layer.getTileWidth();
         float mapHeight = layer.getHeight() * layer.getTileHeight();
 
-        //viewport = new FitViewport(mapWidth, mapHeight, camera);
-        
+        // viewport = new FitViewport(mapWidth, mapHeight, camera);
+
         camera.position.set(mapWidth / 2, mapHeight / 2, 0);
         camera.update();
 
@@ -96,29 +107,53 @@ public class GameScreen implements Screen{
 
         // 4. Crear Colisiones del Mapa (Muros/Río)
         createMapCollissions();
-        
+
         // 5. Inicializar Jugadores y Entidades
         startGame();
 
         // 6. Configurar UI
         setupUI();
 
+        shapeRenderer = new ShapeRenderer(); // Inicializar el dibujante de líneas
+
+        // IMPORTANTE: Cambiamos el InputProcessor.
+        // Ahora seremos nosotros (GameScreen) quienes escuchemos los clicks,
+        // además de la UI (stage) por si hay botones de pausa, etc.
         InputMultiplexer multiplexer = new InputMultiplexer();
-        multiplexer.addProcessor(stage); // UI primero
+        multiplexer.addProcessor(stage); // La UI tiene prioridad
+        multiplexer.addProcessor(new InputAdapter() { // Nuestro detector de mouse
+
+            @Override
+            public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+                return handleTouchDown(screenX, screenY);
+            }
+
+            @Override
+            public boolean touchDragged(int screenX, int screenY, int pointer) {
+                return handleTouchDragged(screenX, screenY);
+            }
+
+            @Override
+            public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+                return handleTouchUp(screenX, screenY);
+            }
+        });
+
         Gdx.input.setInputProcessor(multiplexer);
 
         sfxShoot = game.assets.get("sfx/shoot.mp3", Sound.class);
         sfxBoom = game.assets.get("sfx/boom.mp3", Sound.class);
         bgMusic = game.assets.get("music/game_music.mp3", Music.class);
-        bgMusic.setLooping(true);
-        bgMusic.setVolume(0.5f);
-        bgMusic.play();
+        // bgMusic.setLooping(true);
+        // bgMusic.setVolume(0.5f);
+        // bgMusic.play();
 
     }
 
     @Override
     public void resize(int width, int height) {
-        viewport.update(width, height);
+        viewport.update(width, height, true);
+
         stage.getViewport().update(width, height, true);
     }
 
@@ -128,10 +163,12 @@ public class GameScreen implements Screen{
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         gameLogic.update(delta);
-        world.step(1/60f, 6, 2);
+        updateUI();
+        updateCamera(delta);
+        world.step(1 / 60f, 6, 2);
 
         camera.update();
-        mapRenderer.setView(camera); 
+        mapRenderer.setView(camera);
         mapRenderer.render();
 
         game.batch.setProjectionMatrix(camera.combined);
@@ -140,7 +177,32 @@ public class GameScreen implements Screen{
         drawEntities();
         game.batch.end();
 
-        // Render Debug Box2D (Opcional, quítalo después)
+        if (isDragging) {
+            shapeRenderer.setProjectionMatrix(camera.combined);
+            shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+
+            // Color: Rojo si está al máximo, Amarillo si es suave
+            shapeRenderer.setColor(Color.RED);
+
+            Cannon cannon = gameLogic.getCurrentPlayer().getCannon();
+            float clampedAngle = cannon.getAngle(); // Este ángulo YA respeta los límites (min/max)
+
+            // CALCULAR LONGITUD DE LA LÍNEA (FUERZA)
+            float visualLength = dragStart.dst(dragCurrent);
+
+            // Opcional: Limitar visualmente el largo para que no sea infinita
+            if (visualLength > 300)
+                visualLength = 300;
+
+            //CONVERTIR ÁNGULO + LARGO A COORDENADAS (X, Y)
+            float endX = dragStart.x + com.badlogic.gdx.math.MathUtils.cosDeg(clampedAngle) * visualLength;
+            float endY = dragStart.y + com.badlogic.gdx.math.MathUtils.sinDeg(clampedAngle) * visualLength;
+
+            shapeRenderer.rectLine(dragStart.x, dragStart.y, endX, endY, 5f);
+            shapeRenderer.end();
+        }
+
+        // Render Debug Box2D
         b2dr.render(world, camera.combined.cpy().scl(Constants.PIXELS_PER_METER));
 
         // 6. Render UI
@@ -152,17 +214,16 @@ public class GameScreen implements Screen{
         Player p1 = new Player(1);
         Player p2 = new Player(2);
 
-        Cannon c1 = physicsFactory.createCannon(Constants.WORLD_WIDTH/2, 3 * Constants.TILE_SIZE);
-        Cannon c2 = physicsFactory.createCannon(Constants.WORLD_WIDTH/2, Constants.WORLD_HEIGHT - (3 * Constants.TILE_SIZE));
-        c2.setAngle(270);
+        Cannon c1 = physicsFactory.createCannon(Constants.CANNON_X, Constants.PLAYER_1_CANNON_Y);
+        Cannon c2 = physicsFactory.createCannon(Constants.CANNON_X, Constants.PLAYER_2_CANNON_Y);
         p1.setCannon(c1);
         p2.setCannon(c2);
 
-        Troop t1 = physicsFactory.createTroop(10* Constants.TILE_SIZE, 
-                                            Constants.WORLD_HEIGHT/2 - Constants.TILE_SIZE*8);
-        Troop t2 = physicsFactory.createTroop(10* Constants.TILE_SIZE,  
-                                            Constants.WORLD_HEIGHT - Constants.TILE_SIZE*5);
-        
+        Troop t1 = physicsFactory.createTroop(8 * Constants.TILE_SIZE,
+                Constants.WORLD_HEIGHT / 2 - Constants.TILE_SIZE * 8);
+        Troop t2 = physicsFactory.createTroop(8 * Constants.TILE_SIZE,
+                Constants.WORLD_HEIGHT - Constants.TILE_SIZE * 5);
+
         p1.addTroop(t1);
         p2.addTroop(t2);
 
@@ -173,24 +234,25 @@ public class GameScreen implements Screen{
 
     private void createMapCollissions() {
         TiledMapTileLayer layer = (TiledMapTileLayer) map.getLayers().get("collision");
-        if (layer == null) return;
-        
+        if (layer == null)
+            return;
+
         float tileSize = layer.getTileWidth();
-        
+
         for (int x = 0; x < layer.getWidth(); x++) {
             for (int y = 0; y < layer.getHeight(); y++) {
                 if (layer.getCell(x, y) != null) {
-                    
+
                     BodyDef bdef = new BodyDef();
                     bdef.type = BodyDef.BodyType.StaticBody;
                     // Posición central del tile
-                    bdef.position.set((x * tileSize + tileSize/2) / Constants.PIXELS_PER_METER, 
-                                      (y * tileSize + tileSize/2) / Constants.PIXELS_PER_METER);
-                    
+                    bdef.position.set((x * tileSize + tileSize / 2) / Constants.PIXELS_PER_METER,
+                            (y * tileSize + tileSize / 2) / Constants.PIXELS_PER_METER);
+
                     Body body = world.createBody(bdef);
                     PolygonShape shape = new PolygonShape();
-                    shape.setAsBox((tileSize/2) / Constants.PIXELS_PER_METER, 
-                                   (tileSize/2) / Constants.PIXELS_PER_METER);
+                    shape.setAsBox((tileSize / 2) / Constants.PIXELS_PER_METER,
+                            (tileSize / 2) / Constants.PIXELS_PER_METER);
                     body.createFixture(shape, 1.0f);
                     shape.dispose();
                 }
@@ -199,35 +261,26 @@ public class GameScreen implements Screen{
     }
 
     private void setupUI() {
-        stage = new Stage(new FitViewport(1280, 720));
-        
+        stage = new Stage(new FitViewport(Constants.WORLD_WIDTH, Constants.WORLD_HEIGHT));
+
         Label.LabelStyle labelStyle = new Label.LabelStyle(new BitmapFont(), Color.WHITE);
-        
+
+        Slider.SliderStyle sliderStyle = new Slider.SliderStyle();
+        sliderStyle.background = getColoredDrawable(10, 10, Color.DARK_GRAY);
+        sliderStyle.knob = getColoredDrawable(20, 40, Color.YELLOW);
+
+        // --- 4. ETIQUETA DE ESTADO ---
+        statusLabel = new Label("Iniciando...", labelStyle);
+        statusLabel.setFontScale(2); // Hacerlo grande
+
+        // --- TABLA DE ORGANIZACIÓN ---
         Table table = new Table();
-        table.bottom();
+        table.bottom().padBottom(20);
         table.setFillParent(true);
-        
-        final Label angleLabel = new Label("Angulo: 90", labelStyle);
-        final Label powerLabel = new Label("Potencia: 50", labelStyle);
-        
-        TextButton.TextButtonStyle btnStyle = new TextButton.TextButtonStyle();
-        btnStyle.font = new BitmapFont();
-        btnStyle.fontColor = Color.YELLOW;
-        
-        TextButton fireBtn = new TextButton("¡DISPARAR!", btnStyle);
-        fireBtn.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                float power = 25f;
-                gameLogic.playerShoot(power);
-                sfxShoot.play();
-            }
-        });
-        
-        table.add(angleLabel).pad(10);
-        table.add(fireBtn).pad(10);
-        table.add(powerLabel).pad(10);
-        
+
+        // Fila 1: Estado
+        table.add(statusLabel).colspan(3).padBottom(20).row();
+
         stage.addActor(table);
     }
 
@@ -243,26 +296,26 @@ public class GameScreen implements Screen{
             Cannon c = p.getCannon();
             // Base
             game.batch.draw(cannonBase,
-                            c.getPosX() * Constants.PIXELS_PER_METER - Constants.CANNON_SIZE/2,
-                            c.getPosY() * Constants.PIXELS_PER_METER - Constants.CANNON_SIZE/2,
-                             Constants.CANNON_SIZE, Constants.CANNON_SIZE);
+                    c.getPosX() * Constants.PIXELS_PER_METER - Constants.CANNON_SIZE / 2,
+                    c.getPosY() * Constants.PIXELS_PER_METER - Constants.CANNON_SIZE / 2,
+                    Constants.CANNON_SIZE, Constants.CANNON_SIZE);
             // Barril Rotatorio
             Sprite s = new Sprite(cannonBarrel);
-            s.setSize(Constants.CANNON_SIZE, Constants.CANNON_SIZE/3); // Ajusta tamaño
-            s.setOrigin(0, s.getHeight()/2); // Pivote a la izquierda centro
-            s.setPosition(c.getPosX() * Constants.PIXELS_PER_METER, 
-                          c.getPosY() * Constants.PIXELS_PER_METER - s.getHeight()/2);
+            s.setSize(Constants.CANNON_SIZE, Constants.CANNON_SIZE / 3); // Ajusta tamaño
+            s.setOrigin(0, s.getHeight() / 2); // Pivote a la izquierda centro
+            s.setPosition(c.getPosX() * Constants.PIXELS_PER_METER,
+                    c.getPosY() * Constants.PIXELS_PER_METER - s.getHeight() / 2);
             s.setRotation(c.getAngle()); // Ángulo
             s.draw(game.batch);
 
             // Dibujar Tropas
             Texture troopTex = (p.getId() == 1) ? troopBlue : troopRed;
             for (Troop t : p.getTroopList()) {
-                if(t.isActive()) {
+                if (t.isActive()) {
                     game.batch.draw(troopTex,
-                                    t.getPosX()* Constants.PIXELS_PER_METER  - Constants.TROOP_SIZE/2,
-                                    t.getPosY()* Constants.PIXELS_PER_METER - Constants.TROOP_SIZE/2,
-                                     Constants.TROOP_SIZE, Constants.TROOP_SIZE);
+                            t.getPosX() * Constants.PIXELS_PER_METER - Constants.TROOP_SIZE / 2,
+                            t.getPosY() * Constants.PIXELS_PER_METER - Constants.TROOP_SIZE / 2,
+                            Constants.TROOP_SIZE, Constants.TROOP_SIZE);
                 }
             }
         }
@@ -273,20 +326,20 @@ public class GameScreen implements Screen{
 
         for (Projectile p : gameLogic.getActiveProjectiles()) {
             Vector2 groundPos = p.getGroundPosition();
-            
+
             // 1. Sombra (Siempre en el suelo)
             game.batch.setColor(1, 1, 1, 0.5f); // Transparente
-            game.batch.draw(shadowTex, 
-                            groundPos.x - 10, 
-                            groundPos.y - 5, 
-                            20, 10);
+            game.batch.draw(shadowTex,
+                    groundPos.x - 10,
+                    groundPos.y - 5,
+                    20, 10);
             game.batch.setColor(Color.WHITE);
 
             // 2. Bala (Suelo + Altura)
-            game.batch.draw(bulletTex, 
-                          groundPos.x - Constants.BULLET_SIZE/2, 
-                          groundPos.y + p.getHeight() - Constants.BULLET_SIZE/2, 
-                          Constants.BULLET_SIZE, Constants.BULLET_SIZE);
+            game.batch.draw(bulletTex,
+                    groundPos.x - Constants.BULLET_SIZE / 2,
+                    groundPos.y + p.getHeight() - Constants.BULLET_SIZE / 2,
+                    Constants.BULLET_SIZE, Constants.BULLET_SIZE);
         }
     }
 
@@ -309,11 +362,159 @@ public class GameScreen implements Screen{
         world.dispose();
         b2dr.dispose();
         stage.dispose();
+        if (shapeRenderer != null) {
+            shapeRenderer.dispose();
+        }
     }
 
     @Override
     public void hide() {
         dispose();
     }
- 
+
+    private void updateUI() {
+        // 1. Obtener estado actual
+        GAME_STATE state = gameLogic.getState();
+
+        // 2. Texto informativo
+        if (state == GAME_STATE.WAITING) {
+            statusLabel.setText("Proyectil en el aire...");
+            statusLabel.setColor(Color.YELLOW);
+        } else if (state == GAME_STATE.PLAYER_1_TURN) {
+            statusLabel.setText("TURNO JUGADOR 1 (Abajo)");
+            statusLabel.setColor(Color.CYAN);
+        } else if (state == GAME_STATE.PLAYER_2_TURN) {
+            statusLabel.setText("TURNO JUGADOR 2 (Arriba)");
+            statusLabel.setColor(Color.RED);
+        } else if (state == GAME_STATE.PLAYER_1_WIN) {
+            statusLabel.setText("¡GANÓ JUGADOR 1!");
+            statusLabel.setColor(Color.GREEN);
+        } else if (state == GAME_STATE.PLAYER_2_WIN) {
+            statusLabel.setText("¡GANÓ JUGADOR 2!");
+            statusLabel.setColor(Color.GREEN);
+        } else if (state == GAME_STATE.TURN_TRANSITION) {
+            statusLabel.setText("¡IMPACTO!");
+            statusLabel.setColor(Color.CORAL);
+        }
+
+    }
+
+    // Método mágico para crear texturas de colores sólidos para la UI
+    private TextureRegionDrawable getColoredDrawable(int width, int height, Color color) {
+        Pixmap pixmap = new Pixmap(width, height, Pixmap.Format.RGBA8888);
+        pixmap.setColor(color);
+        pixmap.fill();
+        TextureRegionDrawable drawable = new TextureRegionDrawable(new TextureRegion(new Texture(pixmap)));
+        pixmap.dispose();
+        return drawable;
+    }
+
+    private boolean handleTouchDown(int screenX, int screenY) {
+        // Solo permitir si es turno de alguien
+        GAME_STATE state = gameLogic.getState();
+        if (state != GAME_STATE.PLAYER_1_TURN && state != GAME_STATE.PLAYER_2_TURN)
+            return false;
+
+        // Convertir click de pantalla a coordenadas del mundo (Metros o Pixeles según
+        // tu cámara)
+        Vector2 worldCoordinates = viewport.unproject(new Vector2(screenX, screenY));
+
+        Player currentPlayer = gameLogic.getCurrentPlayer();
+        Cannon cannon = currentPlayer.getCannon();
+
+        // Posición del cañón (Asegúrate de que esté en las mismas unidades que la
+        // cámara)
+        // Si tu cámara está en PIXELES:
+        float cannonX = cannon.getPosX() * Constants.PIXELS_PER_METER;
+        float cannonY = cannon.getPosY() * Constants.PIXELS_PER_METER;
+
+        // Calcular distancia del click al cañón
+        float dist = Vector2.dst(worldCoordinates.x, worldCoordinates.y, cannonX, cannonY);
+
+        // Si hizo click cerca del cañón (ej. 50 pixeles de radio), iniciamos arrastre
+        if (dist < 50) {
+            isDragging = true;
+            dragStart.set(cannonX, cannonY);
+            dragCurrent.set(worldCoordinates.x, worldCoordinates.y);
+            return true;
+        }
+        return false;
+    }
+
+    private boolean handleTouchDragged(int screenX, int screenY) {
+        if (!isDragging)
+            return false;
+
+        // Actualizar posición actual del mouse
+        Vector2 worldCoordinates = viewport.unproject(new Vector2(screenX, screenY));
+        dragCurrent.set(worldCoordinates.x, worldCoordinates.y);
+
+        // --- CÁLCULO DE ÁNGULO ---
+        // En mecánica "Resortera", jalamos al lado contrario.
+        // Vector desde el Mouse -> Cañón
+        Vector2 forceVector = new Vector2(dragStart).sub(dragCurrent);
+
+        // angle() devuelve grados (0-360)
+        float angle = forceVector.angle();
+
+        // Actualizamos visualmente el cañón en tiempo real
+        gameLogic.playerAim(angle);
+
+        return true;
+    }
+
+    private boolean handleTouchUp(int screenX, int screenY) {
+        if (!isDragging)
+            return false;
+
+        isDragging = false;
+
+        // --- CÁLCULO DE POTENCIA ---
+        // Distancia entre el cañón y donde soltaste el mouse
+        float distance = dragStart.dst(dragCurrent);
+
+        // Convertir distancia en pixeles a Potencia (0-100)
+        // Digamos que arrastrar 200 pixeles es el 100% de potencia
+        float maxDragDistance = 300f;
+        float power = (distance / maxDragDistance) * 100;
+
+        // Limitar potencia (Clamp)
+        if (power > Constants.MAX_AIM_POWER)
+            power = Constants.MAX_AIM_POWER;
+        if (power < 0)
+            power = 0;
+
+        // ¡FUEGO!
+        // Solo disparar si arrastró un poquito (para evitar disparos accidentales)
+        if (power > 10) {
+            gameLogic.playerShoot(power);
+            sfxShoot.play();
+        }
+        return true;
+    }
+
+    private void updateCamera(float delta) {
+        // 1. Determinar el ángulo objetivo según de quién sea el turno
+        float targetAngle = 0f; // Por defecto Jugador 1 (0 grados)
+
+        if (gameLogic.getCurrentPlayer().getId() == 2) {
+            targetAngle = 180f; // Jugador 2 (180 grados, mundo invertido)
+        }
+
+        // 2. Mover el ángulo actual hacia el objetivo suavemente
+        // El '5f' es la velocidad de giro. Entre más alto, más rápido.
+        // MathUtils.lerp acerca el primer valor al segundo valor poco a poco.
+        currentCameraAngle = com.badlogic.gdx.math.MathUtils.lerp(currentCameraAngle, targetAngle, delta * 2f);
+
+        // 3. Aplicar rotación a la cámara
+        // TRUCO: Primero reseteamos la cámara para que mire "normal" (Norte)
+        camera.up.set(0, 1, 0);
+        camera.direction.set(0, 0, -1);
+
+        // Luego aplicamos la rotación calculada
+        camera.rotate(currentCameraAngle);
+
+        // 4. ¡IMPORTANTE! Actualizar la cámara
+        camera.update();
+    }
 }
