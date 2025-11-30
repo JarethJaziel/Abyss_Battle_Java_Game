@@ -42,12 +42,10 @@ public class MySkinsScreen extends ScreenAdapter {
         Label.LabelStyle titleStyle = new Label.LabelStyle(titleFont, Color.CYAN);
         Label.LabelStyle skinStyle = new Label.LabelStyle(skinFont, Color.BLACK);
 
-        // ==== TÍTULO ====
         Label title = new Label("Inventario de Skins", titleStyle);
         title.setPosition(40, stage.getHeight() - 90);
         stage.addActor(title);
 
-        // ==== BOTÓN REGRESAR (arriba derecha) ====
         VisTextButton.VisTextButtonStyle backStyle =
                 new VisTextButton.VisTextButtonStyle(
                         VisUI.getSkin().get("default", VisTextButton.VisTextButtonStyle.class)
@@ -70,9 +68,8 @@ public class MySkinsScreen extends ScreenAdapter {
             return true;
         });
 
-        // ==== SISTEMA DE SKINS ====
-        String[] skins = { "Skin Cobre", "Skin Plata", "Skin Verde", "Skin Azul" };
-        int startX = 45;   // posición X inicial del primer recuadro
+        String[] skins = { "Skin Bronze", "Skin Plata", "Skin Verde", "Skin Azul" };
+        int startX = 45;   // posición X inicial del primer recuadro de skin
         int offsetX = 155; // distancia entre recuadros
 
         final int[] equippedIndex = {0};
@@ -87,7 +84,7 @@ public class MySkinsScreen extends ScreenAdapter {
             skinLabel.setPosition(x, 70);
             stage.addActor(skinLabel);
 
-            // ==== Botón Equip abajo en el recuadro café ====
+ 
             VisTextButton.VisTextButtonStyle equipStyle =
                     new VisTextButton.VisTextButtonStyle(
                             VisUI.getSkin().get("default", VisTextButton.VisTextButtonStyle.class)
@@ -98,10 +95,9 @@ public class MySkinsScreen extends ScreenAdapter {
             equipStyle.up   = VisUI.getSkin().newDrawable("white", Color.valueOf("2C3E50FF"));
 
             VisTextButton equipBtn = new VisTextButton("", equipStyle);
-            equipBtn.setSize(60, 25);
-            equipBtn.setPosition(x+10, 13);
+            equipBtn.setSize(70, 25);
+            equipBtn.setPosition(x+10, 15);
 
-            // Texto inicial
             if (i == equippedIndex[0])
                 equipBtn.setText("Equipped");
             else
@@ -109,7 +105,6 @@ public class MySkinsScreen extends ScreenAdapter {
 
             equipButtons[i] = equipBtn;
 
-            // Listener
             final int index = i;
             equipBtn.addListener(new ChangeListener() {
                 @Override
