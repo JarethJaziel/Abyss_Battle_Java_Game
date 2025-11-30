@@ -45,7 +45,8 @@ public void show() {
     Label.LabelStyle titleStyle = new Label.LabelStyle(titleFont, Color.CYAN);
 
     Label title = new Label("Abyss Battle", titleStyle);
-    mainTable.add(title).padBottom(50);
+    mainTable.add(title).right().pad(10);
+    mainTable.add(title).padBottom(80);
     mainTable.row();
 
     VisTextButton.VisTextButtonStyle buttonStyle =
@@ -63,19 +64,28 @@ public void show() {
     buttonStyle.over = VisUI.getSkin().newDrawable("white", Color.valueOf("1ABC9CFF")); // Hover
     buttonStyle.down = VisUI.getSkin().newDrawable("white", Color.valueOf("2ECC71FF")); // Presionado
 
+    VisTextButton loginButton = new VisTextButton("Iniciar Sesion", buttonStyle);
+    mainTable.add(loginButton).top().pad(10);
+    mainTable.add(loginButton).fillX().pad(10);
+    mainTable.row();
+
     VisTextButton playButton = new VisTextButton("Jugar", buttonStyle);
+    mainTable.add(playButton).right().pad(10);
     mainTable.add(playButton).fillX().pad(10);
     mainTable.row();
 
     VisTextButton shopButton = new VisTextButton("Tienda de Skins", buttonStyle);
+    mainTable.add(shopButton).right().pad(10);
     mainTable.add(shopButton).fillX().pad(10);
     mainTable.row();
 
     VisTextButton mySkinsButton = new VisTextButton("Mis Skins", buttonStyle);
+    mainTable.add(mySkinsButton).right().pad(10);
     mainTable.add(mySkinsButton).fillX().pad(10);
     mainTable.row();
 
     VisTextButton exitButton = new VisTextButton("Salir", buttonStyle);
+    mainTable.add(exitButton).right().pad(10);
     mainTable.add(exitButton).fillX().pad(10);
     mainTable.row();
 
