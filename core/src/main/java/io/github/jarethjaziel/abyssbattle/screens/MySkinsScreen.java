@@ -99,9 +99,9 @@ public class MySkinsScreen extends ScreenAdapter {
             equipBtn.setPosition(x+10, 15);
 
             if (i == equippedIndex[0])
-                equipBtn.setText("Equipped");
+                equipBtn.setText("Equipado");
             else
-                equipBtn.setText("Equip");
+                equipBtn.setText("Equipar");
 
             equipButtons[i] = equipBtn;
 
@@ -113,9 +113,9 @@ public class MySkinsScreen extends ScreenAdapter {
 
                     for (int j = 0; j < equipButtons.length; j++) {
                         if (j == equippedIndex[0])
-                            equipButtons[j].setText("Equipped");
+                            equipButtons[j].setText("Equipado");
                         else
-                            equipButtons[j].setText("Equip");
+                            equipButtons[j].setText("Equipar");
                     }
                 }
             });

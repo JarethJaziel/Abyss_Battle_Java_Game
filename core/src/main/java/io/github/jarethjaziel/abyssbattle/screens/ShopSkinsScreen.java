@@ -114,9 +114,9 @@ public class ShopSkinsScreen extends ScreenAdapter {
             VisTextButton btn;
 
             if (purchased)
-                btn = new VisTextButton("Purchased", purchasedStyle);
+                btn = new VisTextButton("Adquirido", purchasedStyle);
             else
-                btn = new VisTextButton("Buy", buyStyle);
+                btn = new VisTextButton("Comprar", buyStyle);
 
             btn.setSize(70, 25);
             btn.setPosition(x + 10, 15); 
@@ -132,7 +132,7 @@ public class ShopSkinsScreen extends ScreenAdapter {
                         prefs.flush();
                     }
 
-                    finalBtn.setText("Purchased");
+                    finalBtn.setText("Adquirido");
                     finalBtn.setStyle(purchasedStyle);
                 }
             });
