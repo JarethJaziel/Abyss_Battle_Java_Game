@@ -68,8 +68,8 @@ public class User {
     }
 
     public void setNewPassword(String rawPassword) {
-        String encriptada = PasswordUtils.hash(rawPassword); 
-        this.passwordHash = encriptada;
+        //String encriptada = PasswordUtils.hash(rawPassword); 
+        //this.passwordHash = encriptada;
     }
 
     @Override
