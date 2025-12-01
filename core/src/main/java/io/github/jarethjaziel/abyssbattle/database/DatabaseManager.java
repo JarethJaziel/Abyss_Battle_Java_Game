@@ -9,6 +9,7 @@ import com.j256.ormlite.table.TableUtils;
 import io.github.jarethjaziel.abyssbattle.database.entities.Skin;
 import io.github.jarethjaziel.abyssbattle.database.entities.Stats;
 import io.github.jarethjaziel.abyssbattle.database.entities.User;
+import io.github.jarethjaziel.abyssbattle.database.entities.UserLoadout;
 import io.github.jarethjaziel.abyssbattle.database.entities.UserSkin;
 
 import java.io.IOException;
@@ -25,6 +26,7 @@ public class DatabaseManager {
     private Dao<Stats, Integer> statsDao;
     private Dao<Skin, Integer> skinDao;
     private Dao<UserSkin, Integer> userSkinDao;
+    private Dao<UserLoadout, Integer> userLoadoutDao;
 
     public void connect() throws SQLException {
         connectionSource = new JdbcConnectionSource(DB_URL);
@@ -52,6 +54,10 @@ public class DatabaseManager {
                 System.out.println("ERROR: " + e.getMessage());
             }
         }
+    }
+
+    public Dao<UserLoadout, Integer> getUserLoadoutDao() {
+        return userLoadoutDao;
     }
 
     public Dao<User, Integer> getUserDao() {

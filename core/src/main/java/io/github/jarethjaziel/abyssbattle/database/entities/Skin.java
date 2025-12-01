@@ -1,7 +1,10 @@
 package io.github.jarethjaziel.abyssbattle.database.entities;
 
+import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
+
+import io.github.jarethjaziel.abyssbattle.util.SkinType;
 
 @DatabaseTable(tableName = "skins")
 public class Skin {
@@ -15,11 +18,16 @@ public class Skin {
     @DatabaseField
     private int price;
 
-    public Skin() {}
+    @DatabaseField(dataType = DataType.ENUM_STRING)
+    private SkinType type;
 
-    public Skin(String name, int price) {
+    public Skin() {
+    }
+
+    public Skin(String name, int price, SkinType type) {
         this.name = name;
         this.price = price;
+        this.type = type;
     }
 
     public int getId() {
@@ -29,5 +37,13 @@ public class Skin {
     public String getName() {
         return name;
     }
-    
+
+    public SkinType getType() {
+        return type;
+    }
+
+    public void setType(SkinType type) {
+        this.type = type;
+    }
+
 }

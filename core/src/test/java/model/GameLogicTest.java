@@ -132,8 +132,8 @@ class GameLogicTest {
         // Asumimos que PPM es 100 (ajustar según tus Constants). 
         // Si radio es 2.5m = 250px. Tropa a 0px de distancia.
         when(mockTroopP1.isActive()).thenReturn(true);
-        when(mockTroopP1.getX()).thenReturn(100f);
-        when(mockTroopP1.getY()).thenReturn(100f);
+        when(mockTroopP1.getPosX()).thenReturn(100f);
+        when(mockTroopP1.getPosY()).thenReturn(100f);
 
         // Inyectar el proyectil manualmente a la lógica
         gameLogic.registerShoot(mockProjectile);
@@ -160,8 +160,8 @@ class GameLogicTest {
         // Simulamos explosión en 0,0
         // Tropa P1 en 125,0 (A la mitad del radio de 250px)
         when(mockTroopP1.isActive()).thenReturn(true);
-        when(mockTroopP1.getX()).thenReturn(125f); // 1.25 metros
-        when(mockTroopP1.getY()).thenReturn(0f);
+        when(mockTroopP1.getPosX()).thenReturn(125f); // 1.25 metros
+        when(mockTroopP1.getPosY()).thenReturn(0f);
         
         // Simulamos proyectil que cae en 0,0
         when(mockProjectile.isFlying()).thenReturn(false);
