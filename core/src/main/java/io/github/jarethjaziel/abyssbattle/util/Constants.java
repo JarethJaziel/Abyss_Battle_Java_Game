@@ -29,7 +29,8 @@ public class Constants {
     public static final float MIN_AIM_POWER = 30;
     public static final float AIM_DEADZONE = 10;
     public static final float MAX_AIM_VISION = 150;
+    public static final float MAX_DRAG_DISTANCE = 300f;
+    public static final int DEFAULT_TROOP_SKIN_ID = 0;
+    public static final int DEFAULT_CANNON_SKIN_ID = 0;
     
-    
-
 }

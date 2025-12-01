@@ -59,6 +59,19 @@ public class User {
         return createdAt;
     }
 
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
+    }
+
+    public void setNewPassword(String rawPassword) {
+        String encriptada = PasswordUtils.hash(rawPassword); 
+        this.passwordHash = encriptada;
+    }
+
     @Override
     public String toString() {
         return "User ID: "+ id + "\nusername: " + username + "\npasswordHash: " + passwordHash + "\ncreatedAt: "

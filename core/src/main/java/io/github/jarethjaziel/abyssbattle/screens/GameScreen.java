@@ -20,6 +20,7 @@ import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
@@ -537,7 +538,7 @@ public class GameScreen implements Screen {
         Vector2 forceVector = new Vector2(dragStart).sub(dragCurrent);
 
         // angle() devuelve grados (0-360)
-        float angle = forceVector.angle();
+        float angle = forceVector.angleDeg();
 
         // Actualizamos visualmente el cañón en tiempo real
         gameLogic.playerAim(angle);
@@ -557,8 +558,7 @@ public class GameScreen implements Screen {
 
         // Convertir distancia en pixeles a Potencia (0-100)
         // Digamos que arrastrar 200 pixeles es el 100% de potencia
-        float maxDragDistance = 300f;
-        float power = (distance / maxDragDistance) * 100;
+        float power = (distance / Constants.MAX_DRAG_DISTANCE) * 100;
 
         if (power < Constants.AIM_DEADZONE) {
             return true;
@@ -603,10 +603,8 @@ public class GameScreen implements Screen {
             targetAngle = 180f; // Jugador 2 (180 grados, mundo invertido)
         }
 
-        // 2. Mover el ángulo actual hacia el objetivo suavemente
-        // El '5f' es la velocidad de giro. Entre más alto, más rápido.
         // MathUtils.lerp acerca el primer valor al segundo valor poco a poco.
-        currentCameraAngle = com.badlogic.gdx.math.MathUtils.lerp(currentCameraAngle, targetAngle, delta * 2f);
+        currentCameraAngle = MathUtils.lerp(currentCameraAngle, targetAngle, delta * 2f);
 
         // 3. Aplicar rotación a la cámara
         // TRUCO: Primero reseteamos la cámara para que mire "normal" (Norte)
