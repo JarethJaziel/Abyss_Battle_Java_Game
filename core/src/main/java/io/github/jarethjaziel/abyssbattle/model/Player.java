@@ -25,10 +25,7 @@ public class Player {
         return cannon;
     }
 
-    public void placeTroop(Troop troop, float px, float py) {
-        float x = px / 100f;  
-        float y = py / 100f;
-        troop.getBody().setTransform(x, y, 0); 
+    public void addTroop(Troop troop){
         troopList.add(troop);
     }
 

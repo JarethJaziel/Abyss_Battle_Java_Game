@@ -10,19 +10,36 @@ public class Cannon extends Entity {
     private float angle;
     
     private float barrelLength; 
+    
+    private float minAngle;
+    private float maxAngle;
 
     public Cannon(Body body) {
         super(body);
         this.angle = (Constants.MIN_SHOOT_ANGLE + Constants.MAX_SHOOT_ANGLE) / 2;
         this.barrelLength = Constants.CANNON_SIZE/2f;
+        this.minAngle = Constants.MIN_SHOOT_ANGLE;
+        this.maxAngle = Constants.MAX_SHOOT_ANGLE;
     }
 
     public void setAngle(float angle) {
-        this.angle = angle;
-        if(this.angle < Constants.MIN_SHOOT_ANGLE) 
-            this.angle = Constants.MIN_SHOOT_ANGLE;
-        if(this.angle > Constants.MAX_SHOOT_ANGLE) 
-            this.angle = Constants.MAX_SHOOT_ANGLE;
+        this.angle = MathUtils.clamp(angle, minAngle, maxAngle);
+    }
+
+    public float getMinAngle() {
+        return minAngle;
+    }
+
+    public void setMinAngle(float minAngle) {
+        this.minAngle = minAngle;
+    }
+
+    public float getMaxAngle() {
+        return maxAngle;
+    }
+
+    public void setMaxAngle(float maxAngle) {
+        this.maxAngle = maxAngle;
     }
 
     public float getAngle() {
