@@ -20,7 +20,7 @@ import io.github.jarethjaziel.abyssbattle.model.Player;
 import io.github.jarethjaziel.abyssbattle.model.Projectile;
 import io.github.jarethjaziel.abyssbattle.model.Troop;
 import io.github.jarethjaziel.abyssbattle.util.Constants;
-import io.github.jarethjaziel.abyssbattle.util.GAME_STATE;
+import io.github.jarethjaziel.abyssbattle.util.GameState;
 
 /**
  * GameLogicTest — único archivo, adaptado a tu GameLogic.java real.
@@ -109,7 +109,7 @@ class GameLogicTest {
     void testStartGame_initializesAnglesStateAndTroopsToPlace() {
         logic.startGame();
 
-        assertEquals(GAME_STATE.PLACEMENT_P1, logic.getState());
+        assertEquals(GameState.PLACEMENT_P1, logic.getState());
         assertEquals(p1, logic.getCurrentPlayer());
         assertEquals(Constants.MAX_PLAYER_TROOPS, logic.getTroopsToPlace());
 
@@ -133,7 +133,7 @@ class GameLogicTest {
     void testPlayerAim_doesNotChangeWhenWaiting() {
         logic.startGame();
         // set internal state WAITING
-        R.setField(logic, "state", GAME_STATE.WAITING);
+        R.setField(logic, "state", GameState.WAITING);
 
         float before = p1.getCannon().getAngle();
         logic.playerAim(before + 30f);
@@ -149,13 +149,13 @@ class GameLogicTest {
             .thenReturn(mockProj);
 
         // set logic to player 1 turn and currentPlayer to p1
-        R.setField(logic, "state", GAME_STATE.PLAYER_1_TURN);
+        R.setField(logic, "state", GameState.PLAYER_1_TURN);
         R.setField(logic, "currentPlayer", p1);
 
         logic.playerShoot(35f);
 
         assertEquals(1, logic.getActiveProjectiles().size());
-        assertEquals(GAME_STATE.WAITING, logic.getState());
+        assertEquals(GameState.WAITING, logic.getState());
 
         verify(mockFactory, times(1)).createProjectile(
                 anyFloat(), anyFloat(), eq(c1.getAngle()), eq(35f), eq(Constants.BULLET_DAMAGE)
@@ -215,7 +215,7 @@ class GameLogicTest {
         boolean ended = logic.checkWinner();
 
         assertTrue(ended);
-        assertEquals(GAME_STATE.PLAYER_2_WIN, logic.getState());
+        assertEquals(GameState.PLAYER_2_WIN, logic.getState());
     }
 
     @Test
@@ -231,7 +231,7 @@ class GameLogicTest {
         boolean ended = logic.checkWinner();
 
         assertTrue(ended);
-        assertEquals(GAME_STATE.DRAW, logic.getState());
+        assertEquals(GameState.DRAW, logic.getState());
     }
 
     @Test
@@ -247,7 +247,7 @@ class GameLogicTest {
         boolean ended = logic.checkWinner();
 
         assertFalse(ended);
-        assertEquals(GAME_STATE.LAST_CHANCE, logic.getState());
+        assertEquals(GameState.LAST_CHANCE, logic.getState());
     }
 
     @Test
@@ -259,7 +259,7 @@ class GameLogicTest {
         assertEquals(p1, logic.getCurrentPlayer());
 
         // Last chance case forces currentPlayer to p2
-        R.setField(logic, "state", GAME_STATE.LAST_CHANCE);
+        R.setField(logic, "state", GameState.LAST_CHANCE);
         logic.changeTurn();
         assertEquals(p2, logic.getCurrentPlayer());
     }

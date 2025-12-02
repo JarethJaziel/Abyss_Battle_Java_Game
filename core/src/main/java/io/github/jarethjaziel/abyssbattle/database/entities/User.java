@@ -36,7 +36,7 @@ public class User {
         final int INITIAL_COINS = 100;
         this.coins = INITIAL_COINS;
     }
-    
+
     public void setStats(Stats stats) { this.stats = stats; }
     public Stats getStats() { return stats; }
 
@@ -67,9 +67,8 @@ public class User {
         this.passwordHash = passwordHash;
     }
 
-    public void setNewPassword(String rawPassword) {
-        //String encriptada = PasswordUtils.hash(rawPassword) 
-        //this.passwordHash = encriptada
+    public void purchase(int amount){
+        this.coins -= amount;
     }
 
     @Override
@@ -77,5 +76,5 @@ public class User {
         return "User ID: "+ id + "\nusername: " + username + "\npasswordHash: " + passwordHash + "\ncreatedAt: "
                 + createdAt + "\ncoins: " + coins + "\nstats:" + stats;
     }
-    
+
 }

@@ -1,100 +1,89 @@
 package io.github.jarethjaziel.abyssbattle;
 
-import java.sql.SQLException;
-
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
-import com.badlogic.gdx.audio.Music;
-import com.badlogic.gdx.audio.Sound;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.j256.ormlite.dao.Dao;
 import com.kotcrab.vis.ui.VisUI;
 
 import io.github.jarethjaziel.abyssbattle.database.DatabaseManager;
-import io.github.jarethjaziel.abyssbattle.database.entities.Skin;
-import io.github.jarethjaziel.abyssbattle.database.entities.Stats;
-import io.github.jarethjaziel.abyssbattle.database.entities.User;
-import io.github.jarethjaziel.abyssbattle.database.entities.UserSkin;
-import io.github.jarethjaziel.abyssbattle.screens.MainMenuScreen;
+import io.github.jarethjaziel.abyssbattle.screens.LoadingScreen;
 
-/** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
+import java.sql.SQLException;
+
 public class AbyssBattle extends Game {
-
-    private DatabaseManager dbManager;
-    private User user;
 
     public SpriteBatch batch;
     public AssetManager assets;
 
+    // Sistema de Base de Datos
+    private DatabaseManager dbManager;
+
+
     @Override
     public void create() {
-        VisUI.load();
-        dbManager = new DatabaseManager();
+        // 1. Inicializar VisUI primero
+        if (!VisUI.isLoaded()) {
+            VisUI.load();
+        }
+
+        System.out.println("Iniciando Abyss Battle...");
+
+        // 2. Inicializar Base de Datos y Sistema de Cuentas
         try {
+            dbManager = new DatabaseManager();
             dbManager.connect();
+            System.out.println("Sistema de base de datos inicializado correctamente");
         } catch (SQLException e) {
-            System.out.println("Error al conectar a la base de datos: " + e.getMessage());
-        }
-        
-        try {
-            user = getUserDao().queryForId(1);
-        } catch (SQLException e) {
-            user = null;
+            System.err.println("ERROR FATAL: No se pudo conectar a la base de datos");
+            e.printStackTrace();
+            Gdx.app.exit();
+            return;
         }
 
-        Gdx.app.log("DB", "Usuario cargado: " + user);
-
-        batch = new SpriteBatch();
+        // 3. Cargar Assets
         assets = new AssetManager();
 
-        // 1. Cargar Imágenes
-        assets.load("sprites/cannon_base.png", Texture.class);
-        assets.load("sprites/cannon_barrel.png", Texture.class);
-        assets.load("sprites/projectile.png", Texture.class);
-        assets.load("sprites/shadow.png", Texture.class);
-        assets.load("sprites/troop_blue.png", Texture.class); // P1
-        assets.load("sprites/troop_red.png", Texture.class);  // P2
-        assets.load("vfx/explosion1.png", Texture.class);
-        assets.load("vfx/explosion2.png", Texture.class);
-        assets.load("vfx/explosion3.png", Texture.class);
-        
-        // 2. Cargar Sonidos y Música
-        assets.load("music/game_music.mp3", Music.class);
-        assets.load("sfx/boom.mp3", Sound.class);
-        assets.load("sfx/shoot.mp3", Sound.class);
+        batch = new SpriteBatch();
 
-        assets.finishLoading();
-
-        setScreen(new MainMenuScreen(this));
+        setScreen(new LoadingScreen(this));
     }
 
     @Override
-    public void dispose () {
-        VisUI.dispose();
-        super.dispose(); 
-        dbManager.close();
+    public void render() {
+        super.render();
     }
 
-    public Dao<User, Integer> getUserDao(){
-        return dbManager.getUserDao();
+    @Override
+    public void dispose() {
+        System.out.println("Cerrando Abyss Battle...");
+        super.dispose();
+
+        if (batch != null) {
+            batch.dispose();
+        }
+
+        if (assets != null) {
+            assets.dispose();
+        }
+
+        if (VisUI.isLoaded()) {
+            VisUI.dispose();
+        }
+
+        // Cerrar conexión a base de datos
+        if (dbManager != null) {
+            dbManager.close();
+            System.out.println("Base de datos cerrada correctamente");
+        }
+
+        System.out.println("Abyss Battle cerrado correctamente");
     }
 
-    public Dao<Stats, Integer> getStatsDao() {
-        return dbManager.getStatsDao();
-    }
+    
 
-    public Dao<Skin, Integer> getSkinDao() {
-        return dbManager.getSkinDao();
-    }
-
-    public Dao<UserSkin, Integer> getUserSkinDao() {
-        return dbManager.getUserSkinDao();
-    }
-
-    public User getUser() {
-        return user;
+    public DatabaseManager getDbManager() {
+        return dbManager;
     }
 
 }

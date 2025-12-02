@@ -17,7 +17,7 @@ import io.github.jarethjaziel.abyssbattle.database.entities.Skin;
 import io.github.jarethjaziel.abyssbattle.database.entities.User;
 import io.github.jarethjaziel.abyssbattle.database.entities.UserLoadout;
 import io.github.jarethjaziel.abyssbattle.database.entities.UserSkin;
-import io.github.jarethjaziel.abyssbattle.database.systems.AccountSystem;
+import io.github.jarethjaziel.abyssbattle.database.systems.AccountManagerSystem;
 import io.github.jarethjaziel.abyssbattle.util.Constants;
 
 public class AccountSystemTest {
@@ -28,7 +28,7 @@ public class AccountSystemTest {
     private Dao<UserSkin, Integer> userSkinDao;
     private Dao<UserLoadout, Integer> loadoutDao;
 
-    private AccountSystem accountSystem;
+    private AccountManagerSystem accountSystem;
 
     @BeforeEach
     void setUp() throws SQLException {
@@ -43,7 +43,7 @@ public class AccountSystemTest {
         when(dbManager.getUserSkinDao()).thenReturn(userSkinDao);
         when(dbManager.getUserLoadoutDao()).thenReturn(loadoutDao);
 
-        accountSystem = new AccountSystem(dbManager);
+        accountSystem = new AccountManagerSystem(dbManager);
     }
 
     @Test
@@ -52,10 +52,10 @@ public class AccountSystemTest {
         Skin troopSkin = new Skin();
         Skin cannonSkin = new Skin();
 
-        when(skinDao.queryForId(Constants.DEFAULT_TROOP_SKIN_ID)).thenReturn(troopSkin);
-        when(skinDao.queryForId(Constants.DEFAULT_CANNON_SKIN_ID)).thenReturn(cannonSkin);
+        when(skinDao.queryForId(Constants.DEFAULT_TROOP_SKIN)).thenReturn(troopSkin);
+        when(skinDao.queryForId(Constants.DEFAULT_ENEMY_TROOP_SKIN)).thenReturn(cannonSkin);
 
-        accountSystem.registrarNuevoUsuario("player", "1234");
+        accountSystem.registerUser("player", "1234");
 
         verify(userDao, times(1)).create(any(User.class));
         verify(userSkinDao, times(2)).create(any(UserSkin.class));
@@ -65,14 +65,14 @@ public class AccountSystemTest {
     @Test
     @DisplayName("Lanza error si falta una skin default")
     void testSkinDefaultNoExiste() throws SQLException {
-        when(skinDao.queryForId(Constants.DEFAULT_TROOP_SKIN_ID)).thenReturn(null);
+        when(skinDao.queryForId(Constants.DEFAULT_TROOP_SKIN)).thenReturn(null);
 
         assertThrows(RuntimeException.class,
-            () -> accountSystem.registrarNuevoUsuario("player", "pass"));
+            () -> accountSystem.registerUser("player", "pass"));
     }
 
     @Test
-    @DisplayName("asignarYEquiparSkin ejecuta DAOs correctamente usando reflexión")
+    @DisplayName("assignAndEquipSkin ejecuta DAOs correctamente usando reflexión")
     void testAsignarSkinReflexion() throws Exception {
         User user = new User();
         Skin skin = new Skin();
@@ -81,7 +81,7 @@ public class AccountSystemTest {
 
         // Obtener método privado sin usar var
         java.lang.reflect.Method method =
-                AccountSystem.class.getDeclaredMethod("asignarYEquiparSkin", User.class, int.class);
+                AccountManagerSystem.class.getDeclaredMethod("assignAndEquipSkin", User.class, int.class);
 
         method.setAccessible(true);
         method.invoke(accountSystem, user, 5);
