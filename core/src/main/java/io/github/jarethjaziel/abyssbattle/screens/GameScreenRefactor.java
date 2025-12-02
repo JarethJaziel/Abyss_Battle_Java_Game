@@ -30,41 +30,23 @@ public class GameScreenRefactor implements Screen {
 
     @Override
     public void show() {
-        // 1. Inicializar Lógica (MODELO)
-        // GameLogic crea el World de Box2D internamente
         gameLogic = new GameLogic();
 
-        // 2. Inicializar Mapa
-        // Le pasamos el World para que cree las paredes físicas
         mapManager = new MapManager(gameLogic.getWorld(), "maps/game_bg_1.tmx");
 
-        // 3. Inicializar Renderer (VISTA JUEGO)
-        // Necesita el batch, los assets, el mapa (para dibujarlo) y la lógica (para
-        // saber qué dibujar)
         gameRenderer = new GameRenderer(game.batch, game.assets, mapManager, gameLogic);
 
-        // 4. Inicializar HUD (VISTA UI)
-        // Necesita assets y el juego principal para cambiar de pantalla (ej: Salir al
-        // menú)
         gameHUD = new GameHUD(game.batch, game.assets, game);
 
-        // 5. Inicializar Input (CONTROLADOR)
-        // Conecta los dedos del usuario con la lógica y el HUD
         inputController = new InputController(gameLogic, gameRenderer.getViewport(), gameHUD, mapManager);
 
-        // 6. Configurar el Multiplexer
-        // IMPORTANTE: El HUD va primero para que los botones agarren el click antes que
-        // el juego
         InputMultiplexer multiplexer = new InputMultiplexer();
         multiplexer.addProcessor(gameHUD.getStage());
         multiplexer.addProcessor(inputController);
         Gdx.input.setInputProcessor(multiplexer);
 
-        // 7. Arrancar Música (Opcional, usando un Manager)
-
         AudioManager.getInstance().playMusic("music/game_music.mp3");
 
-        // Configuración inicial de la partida
         setupGameStart();
     }
 
@@ -75,30 +57,24 @@ public class GameScreenRefactor implements Screen {
 
     @Override
     public void render(float delta) {
-        // A. Limpiar Pantalla
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        // B. Actualizar Lógica (Si no está pausado)
         if (!gameHUD.isPaused() && !gameLogic.isGameOver()) {
             gameLogic.update(delta);
-            gameRenderer.updateCamera(delta); // Mover cámara si es necesario
+            gameRenderer.updateCamera(delta);
         }
 
-        // C. Verificar condiciones de fin de juego
         if (gameLogic.isGameOver()) {
-            gameHUD.showGameOver(gameLogic.getState()); // Mostrar menú de fin
+            gameHUD.showGameOver(gameLogic.getState());
         }
 
-        // D. Dibujar Juego (Fondo, Mapa, Tanques, Proyectiles)
         gameRenderer.render(delta);
 
-        // E. Dibujar línea de apuntado (Solo si se está arrastrando)
         if (inputController.isDragging() && !gameHUD.isPaused()) {
             gameRenderer.drawAimLine(inputController.getDragStart(), inputController.getDragCurrent());
         }
 
-        // F. Actualizar y Dibujar UI (HUD encima de todo)
         gameHUD.updateInfo(gameLogic.getState(), gameLogic.getTroopsToPlace());
         gameHUD.render(delta);
     }

@@ -1,5 +1,6 @@
 package io.github.jarethjaziel.abyssbattle.model;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.physics.box2d.Body;
 
@@ -53,12 +54,15 @@ public class Cannon extends Entity {
         
         float centerX = body.getPosition().x * Constants.PIXELS_PER_METER;
         float centerY = body.getPosition().y * Constants.PIXELS_PER_METER;
-
-        float angleRad = MathUtils.degreesToRadians * angle;
+        Gdx.app.log("CENTERX", ""+centerX);
+        Gdx.app.log("CENTERY", ""+centerY);
         
+        float angleRad = MathUtils.degreesToRadians * angle;
+        Gdx.app.log("ANGLERAD", ""+angleRad);
         float tipX = centerX + MathUtils.cos(angleRad) * barrelLength;
         float tipY = centerY + MathUtils.sin(angleRad) * barrelLength;
-
+        Gdx.app.log("TIP_CENTERX", ""+tipX);
+        Gdx.app.log("TIP_CENTERY", ""+tipY);
         return factory.createProjectile(tipX, tipY, angle, power, damage);
     }
 

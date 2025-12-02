@@ -114,7 +114,6 @@ public class MainMenuScreen implements Screen {
             public void changed(ChangeEvent event, Actor actor) {
                  if (SessionManager.getInstance().isLoggedIn()) {
                     game.setScreen(new GameScreenRefactor(game));
-                } else {
                     showLoginWarning();
                 }
             }

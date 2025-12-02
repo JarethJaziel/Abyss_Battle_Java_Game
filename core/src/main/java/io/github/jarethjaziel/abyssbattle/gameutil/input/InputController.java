@@ -1,5 +1,6 @@
 package io.github.jarethjaziel.abyssbattle.gameutil.input;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.math.Vector2;
@@ -85,7 +86,6 @@ public class InputController extends InputAdapter {
         if (!isDragging)
             return false;
         Vector2 worldCoords = viewport.unproject(new Vector2(screenX, screenY));
-        worldCoords.scl(1f / Constants.PIXELS_PER_METER);
         dragCurrent.set(worldCoords);
 
         // Calcular ángulo y mandar a logic
@@ -102,9 +102,10 @@ public class InputController extends InputAdapter {
         isDragging = false;
 
         float distance = dragStart.dst(dragCurrent);
+        Gdx.app.log("DISTANCE", ""+distance);
 
         float power = (distance / Constants.MAX_DRAG_DISTANCE) * 100;
-
+        Gdx.app.log("POWER",""+ power);
         if (power < Constants.AIM_DEADZONE) {
             return true;
         }
@@ -116,6 +117,8 @@ public class InputController extends InputAdapter {
         if (power > Constants.MAX_AIM_POWER) {
             power = Constants.MAX_AIM_POWER;
         }
+        Gdx.app.log("POWER",""+ power);
+
 
         logic.playerShoot(power);
         AudioManager.getInstance().playSound("sfx/boom.mp3");

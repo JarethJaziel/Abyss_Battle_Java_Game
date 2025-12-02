@@ -96,11 +96,11 @@ public class GameLogic implements Disposable {
         if (state != GameState.PLAYER_1_TURN && state != GameState.PLAYER_2_TURN) {
             return;
         }
-
+        Gdx.app.log("STATE", ""+state);
         Cannon cannon = currentPlayer.getCannon();
 
         Projectile newBullet = cannon.shoot(physicsFactory, power, Constants.BULLET_DAMAGE);
-
+        
         registerShoot(newBullet);
     }
 
@@ -223,6 +223,8 @@ public class GameLogic implements Disposable {
 
     public void update(float delta) {
 
+        world.step(1/60f, 6, 2);
+
         if (state == GameState.TURN_TRANSITION) {
             turnTimer -= delta;
 
@@ -236,7 +238,7 @@ public class GameLogic implements Disposable {
 
         while (iter.hasNext()) {
             Projectile p = iter.next();
-
+            Gdx.app.log("PROJECTILE", p.toString());
             p.update(delta);
 
             if (!p.isFlying()) {

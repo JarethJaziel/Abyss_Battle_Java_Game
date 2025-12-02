@@ -427,16 +427,6 @@ public class GameScreen implements Screen {
 
 
     private void startGame() {
-        Player p1 = new Player(1);
-        Player p2 = new Player(2);
-
-        Cannon c1 = physicsFactory.createCannon(Constants.CANNON_X, Constants.PLAYER_1_CANNON_Y);
-        Cannon c2 = physicsFactory.createCannon(Constants.CANNON_X, Constants.PLAYER_2_CANNON_Y);
-        p1.setCannon(c1);
-        p2.setCannon(c2);
-
-        gameLogic.addPlayer(p1);
-        gameLogic.addPlayer(p2);
         gameLogic.startGame();
     }
 
@@ -693,9 +683,11 @@ public class GameScreen implements Screen {
         isDragging = false;
 
         float distance = dragStart.dst(dragCurrent);
+        
+        Gdx.app.log("DISTANCE", ""+distance);
 
         float power = (distance / Constants.MAX_DRAG_DISTANCE) * 100;
-
+        Gdx.app.log("POWER",""+ power);
         if (power < Constants.AIM_DEADZONE) {
             return true;
         }
@@ -707,6 +699,7 @@ public class GameScreen implements Screen {
         if (power > Constants.MAX_AIM_POWER) {
             power = Constants.MAX_AIM_POWER;
         }
+        Gdx.app.log("POWER",""+ power);
 
         gameLogic.playerShoot(power);
         sfxShoot.play();
