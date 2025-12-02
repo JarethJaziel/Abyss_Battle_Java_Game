@@ -27,7 +27,7 @@ public class MySkinsScreen extends ScreenAdapter {
     public MySkinsScreen(AbyssBattle game) {
         this.game = game;
         stage = new Stage(new ScreenViewport());
-        background = new Texture("images/SkinsShop2.png");
+        background = new Texture("images/ShopSkins.png");
     }
 
     @Override
