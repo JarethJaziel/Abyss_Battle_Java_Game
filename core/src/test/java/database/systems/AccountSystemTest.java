@@ -55,7 +55,7 @@ public class AccountSystemTest {
         when(skinDao.queryForId(Constants.DEFAULT_TROOP_SKIN_ID)).thenReturn(troopSkin);
         when(skinDao.queryForId(Constants.DEFAULT_CANNON_SKIN_ID)).thenReturn(cannonSkin);
 
-        accountSystem.registrarNuevoUsuario("player", "1234");
+        accountSystem.registerUser("player", "1234");
 
         verify(userDao, times(1)).create(any(User.class));
         verify(userSkinDao, times(2)).create(any(UserSkin.class));
@@ -68,7 +68,7 @@ public class AccountSystemTest {
         when(skinDao.queryForId(Constants.DEFAULT_TROOP_SKIN_ID)).thenReturn(null);
 
         assertThrows(RuntimeException.class,
-            () -> accountSystem.registrarNuevoUsuario("player", "pass"));
+            () -> accountSystem.registerUser("player", "pass"));
     }
 
     @Test
