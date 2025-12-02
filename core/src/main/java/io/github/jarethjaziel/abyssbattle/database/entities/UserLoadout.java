@@ -35,4 +35,16 @@ public class UserLoadout {
         this.activeSkin = skin;
         this.skinType = skin.getType();
     }
+
+    public User getUser() {
+        return user;
+    }
+
+    public SkinType getSkinType() {
+        return skinType;
+    }
+
+    public Skin getActiveSkin() {
+        return activeSkin;
+    }
 }

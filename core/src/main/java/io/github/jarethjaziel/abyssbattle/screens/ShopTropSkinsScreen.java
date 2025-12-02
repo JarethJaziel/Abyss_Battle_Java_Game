@@ -1,7 +1,5 @@
 package io.github.jarethjaziel.abyssbattle.screens;
-
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -15,8 +13,17 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.widget.VisTextButton;
 
+import java.util.List;
+
 import io.github.jarethjaziel.abyssbattle.AbyssBattle;
+import io.github.jarethjaziel.abyssbattle.database.SessionManager;
+import io.github.jarethjaziel.abyssbattle.database.entities.Skin;
+import io.github.jarethjaziel.abyssbattle.database.entities.User;
+import io.github.jarethjaziel.abyssbattle.database.systems.ShopSystem;
+import io.github.jarethjaziel.abyssbattle.database.systems.UserInventorySystem;
 import io.github.jarethjaziel.abyssbattle.util.Constants;
+import io.github.jarethjaziel.abyssbattle.util.PurchaseResult;
+import io.github.jarethjaziel.abyssbattle.util.SkinType;
 
 public class ShopTropSkinsScreen extends ScreenAdapter {
 
@@ -24,51 +31,34 @@ public class ShopTropSkinsScreen extends ScreenAdapter {
     private Stage stage;
     private Texture background;
 
+    // --- SISTEMAS DE BASE DE DATOS ---
+    private ShopSystem shopSystem;
+    private UserInventorySystem inventorySystem;
+    private User currentUser;
+
+    // UI Dinámica
+    private Label coinsLabel;
 
     public ShopTropSkinsScreen(AbyssBattle game) {
         this.game = game;
+        
+        // 1. Inicializar conexión
+        this.shopSystem = new ShopSystem(game.getDbManager());
+        this.inventorySystem = new UserInventorySystem(game.getDbManager());
+        this.currentUser = SessionManager.getInstance().getCurrentUser();
+
         stage = new Stage(new ScreenViewport());
         background = new Texture("images/TropSkinsShop2.png");
     }
 
     @Override
     public void show() {
-
         Gdx.input.setInputProcessor(stage);
 
         float w = stage.getViewport().getWorldWidth();
         float h = stage.getViewport().getWorldHeight();
 
-        float titleX = w * Constants.TITLE_POS_X;
-        float titleY = h * Constants.TITLE_POS_Y;
-
-        float backWidth = w * Constants.BACK_WIDTH;
-        float backHeight = h * Constants.BACK_HEIGHT;
-        float backX = w * Constants.BACK_POS_X;
-        float backY = h * Constants.BACK_POS_Y;
-
-        float cannonBtnWidth = w * Constants.CANNON_BTN_WIDTH;
-        float cannonBtnHeight = h * Constants.CANNON_BTN_HEIGHT;
-        float cannonBtnX = w * Constants.CANNON_BTN_POS_X;
-        float cannonBtnY = h * Constants.CANNON_BTN_POS_Y;
-
-        float startX = w * Constants.SKIN_START_X;
-        float offsetX = w * Constants.SKIN_OFFSET_X;
-
-        float skinLabelOffsetX = w * Constants.LABEL_OFFSET_X;
-        float skinLabelY = h * Constants.SKIN_LABEL_Y;
-        float priceLabelY = h * Constants.PRICE_LABEL_Y;
-
-        float buyBtnWidth = w * Constants.BUY_WIDTH;
-        float buyBtnHeight = h * Constants.BUY_HEIGHT;
-        float buyBtnOffsetX = w * Constants.BUY_OFFSET_X;
-        float buyBtnY = h * Constants.BUY_POS_Y;
-
-        Preferences prefs = Gdx.app.getPreferences("abyss_battle_skins");
-
-        String[] skins = {"Skin Bronze", "Skin Silver", "Skin Green", "Skin Ultra"};
-        int[] prices = {100, 150, 200, 300};
-
+        // --- FUENTES Y ESTILOS ---
         BitmapFont titleFont = new BitmapFont();
         titleFont.getData().setScale(h * Constants.TITLE_FONT_SCALE);
 
@@ -82,103 +72,73 @@ public class ShopTropSkinsScreen extends ScreenAdapter {
         Label.LabelStyle skinStyle = new Label.LabelStyle(skinFont, Color.BLACK);
         Label.LabelStyle priceStyle = new Label.LabelStyle(priceFont, Color.YELLOW);
 
+        // --- TÍTULO ---
         Label title = new Label("Skins de Tropas", titleStyle);
-        title.setPosition(titleX, titleY);
+        title.setPosition(w * Constants.TITLE_POS_X, h * Constants.TITLE_POS_Y);
         stage.addActor(title);
 
-        VisTextButton.VisTextButtonStyle backStyle =
-                new VisTextButton.VisTextButtonStyle(
-                        VisUI.getSkin().get("default", VisTextButton.VisTextButtonStyle.class)
-                );
-        backStyle.font = new BitmapFont();
-        backStyle.font.getData().setScale(h * Constants.BUTTON_FONT_SCALE_SHOP);
-        backStyle.fontColor = Color.WHITE;
-        backStyle.up = VisUI.getSkin().newDrawable("white", Color.valueOf("8E44ADFF"));
+        // --- ETIQUETA DE MONEDAS (NUEVO) ---
+        updateCoinsLabel(w, h, priceStyle);
 
-        VisTextButton back = new VisTextButton("Regresar", backStyle);
-        back.setSize(backWidth, backHeight);
-        back.setPosition(backX, backY);
-        stage.addActor(back);
+        // --- BOTÓN REGRESAR ---
+        setupBackButton(w, h);
 
-        back.addListener(event -> {
-            if (event.toString().equals("touchDown")) {
-                game.setScreen(new MainMenuScreen(game));
-            }
-            return true;
-        });
+        // --- BOTÓN IR A CAÑONES ---
+        setupCannonShopButton(w, h);
 
-        VisTextButton.VisTextButtonStyle cannonSkinStyle =
-                new VisTextButton.VisTextButtonStyle(
-                        VisUI.getSkin().get("default", VisTextButton.VisTextButtonStyle.class)
-                );
-        cannonSkinStyle.font = new BitmapFont();
-        cannonSkinStyle.font.getData().setScale(h * Constants.BUTTON_FONT_SCALE_SHOP);
-        cannonSkinStyle.fontColor = Color.WHITE;
-        cannonSkinStyle.up = VisUI.getSkin().newDrawable("white", Color.valueOf("2980B9FF"));
+        // ============================================================
+        //     LOGICA DE CARGA DINÁMICA (TROPAS)
+        // ============================================================
 
-        VisTextButton cannonSkin = new VisTextButton("Skins de Cañones", cannonSkinStyle);
-        cannonSkin.setSize(cannonBtnWidth, cannonBtnHeight);
-        cannonSkin.setPosition(cannonBtnX, cannonBtnY);
-        stage.addActor(cannonSkin);
+        // 1. Obtener Skins de la DB (Solo Tropas)
+        List<Skin> skinsDisponibles = shopSystem.getSkinsByType(SkinType.TROOP);
 
-        cannonSkin.addListener(event -> {
-            if (event.toString().equals("touchDown")) {
-                game.setScreen(new ShopSkinsScreen(game));
-            }
-            return true;
-        });
+        // 2. Generar UI
+        for (int i = 0; i < skinsDisponibles.size(); i++) {
+            Skin skin = skinsDisponibles.get(i);
 
-        for (int i = 0; i < skins.length; i++) {
+            float x = w * Constants.SKIN_START_X + i * w * Constants.SKIN_OFFSET_X;
 
-            float x = startX + i * offsetX;
-
-            String skinName = skins[i];
-            int price = prices[i];
-            boolean purchased = prefs.getBoolean(skinName, false);
-
-            Label skinLabel = new Label(skinName, skinStyle);
-            skinLabel.setPosition(x + skinLabelOffsetX, skinLabelY);
+            // A. Nombre
+            Label skinLabel = new Label(skin.getName(), skinStyle);
+            skinLabel.setPosition(x + w * Constants.LABEL_OFFSET_X, h * Constants.SKIN_LABEL_Y);
             stage.addActor(skinLabel);
 
-            Label priceLabel = new Label(price + " monedas", priceStyle);
-            priceLabel.setPosition(x + skinLabelOffsetX, priceLabelY);
+            // B. Precio
+            Label priceLabel = new Label(skin.getPrice() + " monedas", priceStyle);
+            priceLabel.setPosition(x + w * Constants.LABEL_OFFSET_X, h * Constants.PRICE_LABEL_Y);
             stage.addActor(priceLabel);
 
-            VisTextButton.VisTextButtonStyle buyStyle =
-                    new VisTextButton.VisTextButtonStyle(
-                            VisUI.getSkin().get("default", VisTextButton.VisTextButtonStyle.class)
-                    );
-            buyStyle.font = new BitmapFont();
-            buyStyle.font.getData().setScale(h * Constants.BUY_BUTTON_FONT_SCALE);
-            buyStyle.fontColor = Color.WHITE;
-            buyStyle.up = VisUI.getSkin().newDrawable("white", Color.valueOf("2C3E50FF"));
+            // C. Verificar Propiedad (Con manejo de excepción seguro)
+            boolean owned = inventorySystem.doesUserOwnSkin(currentUser, skin.getId());
 
-            VisTextButton.VisTextButtonStyle purchasedStyle =
-                    new VisTextButton.VisTextButtonStyle(buyStyle);
-            purchasedStyle.up = VisUI.getSkin().newDrawable("white", Color.valueOf("16A085FF"));
-            purchasedStyle.fontColor = Color.YELLOW;
-
-            VisTextButton btn;
-
-            if (purchased)
-                btn = new VisTextButton("Adquirido", purchasedStyle);
-            else
-                btn = new VisTextButton("Comprar", buyStyle);
-
-            btn.setSize(buyBtnWidth, buyBtnHeight);
-            btn.setPosition(x + buyBtnOffsetX, buyBtnY);
-
-            final VisTextButton finalBtn = btn;
-
+            // D. Crear Botón
+            VisTextButton btn = createShopButton(h, owned);
+            btn.setSize(w * Constants.BUY_WIDTH, h * Constants.BUY_HEIGHT);
+            btn.setPosition(x + w * Constants.BUY_OFFSET_X, h * Constants.BUY_POS_Y);
             btn.addListener(new ChangeListener() {
                 @Override
                 public void changed(ChangeEvent event, Actor actor) {
-                    if (!prefs.getBoolean(skinName, false)) {
-                        prefs.putBoolean(skinName, true);
-                        prefs.flush();
+                    if (owned || btn.getText().toString().equals("Adquirido")) return;
+
+                    // INTENTO DE COMPRA
+                    PurchaseResult result = shopSystem.buySkin(currentUser, skin.getId());
+
+                    if (result == PurchaseResult.SUCCESS) {
+                        System.out.println("Skin comprada: " + skin.getName());
+                        
+                        // Actualizar Botón
+                        btn.setText("Adquirido");
+                        updateButtonStyle(btn, true, h);
+                        
+                        // Actualizar Monedas
+                        coinsLabel.setText("Monedas: " + currentUser.getCoins());
+                        
+                    } else if (result == PurchaseResult.INSUFFICIENT_FUNDS) {
+                        System.out.println("No tienes suficiente dinero.");
+                    } else {
+                        System.out.println("Error en la compra: " + result);
                     }
-                    finalBtn.setText("Adquirido");
-                    finalBtn.setStyle(purchasedStyle);
                 }
             });
 
@@ -186,8 +146,88 @@ public class ShopTropSkinsScreen extends ScreenAdapter {
         }
     }
 
+    // --- MÉTODOS AUXILIARES ---
+
+    private void updateCoinsLabel(float w, float h, Label.LabelStyle style) {
+        if (coinsLabel == null) {
+            coinsLabel = new Label("", style);
+            // Posición sugerida: Esquina superior izquierda
+            coinsLabel.setPosition(w * 0.05f, h * 0.9f); 
+            stage.addActor(coinsLabel);
+        }
+        coinsLabel.setText("Monedas: " + currentUser.getCoins());
+    }
+
+    private VisTextButton createShopButton(float h, boolean owned) {
+        VisTextButton btn = new VisTextButton(owned ? "Adquirido" : "Comprar");
+        updateButtonStyle(btn, owned, h);
+        return btn;
+    }
+
+    private void updateButtonStyle(VisTextButton btn, boolean owned, float h) {
+        VisTextButton.VisTextButtonStyle style = new VisTextButton.VisTextButtonStyle(
+                VisUI.getSkin().get("default", VisTextButton.VisTextButtonStyle.class));
+        
+        style.font = new BitmapFont();
+        style.font.getData().setScale(h * Constants.BUY_BUTTON_FONT_SCALE); // Asegúrate de tener esta constante o usa una genérica
+        
+        if (owned) {
+            style.fontColor = Color.YELLOW;
+            style.up = VisUI.getSkin().newDrawable("white", Color.valueOf("16A085FF")); // Verde
+            btn.setDisabled(true);
+        } else {
+            style.fontColor = Color.WHITE;
+            style.up = VisUI.getSkin().newDrawable("white", Color.valueOf("2C3E50FF")); // Azul
+            btn.setDisabled(false);
+        }
+        btn.setStyle(style);
+    }
+
+    private void setupBackButton(float w, float h) {
+        VisTextButton.VisTextButtonStyle backStyle = new VisTextButton.VisTextButtonStyle(
+                VisUI.getSkin().get("default", VisTextButton.VisTextButtonStyle.class));
+        backStyle.font = new BitmapFont();
+        backStyle.font.getData().setScale(h * Constants.BUTTON_FONT_SCALE_SHOP);
+        backStyle.fontColor = Color.WHITE;
+        backStyle.up = VisUI.getSkin().newDrawable("white", Color.valueOf("8E44ADFF"));
+
+        VisTextButton back = new VisTextButton("Regresar", backStyle);
+        back.setSize(w * Constants.BACK_WIDTH, h * Constants.BACK_HEIGHT);
+        back.setPosition(w * Constants.BACK_POS_X, h * Constants.BACK_POS_Y);
+        stage.addActor(back);
+
+        back.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                game.setScreen(new MainMenuScreen(game));
+            }
+        });
+    }
+
+    private void setupCannonShopButton(float w, float h) {
+        VisTextButton.VisTextButtonStyle style = new VisTextButton.VisTextButtonStyle(
+                VisUI.getSkin().get("default", VisTextButton.VisTextButtonStyle.class));
+        style.font = new BitmapFont();
+        style.font.getData().setScale(h * Constants.BUTTON_FONT_SCALE_SHOP);
+        style.fontColor = Color.WHITE;
+        style.up = VisUI.getSkin().newDrawable("white", Color.valueOf("2980B9FF"));
+
+        VisTextButton btn = new VisTextButton("Skins de Cañones", style);
+        btn.setSize(w * Constants.CANNON_BTN_WIDTH, h * Constants.CANNON_BTN_HEIGHT);
+        btn.setPosition(w * Constants.CANNON_BTN_POS_X, h * Constants.CANNON_BTN_POS_Y);
+        stage.addActor(btn);
+
+        btn.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                game.setScreen(new ShopSkinsScreen(game));
+            }
+        });
+    }
+
     @Override
     public void render(float delta) {
+        Gdx.gl.glClearColor(0,0,0,1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         stage.getBatch().begin();
@@ -208,10 +248,6 @@ public class ShopTropSkinsScreen extends ScreenAdapter {
     @Override
     public void dispose() {
         stage.dispose();
+        background.dispose();
     }
 }
-
-
-
-
-

@@ -3,16 +3,11 @@ package io.github.jarethjaziel.abyssbattle;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
-import com.badlogic.gdx.audio.Music;
-import com.badlogic.gdx.audio.Sound;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.kotcrab.vis.ui.VisUI;
 
 import io.github.jarethjaziel.abyssbattle.database.DatabaseManager;
-import io.github.jarethjaziel.abyssbattle.database.systems.AccountManagerSystem;
 import io.github.jarethjaziel.abyssbattle.screens.LoadingScreen;
-import io.github.jarethjaziel.abyssbattle.screens.MainMenuScreen;
 
 import java.sql.SQLException;
 
@@ -22,10 +17,7 @@ public class AbyssBattle extends Game {
     public AssetManager assets;
 
     // Sistema de Base de Datos
-    public DatabaseManager dbManager;
-    public AccountManagerSystem accountSystem;
-    private int equippedSkinIndex = 0;
-    private int equippedTroopSkinIndex = 0;
+    private DatabaseManager dbManager;
 
 
     @Override
@@ -41,7 +33,6 @@ public class AbyssBattle extends Game {
         try {
             dbManager = new DatabaseManager();
             dbManager.connect();
-            accountSystem = new AccountManagerSystem(dbManager);
             System.out.println("Sistema de base de datos inicializado correctamente");
         } catch (SQLException e) {
             System.err.println("ERROR FATAL: No se pudo conectar a la base de datos");
@@ -89,21 +80,10 @@ public class AbyssBattle extends Game {
         System.out.println("Abyss Battle cerrado correctamente");
     }
 
-    public int getEquippedSkinIndex() {
-    return equippedSkinIndex;
-    }
+    
 
-    public void setEquippedSkinIndex(int equippedSkinIndex) {
-        this.equippedSkinIndex = equippedSkinIndex;
+    public DatabaseManager getDbManager() {
+        return dbManager;
     }
-
-    public int getEquippedTroopSkinIndex() {
-        return equippedTroopSkinIndex;
-    }
-
-    public void setEquippedTroopSkinIndex(int equippedTroopSkinIndex) {
-        this.equippedTroopSkinIndex = equippedTroopSkinIndex;
-    }
-
 
 }

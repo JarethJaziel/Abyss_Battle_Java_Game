@@ -1,4 +1,4 @@
-package io.github.jarethjaziel.abyssbattle.util;
+package io.github.jarethjaziel.abyssbattle.database;
 
 import io.github.jarethjaziel.abyssbattle.database.entities.User;
 
