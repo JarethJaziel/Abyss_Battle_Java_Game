@@ -13,6 +13,7 @@ import com.kotcrab.vis.ui.widget.VisProgressBar;
 import com.kotcrab.vis.ui.widget.VisTable;
 
 import io.github.jarethjaziel.abyssbattle.AbyssBattle;
+import io.github.jarethjaziel.abyssbattle.gameutil.manager.AudioManager;
 
 public class LoadingScreen implements Screen {
 
@@ -63,7 +64,7 @@ public class LoadingScreen implements Screen {
         game.assets.load("sfx/shoot.mp3", Sound.class);
         game.assets.load("sfx/boom.mp3", Sound.class);
         game.assets.load("music/game_music.mp3", Music.class);
-
+        AudioManager.getInstance().initialize(game.assets);
     }
 
     @Override

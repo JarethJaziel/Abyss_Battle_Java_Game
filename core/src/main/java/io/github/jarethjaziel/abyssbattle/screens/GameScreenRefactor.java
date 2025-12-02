@@ -1,6 +1,5 @@
 package io.github.jarethjaziel.abyssbattle.screens;
 
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Screen;
@@ -19,10 +18,10 @@ public class GameScreenRefactor implements Screen {
     private final AbyssBattle game;
 
     // --- COMPONENTES (MVC) ---
-    private GameLogic gameLogic;           // El CEREBRO (Física, Turnos, Reglas)
-    private GameRenderer gameRenderer;     // LA VISTA (Dibujo del mundo, Líneas, Explosiones)
-    private GameHUD gameHUD;               // LA UI (Botones, Textos, Menús de Pausa)
-    private MapManager mapManager;         // EL MAPA (Carga TMX, Crea Paredes)
+    private GameLogic gameLogic; // El CEREBRO (Física, Turnos, Reglas)
+    private GameRenderer gameRenderer; // LA VISTA (Dibujo del mundo, Líneas, Explosiones)
+    private GameHUD gameHUD; // LA UI (Botones, Textos, Menús de Pausa)
+    private MapManager mapManager; // EL MAPA (Carga TMX, Crea Paredes)
     private InputController inputController; // EL CONTROL (Mouse/Touch)
 
     public GameScreenRefactor(AbyssBattle game) {
@@ -33,42 +32,45 @@ public class GameScreenRefactor implements Screen {
     public void show() {
         // 1. Inicializar Lógica (MODELO)
         // GameLogic crea el World de Box2D internamente
-        gameLogic = new GameLogic(); 
+        gameLogic = new GameLogic();
 
         // 2. Inicializar Mapa
         // Le pasamos el World para que cree las paredes físicas
         mapManager = new MapManager(gameLogic.getWorld(), "maps/game_bg_1.tmx");
-        
+
         // 3. Inicializar Renderer (VISTA JUEGO)
-        // Necesita el batch, los assets, el mapa (para dibujarlo) y la lógica (para saber qué dibujar)
-        gameRenderer = new GameRenderer(game.batch, game.assets, mapManager.getMap(), gameLogic);
+        // Necesita el batch, los assets, el mapa (para dibujarlo) y la lógica (para
+        // saber qué dibujar)
+        gameRenderer = new GameRenderer(game.batch, game.assets, mapManager, gameLogic);
 
         // 4. Inicializar HUD (VISTA UI)
-        // Necesita assets y el juego principal para cambiar de pantalla (ej: Salir al menú)
+        // Necesita assets y el juego principal para cambiar de pantalla (ej: Salir al
+        // menú)
         gameHUD = new GameHUD(game.batch, game.assets, game);
 
         // 5. Inicializar Input (CONTROLADOR)
         // Conecta los dedos del usuario con la lógica y el HUD
-        inputController = new InputController(gameLogic, gameRenderer.getViewport(), gameHUD);
-        
+        inputController = new InputController(gameLogic, gameRenderer.getViewport(), gameHUD, mapManager);
+
         // 6. Configurar el Multiplexer
-        // IMPORTANTE: El HUD va primero para que los botones agarren el click antes que el juego
+        // IMPORTANTE: El HUD va primero para que los botones agarren el click antes que
+        // el juego
         InputMultiplexer multiplexer = new InputMultiplexer();
         multiplexer.addProcessor(gameHUD.getStage());
         multiplexer.addProcessor(inputController);
         Gdx.input.setInputProcessor(multiplexer);
 
         // 7. Arrancar Música (Opcional, usando un Manager)
+
         AudioManager.getInstance().playMusic("music/game_music.mp3");
-        
+
         // Configuración inicial de la partida
         setupGameStart();
     }
-    
+
     private void setupGameStart() {
-        // Configuramos jugadores y cañones (esto podría ir dentro de GameLogic también)
-        gameLogic.initializePlayersAndCannons();
-        gameHUD.updateStatusLabel(gameLogic.getState()); // Actualizar texto inicial
+        gameLogic.startGame();
+        gameHUD.updateInfo(gameLogic.getState(), gameLogic.getTroopsToPlace()); // Actualizar texto inicial
     }
 
     @Override
@@ -90,7 +92,7 @@ public class GameScreenRefactor implements Screen {
 
         // D. Dibujar Juego (Fondo, Mapa, Tanques, Proyectiles)
         gameRenderer.render(delta);
-        
+
         // E. Dibujar línea de apuntado (Solo si se está arrastrando)
         if (inputController.isDragging() && !gameHUD.isPaused()) {
             gameRenderer.drawAimLine(inputController.getDragStart(), inputController.getDragCurrent());
@@ -124,11 +126,15 @@ public class GameScreenRefactor implements Screen {
     @Override
     public void dispose() {
         // Delegamos la limpieza a cada componente responsable
-        if (gameLogic != null) gameLogic.dispose(); // Dispose World
-        if (gameRenderer != null) gameRenderer.dispose();
-        if (gameHUD != null) gameHUD.dispose();
-        if (mapManager != null) mapManager.dispose();
-        
+        if (gameLogic != null)
+            gameLogic.dispose(); // Dispose World
+        if (gameRenderer != null)
+            gameRenderer.dispose();
+        if (gameHUD != null)
+            gameHUD.dispose();
+        if (mapManager != null)
+            mapManager.dispose();
+
         // No hacemos dispose de 'game' ni 'assets' porque son globales
     }
 }

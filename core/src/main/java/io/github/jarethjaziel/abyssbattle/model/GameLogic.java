@@ -51,6 +51,18 @@ public class GameLogic implements Disposable {
     }
 
     public void startGame() {
+        
+        Player p1 = new Player(1);
+        Player p2 = new Player(2);
+
+        Cannon c1 = physicsFactory.createCannon(Constants.CANNON_X, Constants.PLAYER_1_CANNON_Y);
+        Cannon c2 = physicsFactory.createCannon(Constants.CANNON_X, Constants.PLAYER_2_CANNON_Y);
+        p1.setCannon(c1);
+        p2.setCannon(c2);
+        
+        addPlayer(p1);
+        addPlayer(p2);
+
         if (players.size() != 2)
             return;
 
@@ -360,20 +372,6 @@ public class GameLogic implements Disposable {
 
     private Player getEnemyPlayer() {
         return (currentPlayer == players.get(0)) ? players.get(1) : players.get(0);
-    }
-
-
-    public void initializePlayersAndCannons() {
-        Player p1 = new Player(1);
-        Player p2 = new Player(2);
-
-        Cannon c1 = physicsFactory.createCannon(Constants.CANNON_X, Constants.PLAYER_1_CANNON_Y);
-        Cannon c2 = physicsFactory.createCannon(Constants.CANNON_X, Constants.PLAYER_2_CANNON_Y);
-        p1.setCannon(c1);
-        p2.setCannon(c2);
-        
-        addPlayer(p1);
-        addPlayer(p2);
     }
 
     @Override

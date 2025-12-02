@@ -17,11 +17,11 @@ import com.kotcrab.vis.ui.widget.VisTextButton;
 import java.util.List;
 
 import io.github.jarethjaziel.abyssbattle.AbyssBattle;
-import io.github.jarethjaziel.abyssbattle.database.SessionManager;
 import io.github.jarethjaziel.abyssbattle.database.entities.Skin;
 import io.github.jarethjaziel.abyssbattle.database.entities.User;
 import io.github.jarethjaziel.abyssbattle.database.systems.ShopSystem;
 import io.github.jarethjaziel.abyssbattle.database.systems.UserInventorySystem;
+import io.github.jarethjaziel.abyssbattle.gameutil.manager.SessionManager;
 import io.github.jarethjaziel.abyssbattle.util.Constants;
 import io.github.jarethjaziel.abyssbattle.util.PurchaseResult;
 import io.github.jarethjaziel.abyssbattle.util.SkinType;

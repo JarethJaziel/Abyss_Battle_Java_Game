@@ -21,10 +21,10 @@ import com.kotcrab.vis.ui.widget.VisTextButton;
 import io.github.jarethjaziel.abyssbattle.util.Constants;
 import io.github.jarethjaziel.abyssbattle.util.SkinType;
 import io.github.jarethjaziel.abyssbattle.AbyssBattle;
-import io.github.jarethjaziel.abyssbattle.database.SessionManager;
 import io.github.jarethjaziel.abyssbattle.database.entities.Skin;
 import io.github.jarethjaziel.abyssbattle.database.entities.User;
 import io.github.jarethjaziel.abyssbattle.database.systems.UserInventorySystem;
+import io.github.jarethjaziel.abyssbattle.gameutil.manager.SessionManager;
 
 public class MyTroopSkinsScreen extends ScreenAdapter {
 

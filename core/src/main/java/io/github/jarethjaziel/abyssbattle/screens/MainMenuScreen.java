@@ -19,7 +19,7 @@ import com.kotcrab.vis.ui.widget.VisTextButton;
 import io.github.jarethjaziel.abyssbattle.util.Constants;
 
 import io.github.jarethjaziel.abyssbattle.AbyssBattle;
-import io.github.jarethjaziel.abyssbattle.database.SessionManager;
+import io.github.jarethjaziel.abyssbattle.gameutil.manager.SessionManager;
 
 public class MainMenuScreen implements Screen {
 
@@ -113,7 +113,7 @@ public class MainMenuScreen implements Screen {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                  if (SessionManager.getInstance().isLoggedIn()) {
-                    game.setScreen(new GameScreen(game));
+                    game.setScreen(new GameScreenRefactor(game));
                 } else {
                     showLoginWarning();
                 }
