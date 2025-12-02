@@ -24,13 +24,13 @@ public class Constants {
     public static final int CANNON_X = (int) (12*PIXELS_PER_METER);
     public static final int PLAYER_1_CANNON_Y = (int) (4*PIXELS_PER_METER);
     public static final int PLAYER_2_CANNON_Y = (int) (WORLD_HEIGHT - PLAYER_1_CANNON_Y);
-    //Aim 
+    //Aim
     public static final float MAX_AIM_POWER = 38;
     public static final float MIN_AIM_POWER = 30;
     public static final float AIM_DEADZONE = 10;
     public static final float MAX_AIM_VISION = 150;
     public static final float MAX_DRAG_DISTANCE = 300f;
-    public static final int DEFAULT_TROOP_SKIN_ID = 0;
-    public static final int DEFAULT_CANNON_SKIN_ID = 0;
-    
+    public static final int DEFAULT_TROOP_SKIN_ID = 1;
+    public static final int DEFAULT_CANNON_SKIN_ID = 2;
+
 }
