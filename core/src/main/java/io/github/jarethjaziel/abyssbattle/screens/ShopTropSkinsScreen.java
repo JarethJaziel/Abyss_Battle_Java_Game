@@ -68,7 +68,7 @@ public class ShopTropSkinsScreen extends ScreenAdapter {
 
         VisTextButton back = new VisTextButton("Regresar", backStyle);
         back.setSize(150, 60);
-        back.setPosition(stage.getWidth() - 150, stage.getHeight() - 90);
+        back.setPosition(stage.getWidth() - 180, stage.getHeight() - 80);
         stage.addActor(back);
 
         back.addListener(event -> {
@@ -139,7 +139,7 @@ public class ShopTropSkinsScreen extends ScreenAdapter {
                 btn = new VisTextButton("Comprar", buyStyle);
 
             btn.setSize(90, 30);
-            btn.setPosition(x + 5, 15);
+            btn.setPosition(x, 10);
 
             final VisTextButton finalBtn = btn;
 
