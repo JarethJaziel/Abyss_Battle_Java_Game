@@ -29,7 +29,6 @@ public class ShopSkinsScreen extends ScreenAdapter {
         background = new Texture("images/SkinsShop2.png");
     }
 
-
     @Override
     public void show() {
         Gdx.input.setInputProcessor(stage);
@@ -39,7 +38,6 @@ public class ShopSkinsScreen extends ScreenAdapter {
         String[] skins = {"Skin Bronze", "Skin Plata", "Skin Verde", "Skin Azul"};
         int[] prices = {100, 150, 200, 250};
 
-        // ===== FUENTES =====
         BitmapFont titleFont = new BitmapFont();
         titleFont.getData().setScale(3f);
 
@@ -57,6 +55,7 @@ public class ShopSkinsScreen extends ScreenAdapter {
         title.setPosition(40, stage.getHeight() - 90);
         stage.addActor(title);
 
+
         VisTextButton.VisTextButtonStyle backStyle =
                 new VisTextButton.VisTextButtonStyle(
                         VisUI.getSkin().get("default", VisTextButton.VisTextButtonStyle.class)
@@ -64,11 +63,11 @@ public class ShopSkinsScreen extends ScreenAdapter {
         backStyle.font = new BitmapFont();
         backStyle.font.getData().setScale(1.1f);
         backStyle.fontColor = Color.WHITE;
-        backStyle.up = VisUI.getSkin().newDrawable("white", Color.valueOf("8E44ADFF"));
+        backStyle.up = VisUI.getSkin().newDrawable("white", Color.valueOf("8E44ADFF")); // Morado
 
         VisTextButton back = new VisTextButton("Regresar", backStyle);
-        back.setSize(100, 70);
-        back.setPosition(stage.getWidth() - 130, stage.getHeight() - 90);
+        back.setSize(150, 60);
+        back.setPosition(stage.getWidth() - 180, stage.getHeight() - 80); // ARRIBA DERECHA
         stage.addActor(back);
 
         back.addListener(event -> {
@@ -78,8 +77,31 @@ public class ShopSkinsScreen extends ScreenAdapter {
             return true;
         });
 
-        int startX = 45;  
-        int offsetX = 155;   
+
+        VisTextButton.VisTextButtonStyle tropSkinStyle =
+                new VisTextButton.VisTextButtonStyle(
+                        VisUI.getSkin().get("default", VisTextButton.VisTextButtonStyle.class)
+                );
+
+        tropSkinStyle.font = new BitmapFont();
+        tropSkinStyle.font.getData().setScale(1.2f);
+        tropSkinStyle.fontColor = Color.WHITE;
+        tropSkinStyle.up = VisUI.getSkin().newDrawable("white", Color.valueOf("2980B9FF")); // Azul
+
+        VisTextButton tropSkin = new VisTextButton("Skins de Tropas", tropSkinStyle);
+        tropSkin.setSize(180, 60);
+        tropSkin.setPosition(stage.getWidth() - 200, stage.getHeight() - 150); 
+        stage.addActor(tropSkin);
+
+        tropSkin.addListener(event -> {
+            if (event.toString().equals("touchDown")) {
+                game.setScreen(new ShopTropSkinsScreen(game));
+            }
+            return true;
+        });
+
+        int startX = 45;
+        int offsetX = 155;
 
         for (int i = 0; i < skins.length; i++) {
             int x = startX + i * offsetX;
@@ -93,7 +115,6 @@ public class ShopSkinsScreen extends ScreenAdapter {
             skinLabel.setPosition(x, 90);
             stage.addActor(skinLabel);
 
-
             Label priceLabel = new Label(price + " monedas", priceStyle);
             priceLabel.setPosition(x, 60);
             stage.addActor(priceLabel);
@@ -105,7 +126,7 @@ public class ShopSkinsScreen extends ScreenAdapter {
             buyStyle.font = new BitmapFont();
             buyStyle.font.getData().setScale(1.0f);
             buyStyle.fontColor = Color.WHITE;
-            buyStyle.up   = VisUI.getSkin().newDrawable("white", Color.valueOf("2C3E50FF"));
+            buyStyle.up = VisUI.getSkin().newDrawable("white", Color.valueOf("2C3E50FF"));
 
             VisTextButton.VisTextButtonStyle purchasedStyle = new VisTextButton.VisTextButtonStyle(buyStyle);
             purchasedStyle.up = VisUI.getSkin().newDrawable("white", Color.valueOf("16A085FF"));
@@ -118,8 +139,8 @@ public class ShopSkinsScreen extends ScreenAdapter {
             else
                 btn = new VisTextButton("Comprar", buyStyle);
 
-            btn.setSize(70, 25);
-            btn.setPosition(x + 10, 15); 
+            btn.setSize(90, 30);
+            btn.setPosition(x + 5, 15);
 
             final VisTextButton finalBtn = btn;
 
@@ -140,7 +161,6 @@ public class ShopSkinsScreen extends ScreenAdapter {
             stage.addActor(btn);
         }
     }
-
 
     @Override
     public void render(float delta) {
