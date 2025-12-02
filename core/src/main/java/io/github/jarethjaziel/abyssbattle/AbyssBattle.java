@@ -23,7 +23,7 @@ public class AbyssBattle extends Game {
 
     // Sistema de Base de Datos
     public DatabaseManager dbManager;
-    public AccountSystem accountSystem;
+    public AccountManagerSystem accountSystem;
     private int equippedSkinIndex = 0;
     private int equippedTroopSkinIndex = 0;
 
@@ -55,7 +55,6 @@ public class AbyssBattle extends Game {
 
         batch = new SpriteBatch();
 
-        System.out.println("Todo listo, mostrando menú principal");
         setScreen(new LoadingScreen(this));
     }
 
@@ -89,7 +88,7 @@ public class AbyssBattle extends Game {
 
         System.out.println("Abyss Battle cerrado correctamente");
     }
-}
+
     public int getEquippedSkinIndex() {
     return equippedSkinIndex;
     }

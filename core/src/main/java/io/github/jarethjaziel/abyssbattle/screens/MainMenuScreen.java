@@ -95,6 +95,13 @@ public class MainMenuScreen implements Screen {
             mainTable.row();
         }
 
+        loginButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor){
+                game.setScreen(new LoginScreen(game));
+            }
+        });
+
         playButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
