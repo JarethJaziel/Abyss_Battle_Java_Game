@@ -81,6 +81,30 @@ public class Stats {
         return lastPlayed;
     }
 
+    public void setPlayed(int played) {
+        this.played = played;
+    }
+
+    public void setWon(int won) {
+        this.won = won;
+    }
+
+    public void setLost(int lost) {
+        this.lost = lost;
+    }
+
+    public void setHits(int hits) {
+        this.hits = hits;
+    }
+
+    public void setMisses(int misses) {
+        this.misses = misses;
+    }
+
+    public void setDamageTotal(int damageTotal) {
+        this.damageTotal = damageTotal;
+    }
+
     @Override
     public String toString() {
         return "Stats [played=" + played + ", won=" + won + ", lost=" + lost + ", hits=" + hits + ", misses=" + misses

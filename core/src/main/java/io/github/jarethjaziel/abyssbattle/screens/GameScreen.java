@@ -49,7 +49,7 @@ import io.github.jarethjaziel.abyssbattle.model.Player;
 import io.github.jarethjaziel.abyssbattle.model.Projectile;
 import io.github.jarethjaziel.abyssbattle.model.Troop;
 import io.github.jarethjaziel.abyssbattle.util.Constants;
-import io.github.jarethjaziel.abyssbattle.util.GAME_STATE;
+import io.github.jarethjaziel.abyssbattle.util.GameState;
 
 public class GameScreen implements Screen {
 
@@ -381,11 +381,11 @@ public class GameScreen implements Screen {
     }
 
     private void checkGameOver() {
-        GAME_STATE state = gameLogic.getState();
+        GameState state = gameLogic.getState();
 
-        if (!isGameOver && (state == GAME_STATE.PLAYER_1_WIN ||
-            state == GAME_STATE.PLAYER_2_WIN ||
-            state == GAME_STATE.DRAW)) {
+        if (!isGameOver && (state == GameState.PLAYER_1_WIN ||
+            state == GameState.PLAYER_2_WIN ||
+            state == GameState.DRAW)) {
 
             isGameOver = true;
             gameOverMenu.setVisible(true);
@@ -393,13 +393,13 @@ public class GameScreen implements Screen {
             // Actualizar título según resultado
             Label title = gameOverMenu.findActor("gameOverTitle");
             if (title != null) {
-                if (state == GAME_STATE.PLAYER_1_WIN) {
+                if (state == GameState.PLAYER_1_WIN) {
                     title.setText("¡VICTORIA JUGADOR 1!");
                     title.setColor(Color.CYAN);
-                } else if (state == GAME_STATE.PLAYER_2_WIN) {
+                } else if (state == GameState.PLAYER_2_WIN) {
                     title.setText("¡VICTORIA JUGADOR 2!");
                     title.setColor(Color.RED);
-                } else if (state == GAME_STATE.DRAW) {
+                } else if (state == GameState.DRAW) {
                     title.setText("¡EMPATE!");
                     title.setColor(Color.YELLOW);
                 }
@@ -486,9 +486,9 @@ public class GameScreen implements Screen {
 
     private void drawEntities() {
         Texture cannonBase = game.assets.get("sprites/cannon_base.png");
-        Texture cannonBarrel = game.assets.get("sprites/cannon_barrel.png");
-        Texture troopBlue = game.assets.get("sprites/troop_blue.png");
-        Texture troopRed = game.assets.get("sprites/troop_red.png");
+        Texture cannonBarrel = game.assets.get("sprites/cannon_skin/cannon_barrel_default.png");
+        Texture troopBlue = game.assets.get("sprites/troop_skin/troop_blue.png");
+        Texture troopRed = game.assets.get("sprites/troop_skin/troop_red.png");
 
         for (Player p : gameLogic.getPlayers()) {
             Cannon c = p.getCannon();
@@ -520,7 +520,7 @@ public class GameScreen implements Screen {
                     float barHeight = 5;
                     float yOffset = Constants.TROOP_SIZE / 2 + 10;
 
-                    float healthBarY = (gameLogic.getState() == GAME_STATE.PLAYER_1_TURN) ? troopY + yOffset
+                    float healthBarY = (gameLogic.getState() == GameState.PLAYER_1_TURN) ? troopY + yOffset
                         : troopY - yOffset;
 
                     float healthPct = t.getHealth() / (float) Constants.TROOP_INITIAL_HEALTH;
@@ -534,7 +534,7 @@ public class GameScreen implements Screen {
                     game.batch.setColor(Color.WHITE);
                 }
             }
-            if (gameLogic.getState() == GAME_STATE.TURN_TRANSITION) {
+            if (gameLogic.getState() == GameState.TURN_TRANSITION) {
 
                 explosionTimer += Gdx.graphics.getDeltaTime();
                 TextureRegion currentFrame = explosionAnim.getKeyFrame(explosionTimer, false);
@@ -597,38 +597,38 @@ public class GameScreen implements Screen {
     }
 
     private void updateUI() {
-        GAME_STATE state = gameLogic.getState();
+        GameState state = gameLogic.getState();
 
-        if (state == GAME_STATE.WAITING) {
+        if (state == GameState.WAITING) {
             statusLabel.setText("Proyectil en el aire...");
             statusLabel.setColor(Color.YELLOW);
-        } else if (state == GAME_STATE.PLAYER_1_TURN) {
+        } else if (state == GameState.PLAYER_1_TURN) {
             statusLabel.setText("TURNO JUGADOR 1 (Abajo)");
             statusLabel.setColor(Color.CYAN);
-        } else if (state == GAME_STATE.PLAYER_2_TURN) {
+        } else if (state == GameState.PLAYER_2_TURN) {
             statusLabel.setText("TURNO JUGADOR 2 (Arriba)");
             statusLabel.setColor(Color.RED);
-        } else if (state == GAME_STATE.PLAYER_1_WIN) {
+        } else if (state == GameState.PLAYER_1_WIN) {
             statusLabel.setText("¡GANÓ JUGADOR 1!");
             statusLabel.setColor(Color.GREEN);
-        } else if (state == GAME_STATE.PLAYER_2_WIN) {
+        } else if (state == GameState.PLAYER_2_WIN) {
             statusLabel.setText("¡GANÓ JUGADOR 2!");
             statusLabel.setColor(Color.GREEN);
-        } else if (state == GAME_STATE.DRAW) {
+        } else if (state == GameState.DRAW) {
             statusLabel.setText("¡EMPATE!");
             statusLabel.setColor(Color.YELLOW);
-        } else if (state == GAME_STATE.TURN_TRANSITION) {
+        } else if (state == GameState.TURN_TRANSITION) {
             statusLabel.setText("¡IMPACTO!");
             statusLabel.setColor(Color.CORAL);
-        } else if (state == GAME_STATE.PLACEMENT_P1) {
+        } else if (state == GameState.PLACEMENT_P1) {
             statusLabel.setText("COLOCA TUS TROPAS, JUGADOR 1: " +
                 "(" + gameLogic.getTroopsToPlace() + " restantes)");
             statusLabel.setColor(Color.DARK_GRAY);
-        } else if (state == GAME_STATE.PLACEMENT_P2) {
+        } else if (state == GameState.PLACEMENT_P2) {
             statusLabel.setText("COLOCA TUS TROPAS, JUGADOR 2: " +
                 "(" + gameLogic.getTroopsToPlace() + " restantes)");
             statusLabel.setColor(Color.DARK_GRAY);
-        } else if (state == GAME_STATE.LAST_CHANCE) {
+        } else if (state == GameState.LAST_CHANCE) {
             statusLabel.setText("¡ÚLTIMA OPORTUNIDAD JUGADOR 2!");
             statusLabel.setColor(Color.BLACK);
         }
@@ -646,9 +646,9 @@ public class GameScreen implements Screen {
     private boolean handleTouchDown(int screenX, int screenY) {
         Vector2 worldCoords = viewport.unproject(new Vector2(screenX, screenY));
 
-        GAME_STATE state = gameLogic.getState();
+        GameState state = gameLogic.getState();
 
-        if (state == GAME_STATE.PLACEMENT_P1 || state == GAME_STATE.PLACEMENT_P2) {
+        if (state == GameState.PLACEMENT_P1 || state == GameState.PLACEMENT_P2) {
 
             if (isValidPlacement(worldCoords.x, worldCoords.y)) {
                 gameLogic.tryPlaceTroop(worldCoords.x, worldCoords.y);
@@ -659,7 +659,7 @@ public class GameScreen implements Screen {
             }
         }
 
-        if (state != GAME_STATE.PLAYER_1_TURN && state != GAME_STATE.PLAYER_2_TURN)
+        if (state != GameState.PLAYER_1_TURN && state != GameState.PLAYER_2_TURN)
             return false;
 
         Player currentPlayer = gameLogic.getCurrentPlayer();

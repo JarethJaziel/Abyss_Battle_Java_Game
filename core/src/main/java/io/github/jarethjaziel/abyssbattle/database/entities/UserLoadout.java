@@ -21,6 +21,7 @@ public class UserLoadout {
 
     @DatabaseField(foreign = true, foreignAutoRefresh = true, columnName = "skin_id")
     private Skin activeSkin;
+    
 
     public UserLoadout() {}
 
