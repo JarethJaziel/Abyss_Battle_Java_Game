@@ -1,7 +1,6 @@
 package io.github.jarethjaziel.abyssbattle.screens;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -17,7 +16,7 @@ import com.kotcrab.vis.ui.widget.VisTextButton;
 
 import io.github.jarethjaziel.abyssbattle.AbyssBattle;
 
-public class ShopSkinsScreen extends ScreenAdapter {
+public class MyTroopSkinsScreen extends ScreenAdapter {
 
     private AbyssBattle game;
     private Stage stage;
@@ -25,7 +24,6 @@ public class ShopSkinsScreen extends ScreenAdapter {
 
     private static final float TITLE_SCALE = 0.0042f;
     private static final float SKIN_NAME_SCALE = 0.0022f;
-    private static final float PRICE_SCALE = 0.0020f;
 
     private static final float TITLE_POS_X = 0.35f;
     private static final float TITLE_POS_Y = 0.86f;
@@ -35,12 +33,12 @@ public class ShopSkinsScreen extends ScreenAdapter {
     private static final float BACK_BUTTON_HEIGHT = 0.085f;
     private static final float BACK_BUTTON_POS_X = 0.87f;
     private static final float BACK_BUTTON_POS_Y = 0.86f;
-
-    private static final float TROP_BUTTON_FONT_SCALE = 0.0014f;
-    private static final float TROP_BUTTON_WIDTH = 0.13f;
-    private static final float TROP_BUTTON_HEIGHT = 0.075f;
-    private static final float TROP_BUTTON_POS_X = 0.84f;
-    private static final float TROP_BUTTON_POS_Y = 0.73f;
+    
+    private static final float CANNON_BUTTON_FONT_SCALE = 0.0014f;
+    private static final float CANNON_BUTTON_WIDTH = 0.13f;
+    private static final float CANNON_BUTTON_HEIGHT = 0.075f;
+    private static final float CANNON_BUTTON_POS_X = 0.84f;
+    private static final float CANNON_BUTTON_POS_Y = 0.86f;
 
     private static final float SKIN_START_X = 0.05f;
     private static final float SKIN_OFFSET_X = 0.242f;
@@ -48,18 +46,16 @@ public class ShopSkinsScreen extends ScreenAdapter {
     private static final float SKIN_LABEL_OFFSET_X = 0.03f;
     private static final float SKIN_LABEL_Y = 0.17f;
 
-    private static final float PRICE_LABEL_Y = 0.12f;
+    private static final float EQUIP_BUTTON_FONT_SCALE = 0.002f;
+    private static final float EQUIP_BUTTON_WIDTH = 0.12f;
+    private static final float EQUIP_BUTTON_HEIGHT = 0.065f;
+    private static final float EQUIP_BUTTON_OFFSET_X = 0.025f;
+    private static final float EQUIP_BUTTON_Y = 0.02f;
 
-    private static final float BUY_BUTTON_FONT_SCALE = 0.002f;
-    private static final float BUY_BUTTON_WIDTH = 0.12f;
-    private static final float BUY_BUTTON_HEIGHT = 0.065f;
-    private static final float BUY_BUTTON_OFFSET_X = 0.025f;
-    private static final float BUY_BUTTON_Y = 0.02f;
-
-    public ShopSkinsScreen(AbyssBattle game) {
+    public MyTroopSkinsScreen(AbyssBattle game) {
         this.game = game;
         stage = new Stage(new ScreenViewport());
-        background = new Texture("images/SkinsShop2.png");
+        background = new Texture("images/TropSkinsShop2.png");
     }
 
     @Override
@@ -69,25 +65,16 @@ public class ShopSkinsScreen extends ScreenAdapter {
         float w = stage.getViewport().getWorldWidth();
         float h = stage.getViewport().getWorldHeight();
 
-        Preferences prefs = Gdx.app.getPreferences("abyss_battle_skins");
-
-        String[] skins = { "Skin Bronze", "Skin Plata", "Skin Verde", "Skin Azul" };
-        int[] prices = { 100, 150, 200, 250 };
-
         BitmapFont titleFont = new BitmapFont();
         titleFont.getData().setScale(h * TITLE_SCALE);
 
         BitmapFont skinFont = new BitmapFont();
         skinFont.getData().setScale(h * SKIN_NAME_SCALE);
 
-        BitmapFont priceFont = new BitmapFont();
-        priceFont.getData().setScale(h * PRICE_SCALE);
-
-        Label.LabelStyle titleStyle = new Label.LabelStyle(titleFont, Color.GOLD);
+        Label.LabelStyle titleStyle = new Label.LabelStyle(titleFont, Color.CYAN);
         Label.LabelStyle skinStyle = new Label.LabelStyle(skinFont, Color.BLACK);
-        Label.LabelStyle priceStyle = new Label.LabelStyle(priceFont, Color.YELLOW);
 
-        Label title = new Label("Tienda de Skins", titleStyle);
+        Label title = new Label("Inventario de Tropas", titleStyle);
         title.setPosition(w * TITLE_POS_X, h * TITLE_POS_Y);
         stage.addActor(title);
 
@@ -113,83 +100,70 @@ public class ShopSkinsScreen extends ScreenAdapter {
             return true;
         });
 
-        VisTextButton.VisTextButtonStyle tropSkinStyle =
+        VisTextButton.VisTextButtonStyle cannonSkinStyle =
                 new VisTextButton.VisTextButtonStyle(
                         VisUI.getSkin().get("default", VisTextButton.VisTextButtonStyle.class)
                 );
 
-        tropSkinStyle.font = new BitmapFont();
-        tropSkinStyle.font.getData().setScale(h * TROP_BUTTON_FONT_SCALE);
-        tropSkinStyle.fontColor = Color.WHITE;
-        tropSkinStyle.up = VisUI.getSkin().newDrawable("white", Color.valueOf("2980B9FF"));
+        cannonSkinStyle.font = new BitmapFont();
+        cannonSkinStyle.font.getData().setScale(h * CANNON_BUTTON_FONT_SCALE);
+        cannonSkinStyle.fontColor = Color.WHITE;
+        cannonSkinStyle.up = VisUI.getSkin().newDrawable("white", Color.valueOf("2980B9FF"));
 
-        VisTextButton tropSkin = new VisTextButton("Skins de Tropas", tropSkinStyle);
-        tropSkin.setSize(w * TROP_BUTTON_WIDTH, h * TROP_BUTTON_HEIGHT);
-        tropSkin.setPosition(w * TROP_BUTTON_POS_X, h * TROP_BUTTON_POS_Y);
-        stage.addActor(tropSkin);
+        VisTextButton cannonButton = new VisTextButton("Skins de Cañones", cannonSkinStyle);
+        cannonButton.setSize(w * CANNON_BUTTON_WIDTH, h * CANNON_BUTTON_HEIGHT);
+        cannonButton.setPosition(w * CANNON_BUTTON_POS_X, h * (CANNON_BUTTON_POS_Y - 0.12f));
+        stage.addActor(cannonButton);
 
-        tropSkin.addListener(event -> {
+        cannonButton.addListener(event -> {
             if (event.toString().equals("touchDown")) {
-                game.setScreen(new ShopTropSkinsScreen(game));
+                game.setScreen(new MySkinsScreen(game));
             }
             return true;
         });
 
+        String[] skins = { "Tropa Bronze", "Tropa Plata", "Tropa Verde", "Tropa Ultra" };
+
+        final int[] equippedIndex = { game.getEquippedTroopSkinIndex() };
+        VisTextButton[] equipButtons = new VisTextButton[skins.length];
+
         for (int i = 0; i < skins.length; i++) {
             float x = w * SKIN_START_X + i * w * SKIN_OFFSET_X;
 
-            String skinName = skins[i];
-            int price = prices[i];
-
-            boolean purchased = prefs.getBoolean(skinName, false);
-
-            Label skinLabel = new Label(skinName, skinStyle);
+            Label skinLabel = new Label(skins[i], skinStyle);
             skinLabel.setPosition(x + w * SKIN_LABEL_OFFSET_X, h * SKIN_LABEL_Y);
             stage.addActor(skinLabel);
 
-            Label priceLabel = new Label(price + " monedas", priceStyle);
-            priceLabel.setPosition(x + w * SKIN_LABEL_OFFSET_X, h * PRICE_LABEL_Y);
-            stage.addActor(priceLabel);
-
-            VisTextButton.VisTextButtonStyle buyStyle =
+            VisTextButton.VisTextButtonStyle equipStyle =
                     new VisTextButton.VisTextButtonStyle(
                             VisUI.getSkin().get("default", VisTextButton.VisTextButtonStyle.class)
                     );
 
-            buyStyle.font = new BitmapFont();
-            buyStyle.font.getData().setScale(h * BUY_BUTTON_FONT_SCALE);
-            buyStyle.fontColor = Color.WHITE;
-            buyStyle.up = VisUI.getSkin().newDrawable("white", Color.valueOf("2C3E50FF"));
+            equipStyle.font = new BitmapFont();
+            equipStyle.font.getData().setScale(h * EQUIP_BUTTON_FONT_SCALE);
+            equipStyle.fontColor = Color.WHITE;
+            equipStyle.up = VisUI.getSkin().newDrawable("white", Color.valueOf("2C3E50FF"));
 
-            VisTextButton.VisTextButtonStyle purchasedStyle = new VisTextButton.VisTextButtonStyle(buyStyle);
-            purchasedStyle.up = VisUI.getSkin().newDrawable("white", Color.valueOf("16A085FF"));
-            purchasedStyle.fontColor = Color.YELLOW;
+            VisTextButton equipBtn = new VisTextButton("", equipStyle);
+            equipBtn.setSize(w * EQUIP_BUTTON_WIDTH, h * EQUIP_BUTTON_HEIGHT);
+            equipBtn.setPosition(x + w * EQUIP_BUTTON_OFFSET_X, h * EQUIP_BUTTON_Y);
 
-            VisTextButton btn;
+            equipBtn.setText(i == equippedIndex[0] ? "Equipado" : "Equipar");
+            equipButtons[i] = equipBtn;
 
-            if (purchased)
-                btn = new VisTextButton("Adquirido", purchasedStyle);
-            else
-                btn = new VisTextButton("Comprar", buyStyle);
-
-            btn.setSize(w * BUY_BUTTON_WIDTH, h * BUY_BUTTON_HEIGHT);
-            btn.setPosition(x + w * BUY_BUTTON_OFFSET_X, h * BUY_BUTTON_Y);
-
-            final VisTextButton finalBtn = btn;
-
-            btn.addListener(new ChangeListener() {
+            final int index = i;
+            equipBtn.addListener(new ChangeListener() {
                 @Override
                 public void changed(ChangeEvent event, Actor actor) {
-                    if (!prefs.getBoolean(skinName, false)) {
-                        prefs.putBoolean(skinName, true);
-                        prefs.flush();
+                    game.setEquippedTroopSkinIndex(index); 
+                    equippedIndex[0] = index;
+                    for (int j = 0; j < equipButtons.length; j++) {
+                        equipButtons[j].setText(j == equippedIndex[0] ? "Equipado" : "Equipar");
                     }
-                    finalBtn.setText("Adquirido");
-                    finalBtn.setStyle(purchasedStyle);
                 }
             });
 
-            stage.addActor(btn);
+            stage.addActor(equipBtn);
         }
     }
 
@@ -208,15 +182,7 @@ public class ShopSkinsScreen extends ScreenAdapter {
     }
 
     @Override
-    public void resize(int width, int height) {
-        stage.getViewport().update(width, height, true);
-    }
-
-    @Override
     public void dispose() {
         stage.dispose();
     }
 }
-
-
-

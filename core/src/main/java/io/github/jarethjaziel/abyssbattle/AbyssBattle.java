@@ -28,6 +28,10 @@ public class AbyssBattle extends Game {
     public SpriteBatch batch;
     public AssetManager assets;
 
+    private int equippedSkinIndex = 0;
+    private int equippedTroopSkinIndex = 0;
+
+
     @Override
     public void create() {
         VisUI.load();
@@ -96,5 +100,22 @@ public class AbyssBattle extends Game {
     public User getUser() {
         return user;
     }
+
+    public int getEquippedSkinIndex() {
+    return equippedSkinIndex;
+    }
+
+    public void setEquippedSkinIndex(int equippedSkinIndex) {
+        this.equippedSkinIndex = equippedSkinIndex;
+    }
+
+    public int getEquippedTroopSkinIndex() {
+        return equippedTroopSkinIndex;
+    }
+
+    public void setEquippedTroopSkinIndex(int equippedTroopSkinIndex) {
+        this.equippedTroopSkinIndex = equippedTroopSkinIndex;
+    }
+
 
 }

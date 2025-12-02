@@ -22,6 +22,36 @@ public class MySkinsScreen extends ScreenAdapter {
     private Stage stage;
     private Texture background;
 
+    private static final float TITLE_SCALE = 0.0042f;
+    private static final float SKIN_NAME_SCALE = 0.0022f;
+
+    private static final float TITLE_POS_X = 0.35f;
+    private static final float TITLE_POS_Y = 0.86f;
+
+    private static final float BACK_BUTTON_FONT_SCALE = 0.0014f;
+    private static final float BACK_BUTTON_WIDTH = 0.11f;
+    private static final float BACK_BUTTON_HEIGHT = 0.085f;
+    private static final float BACK_BUTTON_POS_X = 0.87f;
+    private static final float BACK_BUTTON_POS_Y = 0.86f;
+
+    private static final float TROP_BUTTON_FONT_SCALE = 0.0014f;
+    private static final float TROP_BUTTON_WIDTH = 0.13f;
+    private static final float TROP_BUTTON_HEIGHT = 0.075f;
+    private static final float TROP_BUTTON_POS_X = 0.84f;
+    private static final float TROP_BUTTON_POS_Y = 0.86f;
+
+    private static final float SKIN_START_X = 0.05f;
+    private static final float SKIN_OFFSET_X = 0.242f;
+
+    private static final float SKIN_LABEL_OFFSET_X = 0.03f;
+    private static final float SKIN_LABEL_Y = 0.17f;
+
+    private static final float EQUIP_BUTTON_FONT_SCALE = 0.002f;
+    private static final float EQUIP_BUTTON_WIDTH = 0.12f;
+    private static final float EQUIP_BUTTON_HEIGHT = 0.065f;
+    private static final float EQUIP_BUTTON_OFFSET_X = 0.025f;
+    private static final float EQUIP_BUTTON_Y = 0.02f;
+
     public MySkinsScreen(AbyssBattle game) {
         this.game = game;
         stage = new Stage(new ScreenViewport());
@@ -32,18 +62,20 @@ public class MySkinsScreen extends ScreenAdapter {
     public void show() {
         Gdx.input.setInputProcessor(stage);
 
-        // ==== FUENTES ====
+        float w = stage.getViewport().getWorldWidth();
+        float h = stage.getViewport().getWorldHeight();
+
         BitmapFont titleFont = new BitmapFont();
-        titleFont.getData().setScale(3f);
+        titleFont.getData().setScale(h * TITLE_SCALE);
 
         BitmapFont skinFont = new BitmapFont();
-        skinFont.getData().setScale(1.2f);
+        skinFont.getData().setScale(h * SKIN_NAME_SCALE);
 
         Label.LabelStyle titleStyle = new Label.LabelStyle(titleFont, Color.CYAN);
         Label.LabelStyle skinStyle = new Label.LabelStyle(skinFont, Color.BLACK);
 
         Label title = new Label("Inventario de Skins", titleStyle);
-        title.setPosition(40, stage.getHeight() - 90);
+        title.setPosition(w * TITLE_POS_X, h * TITLE_POS_Y);
         stage.addActor(title);
 
         VisTextButton.VisTextButtonStyle backStyle =
@@ -52,13 +84,13 @@ public class MySkinsScreen extends ScreenAdapter {
                 );
 
         backStyle.font = new BitmapFont();
-        backStyle.font.getData().setScale(1.1f);
+        backStyle.font.getData().setScale(h * BACK_BUTTON_FONT_SCALE);
         backStyle.fontColor = Color.WHITE;
         backStyle.up = VisUI.getSkin().newDrawable("white", Color.valueOf("8E44ADFF"));
 
         VisTextButton back = new VisTextButton("Regresar", backStyle);
-        back.setSize(100, 70);
-        back.setPosition(stage.getWidth() - 130, stage.getHeight() - 90);
+        back.setSize(w * BACK_BUTTON_WIDTH, h * BACK_BUTTON_HEIGHT);
+        back.setPosition(w * BACK_BUTTON_POS_X, h * BACK_BUTTON_POS_Y);
         stage.addActor(back);
 
         back.addListener(event -> {
@@ -68,35 +100,53 @@ public class MySkinsScreen extends ScreenAdapter {
             return true;
         });
 
+        VisTextButton.VisTextButtonStyle tropSkinStyle =
+                new VisTextButton.VisTextButtonStyle(
+                        VisUI.getSkin().get("default", VisTextButton.VisTextButtonStyle.class)
+                );
+
+        tropSkinStyle.font = new BitmapFont();
+        tropSkinStyle.font.getData().setScale(h * TROP_BUTTON_FONT_SCALE);
+        tropSkinStyle.fontColor = Color.WHITE;
+        tropSkinStyle.up = VisUI.getSkin().newDrawable("white", Color.valueOf("2980B9FF"));
+
+        VisTextButton troopsButton = new VisTextButton("Skins de Tropas", tropSkinStyle);
+        troopsButton.setSize(w * TROP_BUTTON_WIDTH, h * TROP_BUTTON_HEIGHT);
+        troopsButton.setPosition(w * TROP_BUTTON_POS_X, h * (TROP_BUTTON_POS_Y - 0.12f));
+        stage.addActor(troopsButton);
+
+        troopsButton.addListener(event -> {
+            if (event.toString().equals("touchDown")) {
+                game.setScreen(new MyTroopSkinsScreen(game));
+            }
+            return true;
+        });
+
         String[] skins = { "Skin Bronze", "Skin Plata", "Skin Verde", "Skin Azul" };
-        int startX = 45;   // posición X inicial del primer recuadro de skin
-        int offsetX = 155; // distancia entre recuadros
 
-        final int[] equippedIndex = {0};
-
+        final int[] equippedIndex = { game.getEquippedSkinIndex() };
         VisTextButton[] equipButtons = new VisTextButton[skins.length];
 
         for (int i = 0; i < skins.length; i++) {
-            int x = startX + i * offsetX;
+            float x = w * SKIN_START_X + i * w * SKIN_OFFSET_X;
 
-            // Texto dentro del recuadro crema
             Label skinLabel = new Label(skins[i], skinStyle);
-            skinLabel.setPosition(x, 70);
+            skinLabel.setPosition(x + w * SKIN_LABEL_OFFSET_X, h * SKIN_LABEL_Y);
             stage.addActor(skinLabel);
 
- 
             VisTextButton.VisTextButtonStyle equipStyle =
                     new VisTextButton.VisTextButtonStyle(
                             VisUI.getSkin().get("default", VisTextButton.VisTextButtonStyle.class)
                     );
+
             equipStyle.font = new BitmapFont();
-            equipStyle.font.getData().setScale(1.0f);
+            equipStyle.font.getData().setScale(h * EQUIP_BUTTON_FONT_SCALE);
             equipStyle.fontColor = Color.WHITE;
-            equipStyle.up   = VisUI.getSkin().newDrawable("white", Color.valueOf("2C3E50FF"));
+            equipStyle.up = VisUI.getSkin().newDrawable("white", Color.valueOf("2C3E50FF"));
 
             VisTextButton equipBtn = new VisTextButton("", equipStyle);
-            equipBtn.setSize(70, 25);
-            equipBtn.setPosition(x+10, 15);
+            equipBtn.setSize(w * EQUIP_BUTTON_WIDTH, h * EQUIP_BUTTON_HEIGHT);
+            equipBtn.setPosition(x + w * EQUIP_BUTTON_OFFSET_X, h * EQUIP_BUTTON_Y);
 
             if (i == equippedIndex[0])
                 equipBtn.setText("Equipado");
@@ -109,7 +159,9 @@ public class MySkinsScreen extends ScreenAdapter {
             equipBtn.addListener(new ChangeListener() {
                 @Override
                 public void changed(ChangeEvent event, Actor actor) {
-                    equippedIndex[0] = index;
+                    game.setEquippedSkinIndex(index);  
+                    equippedIndex[0] = index;  
+
 
                     for (int j = 0; j < equipButtons.length; j++) {
                         if (j == equippedIndex[0])
@@ -129,7 +181,9 @@ public class MySkinsScreen extends ScreenAdapter {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         stage.getBatch().begin();
-        stage.getBatch().draw(background, 0, 0, stage.getWidth(), stage.getHeight());
+        stage.getBatch().draw(background, 0, 0,
+                stage.getViewport().getWorldWidth(),
+                stage.getViewport().getWorldHeight());
         stage.getBatch().end();
 
         stage.act(delta);
@@ -141,4 +195,6 @@ public class MySkinsScreen extends ScreenAdapter {
         stage.dispose();
     }
 }
+
+
 
