@@ -170,7 +170,7 @@ public class LoginScreen implements Screen {
 
         } else {
             // modo de registro
-            boolean success = game.accountSystem.registerNewUser(username, password);
+            boolean success = game.accountSystem.registerUser(username, password);
 
             if (success) {
                 showMessage("¡Cuenta creada! Ya puedes iniciar sesión", Color.GREEN);

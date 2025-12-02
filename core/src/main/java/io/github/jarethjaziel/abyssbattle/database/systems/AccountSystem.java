@@ -57,7 +57,7 @@ public class AccountSystem {
      * Registra un nuevo usuario en el sistema
      * @return true si se registró exitosamente, false si el username ya existe
      */
-    public boolean registerNewUser(String username, String password) {
+    public boolean registerUser(String username, String password) {
         try {
             // Verificar si el username ya existe
             List<User> existingUsers = dbManager.getUserDao().queryForEq("username", username);

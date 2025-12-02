@@ -55,7 +55,7 @@ public class AccountSystemTest {
         when(skinDao.queryForId(Constants.DEFAULT_TROOP_SKIN_ID)).thenReturn(troopSkin);
         when(skinDao.queryForId(Constants.DEFAULT_CANNON_SKIN_ID)).thenReturn(cannonSkin);
 
-        accountSystem.registrarNuevoUsuario("player", "1234");
+        accountSystem.registerUser("player", "1234");
 
         verify(userDao, times(1)).create(any(User.class));
         verify(userSkinDao, times(2)).create(any(UserSkin.class));
@@ -68,11 +68,11 @@ public class AccountSystemTest {
         when(skinDao.queryForId(Constants.DEFAULT_TROOP_SKIN_ID)).thenReturn(null);
 
         assertThrows(RuntimeException.class,
-            () -> accountSystem.registrarNuevoUsuario("player", "pass"));
+            () -> accountSystem.registerUser("player", "pass"));
     }
 
     @Test
-    @DisplayName("asignarYEquiparSkin ejecuta DAOs correctamente usando reflexión")
+    @DisplayName("assignAndEquipSkin ejecuta DAOs correctamente usando reflexión")
     void testAsignarSkinReflexion() throws Exception {
         User user = new User();
         Skin skin = new Skin();
@@ -81,7 +81,7 @@ public class AccountSystemTest {
 
         // Obtener método privado sin usar var
         java.lang.reflect.Method method =
-                AccountSystem.class.getDeclaredMethod("asignarYEquiparSkin", User.class, int.class);
+                AccountSystem.class.getDeclaredMethod("assignAndEquipSkin", User.class, int.class);
 
         method.setAccessible(true);
         method.invoke(accountSystem, user, 5);
