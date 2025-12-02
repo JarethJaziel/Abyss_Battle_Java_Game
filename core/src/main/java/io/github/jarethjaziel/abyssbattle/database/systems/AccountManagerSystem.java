@@ -3,7 +3,6 @@ package io.github.jarethjaziel.abyssbattle.database.systems;
 import java.sql.SQLException;
 import java.util.List;
 
-import javax.naming.NameNotFoundException;
 
 import com.j256.ormlite.dao.Dao;
 
@@ -11,7 +10,6 @@ import io.github.jarethjaziel.abyssbattle.database.DatabaseManager;
 import io.github.jarethjaziel.abyssbattle.database.entities.Skin;
 import io.github.jarethjaziel.abyssbattle.database.entities.User;
 import io.github.jarethjaziel.abyssbattle.util.Constants;
-import io.github.jarethjaziel.abyssbattle.util.GameSkins;
 import io.github.jarethjaziel.abyssbattle.util.PasswordUtils;
 
 public class AccountManagerSystem {

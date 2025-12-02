@@ -634,15 +634,6 @@ public class GameScreen implements Screen {
         }
     }
 
-    private TextureRegionDrawable getColoredDrawable(int width, int height, Color color) {
-        Pixmap pixmap = new Pixmap(width, height, Pixmap.Format.RGBA8888);
-        pixmap.setColor(color);
-        pixmap.fill();
-        TextureRegionDrawable drawable = new TextureRegionDrawable(new TextureRegion(new Texture(pixmap)));
-        pixmap.dispose();
-        return drawable;
-    }
-
     private boolean handleTouchDown(int screenX, int screenY) {
         Vector2 worldCoords = viewport.unproject(new Vector2(screenX, screenY));
 

@@ -7,11 +7,12 @@ import java.util.List;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.utils.Disposable;
 
 import io.github.jarethjaziel.abyssbattle.util.Constants;
 import io.github.jarethjaziel.abyssbattle.util.GameState;
 
-public class GameLogic {
+public class GameLogic implements Disposable {
 
     private List<Player> players;
     private Player currentPlayer;
@@ -28,6 +29,14 @@ public class GameLogic {
     private boolean troopDestroyedInShot = false;
     private boolean lastChanceActive = false;
     private boolean lastChanceUsed = false;
+
+    public GameLogic() {
+        world = new World(new Vector2(0, 0), true);
+        players = new ArrayList<>();
+        activeProjectiles = new ArrayList<>();
+        state = GameState.INITIATED;
+        this.physicsFactory = new PhysicsFactory(world);
+    }
 
     public GameLogic(World world) {
         this.world = world;
@@ -65,6 +74,10 @@ public class GameLogic {
 
     public void onCollision(int a, int b) {
 
+    }
+
+    public World getWorld() {
+        return world;
     }
 
     public void playerShoot(float power) {
@@ -347,6 +360,25 @@ public class GameLogic {
 
     private Player getEnemyPlayer() {
         return (currentPlayer == players.get(0)) ? players.get(1) : players.get(0);
+    }
+
+
+    public void initializePlayersAndCannons() {
+        Player p1 = new Player(1);
+        Player p2 = new Player(2);
+
+        Cannon c1 = physicsFactory.createCannon(Constants.CANNON_X, Constants.PLAYER_1_CANNON_Y);
+        Cannon c2 = physicsFactory.createCannon(Constants.CANNON_X, Constants.PLAYER_2_CANNON_Y);
+        p1.setCannon(c1);
+        p2.setCannon(c2);
+        
+        addPlayer(p1);
+        addPlayer(p2);
+    }
+
+    @Override
+    public void dispose() {
+        world.dispose();
     }
 
 }

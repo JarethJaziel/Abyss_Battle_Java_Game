@@ -17,9 +17,9 @@ import com.kotcrab.vis.ui.widget.VisTextButton;
 import com.kotcrab.vis.ui.widget.VisTextField;
 
 import io.github.jarethjaziel.abyssbattle.AbyssBattle;
-import io.github.jarethjaziel.abyssbattle.database.SessionManager;
 import io.github.jarethjaziel.abyssbattle.database.entities.User;
 import io.github.jarethjaziel.abyssbattle.database.systems.AccountManagerSystem;
+import io.github.jarethjaziel.abyssbattle.gameutil.manager.SessionManager;
 
 public class LoginScreen implements Screen {
 
