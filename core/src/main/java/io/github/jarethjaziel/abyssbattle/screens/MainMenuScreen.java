@@ -1,4 +1,5 @@
 package io.github.jarethjaziel.abyssbattle.screens;
+import io.github.jarethjaziel.abyssbattle.util.SessionManager;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
@@ -26,9 +27,11 @@ public class MainMenuScreen implements Screen {
     private AbyssBattle game;
     private Stage stage;
     private Texture background;
+    private Label userLabel;
 
     public MainMenuScreen(AbyssBattle game) {
         this.game = game;
+
         stage = new Stage(new ScreenViewport());
         background = new Texture("images/MenuBackGround.png");
     }
@@ -37,6 +40,7 @@ public class MainMenuScreen implements Screen {
     public void show() {
         Gdx.input.setInputProcessor(stage);
 
+        // tabla principal
         float w = stage.getViewport().getWorldWidth();
         float h = stage.getViewport().getWorldHeight();
 
