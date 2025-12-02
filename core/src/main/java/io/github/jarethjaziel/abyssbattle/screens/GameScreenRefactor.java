@@ -83,8 +83,9 @@ public class GameScreenRefactor implements Screen {
         if (!gameHUD.isPaused() && !gameLogic.isGameOver()) {
             gameLogic.update(delta);
             gameRenderer.updateCamera(delta); // Mover cámara si es necesario
+            
         }
-
+        
         // C. Verificar condiciones de fin de juego
         if (gameLogic.isGameOver()) {
             gameHUD.showGameOver(gameLogic.getState()); // Mostrar menú de fin

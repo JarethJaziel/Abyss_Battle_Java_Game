@@ -181,10 +181,8 @@ public class GameRenderer implements Disposable {
             batch.setColor(Color.WHITE);
 
             batch.draw(projectileTex,
-                        groundPos.y + p.getHeight() - Constants.BULLET_SIZE / 2,
-                        groundPos.x - Constants.BULLET_SIZE / 2,
-                    //groundPos.x - Constants.BULLET_SIZE / 2,
-                    //groundPos.y + p.getHeight() - Constants.BULLET_SIZE / 2,
+                    groundPos.x - Constants.BULLET_SIZE / 2,
+                    groundPos.y + p.getHeight() - Constants.BULLET_SIZE / 2,
                     Constants.BULLET_SIZE, Constants.BULLET_SIZE);
         }
     }
