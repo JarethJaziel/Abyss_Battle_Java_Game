@@ -72,7 +72,7 @@ public class AccountSystemTest {
     }
 
     @Test
-    @DisplayName("asignarYEquiparSkin ejecuta DAOs correctamente usando reflexión")
+    @DisplayName("assignAndEquipSkin ejecuta DAOs correctamente usando reflexión")
     void testAsignarSkinReflexion() throws Exception {
         User user = new User();
         Skin skin = new Skin();
@@ -81,7 +81,7 @@ public class AccountSystemTest {
 
         // Obtener método privado sin usar var
         java.lang.reflect.Method method =
-                AccountSystem.class.getDeclaredMethod("asignarYEquiparSkin", User.class, int.class);
+                AccountSystem.class.getDeclaredMethod("assignAndEquipSkin", User.class, int.class);
 
         method.setAccessible(true);
         method.invoke(accountSystem, user, 5);
