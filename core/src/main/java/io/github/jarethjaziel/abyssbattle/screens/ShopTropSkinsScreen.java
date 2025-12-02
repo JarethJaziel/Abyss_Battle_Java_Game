@@ -36,7 +36,7 @@ public class ShopTropSkinsScreen extends ScreenAdapter {
 
         Preferences prefs = Gdx.app.getPreferences("abyss_battle_skins");
 
-        String[] skins = {"Skin Bronze", "Skin Plata", "Skin Verde", "Skin Azul"};
+        String[] skins = {"Skin Bronze", "Skin Plata", "Skin Verde", "Skin Ultra"};
         int[] prices = {100, 150, 200, 250};
 
         // ===== FUENTES =====
