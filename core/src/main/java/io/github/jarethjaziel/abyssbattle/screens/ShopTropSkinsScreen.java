@@ -16,6 +16,7 @@ import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.widget.VisTextButton;
 
 import io.github.jarethjaziel.abyssbattle.AbyssBattle;
+import io.github.jarethjaziel.abyssbattle.util.Constants;
 
 public class ShopTropSkinsScreen extends ScreenAdapter {
 
@@ -23,40 +24,6 @@ public class ShopTropSkinsScreen extends ScreenAdapter {
     private Stage stage;
     private Texture background;
 
-    // =======================
-    //        CONSTANTES
-    // =======================
-
-    private static final float TITLE_POS_X = 0.35f;
-    private static final float TITLE_POS_Y = 0.86f;
-
-    private static final float BACK_WIDTH = 0.11f;
-    private static final float BACK_HEIGHT = 0.085f;
-    private static final float BACK_POS_X = 0.87f;
-    private static final float BACK_POS_Y = 0.86f;
-
-    private static final float CANNON_BTN_WIDTH = 0.13f;
-    private static final float CANNON_BTN_HEIGHT = 0.075f;
-    private static final float CANNON_BTN_POS_X = 0.84f;
-    private static final float CANNON_BTN_POS_Y = 0.73f;
-
-    private static final float SKIN_START_X = 0.05f;
-    private static final float SKIN_OFFSET_X = 0.242f;
-
-    private static final float LABEL_OFFSET_X = 0.03f;
-    private static final float SKIN_LABEL_Y = 0.17f;
-    private static final float PRICE_LABEL_Y = 0.12f;
-
-    private static final float BUY_WIDTH = 0.12f;
-    private static final float BUY_HEIGHT = 0.065f;
-    private static final float BUY_OFFSET_X = 0.025f;
-    private static final float BUY_POS_Y = 0.02f;
-
-    private static final float TITLE_FONT_SCALE = 0.0042f;
-    private static final float SKIN_FONT_SCALE = 0.0022f;
-    private static final float PRICE_FONT_SCALE = 0.0020f;
-    private static final float BUTTON_FONT_SCALE = 0.0014f;
-    private static final float BUY_BUTTON_FONT_SCALE = 0.002f;
 
     public ShopTropSkinsScreen(AbyssBattle game) {
         this.game = game;
@@ -72,30 +39,30 @@ public class ShopTropSkinsScreen extends ScreenAdapter {
         float w = stage.getViewport().getWorldWidth();
         float h = stage.getViewport().getWorldHeight();
 
-        float titleX = w * TITLE_POS_X;
-        float titleY = h * TITLE_POS_Y;
+        float titleX = w * Constants.TITLE_POS_X;
+        float titleY = h * Constants.TITLE_POS_Y;
 
-        float backWidth = w * BACK_WIDTH;
-        float backHeight = h * BACK_HEIGHT;
-        float backX = w * BACK_POS_X;
-        float backY = h * BACK_POS_Y;
+        float backWidth = w * Constants.BACK_WIDTH;
+        float backHeight = h * Constants.BACK_HEIGHT;
+        float backX = w * Constants.BACK_POS_X;
+        float backY = h * Constants.BACK_POS_Y;
 
-        float cannonBtnWidth = w * CANNON_BTN_WIDTH;
-        float cannonBtnHeight = h * CANNON_BTN_HEIGHT;
-        float cannonBtnX = w * CANNON_BTN_POS_X;
-        float cannonBtnY = h * CANNON_BTN_POS_Y;
+        float cannonBtnWidth = w * Constants.CANNON_BTN_WIDTH;
+        float cannonBtnHeight = h * Constants.CANNON_BTN_HEIGHT;
+        float cannonBtnX = w * Constants.CANNON_BTN_POS_X;
+        float cannonBtnY = h * Constants.CANNON_BTN_POS_Y;
 
-        float startX = w * SKIN_START_X;
-        float offsetX = w * SKIN_OFFSET_X;
+        float startX = w * Constants.SKIN_START_X;
+        float offsetX = w * Constants.SKIN_OFFSET_X;
 
-        float skinLabelOffsetX = w * LABEL_OFFSET_X;
-        float skinLabelY = h * SKIN_LABEL_Y;
-        float priceLabelY = h * PRICE_LABEL_Y;
+        float skinLabelOffsetX = w * Constants.LABEL_OFFSET_X;
+        float skinLabelY = h * Constants.SKIN_LABEL_Y;
+        float priceLabelY = h * Constants.PRICE_LABEL_Y;
 
-        float buyBtnWidth = w * BUY_WIDTH;
-        float buyBtnHeight = h * BUY_HEIGHT;
-        float buyBtnOffsetX = w * BUY_OFFSET_X;
-        float buyBtnY = h * BUY_POS_Y;
+        float buyBtnWidth = w * Constants.BUY_WIDTH;
+        float buyBtnHeight = h * Constants.BUY_HEIGHT;
+        float buyBtnOffsetX = w * Constants.BUY_OFFSET_X;
+        float buyBtnY = h * Constants.BUY_POS_Y;
 
         Preferences prefs = Gdx.app.getPreferences("abyss_battle_skins");
 
@@ -103,13 +70,13 @@ public class ShopTropSkinsScreen extends ScreenAdapter {
         int[] prices = {100, 150, 200, 300};
 
         BitmapFont titleFont = new BitmapFont();
-        titleFont.getData().setScale(h * TITLE_FONT_SCALE);
+        titleFont.getData().setScale(h * Constants.TITLE_FONT_SCALE);
 
         BitmapFont skinFont = new BitmapFont();
-        skinFont.getData().setScale(h * SKIN_FONT_SCALE);
+        skinFont.getData().setScale(h * Constants.SKIN_FONT_SCALE);
 
         BitmapFont priceFont = new BitmapFont();
-        priceFont.getData().setScale(h * PRICE_FONT_SCALE);
+        priceFont.getData().setScale(h * Constants.PRICE_FONT_SCALE);
 
         Label.LabelStyle titleStyle = new Label.LabelStyle(titleFont, Color.GOLD);
         Label.LabelStyle skinStyle = new Label.LabelStyle(skinFont, Color.BLACK);
@@ -124,7 +91,7 @@ public class ShopTropSkinsScreen extends ScreenAdapter {
                         VisUI.getSkin().get("default", VisTextButton.VisTextButtonStyle.class)
                 );
         backStyle.font = new BitmapFont();
-        backStyle.font.getData().setScale(h * BUTTON_FONT_SCALE);
+        backStyle.font.getData().setScale(h * Constants.BUTTON_FONT_SCALE_SHOP);
         backStyle.fontColor = Color.WHITE;
         backStyle.up = VisUI.getSkin().newDrawable("white", Color.valueOf("8E44ADFF"));
 
@@ -145,7 +112,7 @@ public class ShopTropSkinsScreen extends ScreenAdapter {
                         VisUI.getSkin().get("default", VisTextButton.VisTextButtonStyle.class)
                 );
         cannonSkinStyle.font = new BitmapFont();
-        cannonSkinStyle.font.getData().setScale(h * BUTTON_FONT_SCALE);
+        cannonSkinStyle.font.getData().setScale(h * Constants.BUTTON_FONT_SCALE_SHOP);
         cannonSkinStyle.fontColor = Color.WHITE;
         cannonSkinStyle.up = VisUI.getSkin().newDrawable("white", Color.valueOf("2980B9FF"));
 
@@ -182,7 +149,7 @@ public class ShopTropSkinsScreen extends ScreenAdapter {
                             VisUI.getSkin().get("default", VisTextButton.VisTextButtonStyle.class)
                     );
             buyStyle.font = new BitmapFont();
-            buyStyle.font.getData().setScale(h * BUY_BUTTON_FONT_SCALE);
+            buyStyle.font.getData().setScale(h * Constants.BUY_BUTTON_FONT_SCALE);
             buyStyle.fontColor = Color.WHITE;
             buyStyle.up = VisUI.getSkin().newDrawable("white", Color.valueOf("2C3E50FF"));
 

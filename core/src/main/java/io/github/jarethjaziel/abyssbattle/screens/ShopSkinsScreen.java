@@ -14,6 +14,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.widget.VisTextButton;
+import io.github.jarethjaziel.abyssbattle.util.Constants;
 
 import io.github.jarethjaziel.abyssbattle.AbyssBattle;
 
@@ -23,38 +24,7 @@ public class ShopSkinsScreen extends ScreenAdapter {
     private Stage stage;
     private Texture background;
 
-    private static final float TITLE_SCALE = 0.0042f;
-    private static final float SKIN_NAME_SCALE = 0.0022f;
-    private static final float PRICE_SCALE = 0.0020f;
-
-    private static final float TITLE_POS_X = 0.35f;
-    private static final float TITLE_POS_Y = 0.86f;
-
-    private static final float BACK_BUTTON_FONT_SCALE = 0.0014f;
-    private static final float BACK_BUTTON_WIDTH = 0.11f;
-    private static final float BACK_BUTTON_HEIGHT = 0.085f;
-    private static final float BACK_BUTTON_POS_X = 0.87f;
-    private static final float BACK_BUTTON_POS_Y = 0.86f;
-
-    private static final float TROP_BUTTON_FONT_SCALE = 0.0014f;
-    private static final float TROP_BUTTON_WIDTH = 0.13f;
-    private static final float TROP_BUTTON_HEIGHT = 0.075f;
-    private static final float TROP_BUTTON_POS_X = 0.84f;
-    private static final float TROP_BUTTON_POS_Y = 0.73f;
-
-    private static final float SKIN_START_X = 0.05f;
-    private static final float SKIN_OFFSET_X = 0.242f;
-
-    private static final float SKIN_LABEL_OFFSET_X = 0.03f;
-    private static final float SKIN_LABEL_Y = 0.17f;
-
-    private static final float PRICE_LABEL_Y = 0.12f;
-
-    private static final float BUY_BUTTON_FONT_SCALE = 0.002f;
-    private static final float BUY_BUTTON_WIDTH = 0.12f;
-    private static final float BUY_BUTTON_HEIGHT = 0.065f;
-    private static final float BUY_BUTTON_OFFSET_X = 0.025f;
-    private static final float BUY_BUTTON_Y = 0.02f;
+    
 
     public ShopSkinsScreen(AbyssBattle game) {
         this.game = game;
@@ -75,20 +45,20 @@ public class ShopSkinsScreen extends ScreenAdapter {
         int[] prices = { 100, 150, 200, 250 };
 
         BitmapFont titleFont = new BitmapFont();
-        titleFont.getData().setScale(h * TITLE_SCALE);
+        titleFont.getData().setScale(h * Constants.TITLE_SCALE);
 
         BitmapFont skinFont = new BitmapFont();
-        skinFont.getData().setScale(h * SKIN_NAME_SCALE);
+        skinFont.getData().setScale(h * Constants.SKIN_NAME_SCALE);
 
         BitmapFont priceFont = new BitmapFont();
-        priceFont.getData().setScale(h * PRICE_SCALE);
+        priceFont.getData().setScale(h * Constants.PRICE_SCALE);
 
         Label.LabelStyle titleStyle = new Label.LabelStyle(titleFont, Color.GOLD);
         Label.LabelStyle skinStyle = new Label.LabelStyle(skinFont, Color.BLACK);
         Label.LabelStyle priceStyle = new Label.LabelStyle(priceFont, Color.YELLOW);
 
         Label title = new Label("Tienda de Skins", titleStyle);
-        title.setPosition(w * TITLE_POS_X, h * TITLE_POS_Y);
+        title.setPosition(w * Constants.TITLE_POS_X, h * Constants.TITLE_POS_Y);
         stage.addActor(title);
 
         VisTextButton.VisTextButtonStyle backStyle =
@@ -97,13 +67,13 @@ public class ShopSkinsScreen extends ScreenAdapter {
                 );
 
         backStyle.font = new BitmapFont();
-        backStyle.font.getData().setScale(h * BACK_BUTTON_FONT_SCALE);
+        backStyle.font.getData().setScale(h * Constants.BACK_BUTTON_FONT_SCALE);
         backStyle.fontColor = Color.WHITE;
         backStyle.up = VisUI.getSkin().newDrawable("white", Color.valueOf("8E44ADFF"));
 
         VisTextButton back = new VisTextButton("Regresar", backStyle);
-        back.setSize(w * BACK_BUTTON_WIDTH, h * BACK_BUTTON_HEIGHT);
-        back.setPosition(w * BACK_BUTTON_POS_X, h * BACK_BUTTON_POS_Y);
+        back.setSize(w * Constants.BACK_BUTTON_WIDTH, h * Constants.BACK_BUTTON_HEIGHT);
+        back.setPosition(w * Constants.BACK_BUTTON_POS_X, h * Constants.BACK_BUTTON_POS_Y);
         stage.addActor(back);
 
         back.addListener(event -> {
@@ -119,13 +89,13 @@ public class ShopSkinsScreen extends ScreenAdapter {
                 );
 
         tropSkinStyle.font = new BitmapFont();
-        tropSkinStyle.font.getData().setScale(h * TROP_BUTTON_FONT_SCALE);
+        tropSkinStyle.font.getData().setScale(h * Constants.TROP_BUTTON_FONT_SCALE);
         tropSkinStyle.fontColor = Color.WHITE;
         tropSkinStyle.up = VisUI.getSkin().newDrawable("white", Color.valueOf("2980B9FF"));
 
         VisTextButton tropSkin = new VisTextButton("Skins de Tropas", tropSkinStyle);
-        tropSkin.setSize(w * TROP_BUTTON_WIDTH, h * TROP_BUTTON_HEIGHT);
-        tropSkin.setPosition(w * TROP_BUTTON_POS_X, h * TROP_BUTTON_POS_Y);
+        tropSkin.setSize(w * Constants.TROP_BUTTON_WIDTH, h * Constants.TROP_BUTTON_HEIGHT);
+        tropSkin.setPosition(w * Constants.TROP_BUTTON_POS_X, h * Constants.TROP_BUTTON_POS_Y);
         stage.addActor(tropSkin);
 
         tropSkin.addListener(event -> {
@@ -136,7 +106,7 @@ public class ShopSkinsScreen extends ScreenAdapter {
         });
 
         for (int i = 0; i < skins.length; i++) {
-            float x = w * SKIN_START_X + i * w * SKIN_OFFSET_X;
+            float x = w * Constants.SKIN_START_X + i * w * Constants.SKIN_OFFSET_X;
 
             String skinName = skins[i];
             int price = prices[i];
@@ -144,11 +114,11 @@ public class ShopSkinsScreen extends ScreenAdapter {
             boolean purchased = prefs.getBoolean(skinName, false);
 
             Label skinLabel = new Label(skinName, skinStyle);
-            skinLabel.setPosition(x + w * SKIN_LABEL_OFFSET_X, h * SKIN_LABEL_Y);
+            skinLabel.setPosition(x + w * Constants.SKIN_LABEL_OFFSET_X, h * Constants.SKIN_LABEL_Y);
             stage.addActor(skinLabel);
 
             Label priceLabel = new Label(price + " monedas", priceStyle);
-            priceLabel.setPosition(x + w * SKIN_LABEL_OFFSET_X, h * PRICE_LABEL_Y);
+            priceLabel.setPosition(x + w * Constants.SKIN_LABEL_OFFSET_X, h * Constants.PRICE_LABEL_Y);
             stage.addActor(priceLabel);
 
             VisTextButton.VisTextButtonStyle buyStyle =
@@ -157,7 +127,7 @@ public class ShopSkinsScreen extends ScreenAdapter {
                     );
 
             buyStyle.font = new BitmapFont();
-            buyStyle.font.getData().setScale(h * BUY_BUTTON_FONT_SCALE);
+            buyStyle.font.getData().setScale(h * Constants.BUY_BUTTON_FONT_SCALE);
             buyStyle.fontColor = Color.WHITE;
             buyStyle.up = VisUI.getSkin().newDrawable("white", Color.valueOf("2C3E50FF"));
 
@@ -172,8 +142,8 @@ public class ShopSkinsScreen extends ScreenAdapter {
             else
                 btn = new VisTextButton("Comprar", buyStyle);
 
-            btn.setSize(w * BUY_BUTTON_WIDTH, h * BUY_BUTTON_HEIGHT);
-            btn.setPosition(x + w * BUY_BUTTON_OFFSET_X, h * BUY_BUTTON_Y);
+            btn.setSize(w * Constants.BUY_BUTTON_WIDTH, h * Constants.BUY_BUTTON_HEIGHT);
+            btn.setPosition(x + w * Constants.BUY_BUTTON_OFFSET_X, h * Constants.BUY_BUTTON_Y);
 
             final VisTextButton finalBtn = btn;
 

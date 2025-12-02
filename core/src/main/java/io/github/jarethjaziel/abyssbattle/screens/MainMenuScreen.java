@@ -16,24 +16,16 @@ import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.widget.VisTable;
 import com.kotcrab.vis.ui.widget.VisTextButton;
 
+import io.github.jarethjaziel.abyssbattle.util.Constants;
+
 import io.github.jarethjaziel.abyssbattle.AbyssBattle;
+
 
 public class MainMenuScreen implements Screen {
 
     private AbyssBattle game;
     private Stage stage;
     private Texture background;
-
-    private static final float TITLE_SCALE_FACTOR = 0.0090f;
-    private static final float TITLE_BOTTOM_PADDING = 0.08f;
-    private static final float TITLE_LEFT_PADDING = 0.36f;
-
-    private static final float BUTTON_FONT_SCALE = 0.0032f;
-    private static final float BUTTON_WIDTH_PERCENT = 0.28f;
-    private static final float BUTTON_HEIGHT_PERCENT = 0.12f;
-
-    private static final float BUTTON_LEFT_PADDING = 0.42f;
-    private static final float BUTTON_BOTTOM_PADDING = 0.04f;
 
     public MainMenuScreen(AbyssBattle game) {
         this.game = game;
@@ -53,14 +45,14 @@ public class MainMenuScreen implements Screen {
         stage.addActor(mainTable);
 
         BitmapFont titleFont = new BitmapFont();
-        titleFont.getData().setScale(h * TITLE_SCALE_FACTOR);
+        titleFont.getData().setScale(h * Constants.TITLE_SCALE_FACTOR);
 
         Label.LabelStyle titleStyle = new Label.LabelStyle(titleFont, Color.CYAN);
         Label title = new Label("Abyss Battle", titleStyle);
         mainTable.add(title)
-                .padBottom(h * TITLE_BOTTOM_PADDING)
+                .padBottom(h * Constants.TITLE_BOTTOM_PADDING)
                 .left()
-                .padLeft(w * TITLE_LEFT_PADDING);
+                .padLeft(w * Constants.TITLE_LEFT_PADDING);
         mainTable.row();
 
         VisTextButton.VisTextButtonStyle buttonStyle =
@@ -69,7 +61,7 @@ public class MainMenuScreen implements Screen {
                 );
 
         buttonStyle.font = new BitmapFont();
-        buttonStyle.font.getData().setScale(h * BUTTON_FONT_SCALE);
+        buttonStyle.font.getData().setScale(h * Constants.BUTTON_FONT_SCALE_MENU);
 
         buttonStyle.fontColor = Color.WHITE;
         buttonStyle.downFontColor = Color.YELLOW;
@@ -78,8 +70,8 @@ public class MainMenuScreen implements Screen {
         buttonStyle.over = VisUI.getSkin().newDrawable("white", Color.valueOf("1ABC9CFF"));
         buttonStyle.down = VisUI.getSkin().newDrawable("white", Color.valueOf("2ECC71FF"));
 
-        float buttonWidth = w * BUTTON_WIDTH_PERCENT;
-        float buttonHeight = h * BUTTON_HEIGHT_PERCENT;
+        float buttonWidth = w * Constants.BUTTON_WIDTH_PERCENT;
+        float buttonHeight = h * Constants.BUTTON_HEIGHT_PERCENT;
 
         VisTextButton loginButton = new VisTextButton("Iniciar Sesión", buttonStyle);
         VisTextButton playButton = new VisTextButton("Jugar", buttonStyle);
@@ -93,9 +85,9 @@ public class MainMenuScreen implements Screen {
             mainTable.add(b)
                     .width(buttonWidth)
                     .height(buttonHeight)
-                    .padBottom(h * BUTTON_BOTTOM_PADDING)
+                    .padBottom(h * Constants.BUTTON_BOTTOM_PADDING)
                     .left()
-                    .padLeft(w * BUTTON_LEFT_PADDING);
+                    .padLeft(w * Constants.BUTTON_LEFT_PADDING);
             mainTable.row();
         }
 

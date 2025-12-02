@@ -13,6 +13,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.widget.VisTextButton;
+import io.github.jarethjaziel.abyssbattle.util.Constants;
 
 import io.github.jarethjaziel.abyssbattle.AbyssBattle;
 
@@ -21,36 +22,8 @@ public class MyTroopSkinsScreen extends ScreenAdapter {
     private AbyssBattle game;
     private Stage stage;
     private Texture background;
-
-    private static final float TITLE_SCALE = 0.0042f;
-    private static final float SKIN_NAME_SCALE = 0.0022f;
-
-    private static final float TITLE_POS_X = 0.35f;
-    private static final float TITLE_POS_Y = 0.86f;
-
-    private static final float BACK_BUTTON_FONT_SCALE = 0.0014f;
-    private static final float BACK_BUTTON_WIDTH = 0.11f;
-    private static final float BACK_BUTTON_HEIGHT = 0.085f;
-    private static final float BACK_BUTTON_POS_X = 0.87f;
-    private static final float BACK_BUTTON_POS_Y = 0.86f;
     
-    private static final float CANNON_BUTTON_FONT_SCALE = 0.0014f;
-    private static final float CANNON_BUTTON_WIDTH = 0.13f;
-    private static final float CANNON_BUTTON_HEIGHT = 0.075f;
-    private static final float CANNON_BUTTON_POS_X = 0.84f;
-    private static final float CANNON_BUTTON_POS_Y = 0.86f;
-
-    private static final float SKIN_START_X = 0.05f;
-    private static final float SKIN_OFFSET_X = 0.242f;
-
-    private static final float SKIN_LABEL_OFFSET_X = 0.03f;
-    private static final float SKIN_LABEL_Y = 0.17f;
-
-    private static final float EQUIP_BUTTON_FONT_SCALE = 0.002f;
-    private static final float EQUIP_BUTTON_WIDTH = 0.12f;
-    private static final float EQUIP_BUTTON_HEIGHT = 0.065f;
-    private static final float EQUIP_BUTTON_OFFSET_X = 0.025f;
-    private static final float EQUIP_BUTTON_Y = 0.02f;
+    
 
     public MyTroopSkinsScreen(AbyssBattle game) {
         this.game = game;
@@ -66,16 +39,16 @@ public class MyTroopSkinsScreen extends ScreenAdapter {
         float h = stage.getViewport().getWorldHeight();
 
         BitmapFont titleFont = new BitmapFont();
-        titleFont.getData().setScale(h * TITLE_SCALE);
+        titleFont.getData().setScale(h * Constants.TITLE_SCALE);
 
         BitmapFont skinFont = new BitmapFont();
-        skinFont.getData().setScale(h * SKIN_NAME_SCALE);
+        skinFont.getData().setScale(h * Constants.SKIN_NAME_SCALE);
 
         Label.LabelStyle titleStyle = new Label.LabelStyle(titleFont, Color.CYAN);
         Label.LabelStyle skinStyle = new Label.LabelStyle(skinFont, Color.BLACK);
 
         Label title = new Label("Inventario de Tropas", titleStyle);
-        title.setPosition(w * TITLE_POS_X, h * TITLE_POS_Y);
+        title.setPosition(w * Constants.TITLE_POS_X, h * Constants.TITLE_POS_Y);
         stage.addActor(title);
 
         VisTextButton.VisTextButtonStyle backStyle =
@@ -84,13 +57,13 @@ public class MyTroopSkinsScreen extends ScreenAdapter {
                 );
 
         backStyle.font = new BitmapFont();
-        backStyle.font.getData().setScale(h * BACK_BUTTON_FONT_SCALE);
+        backStyle.font.getData().setScale(h * Constants.BACK_BUTTON_FONT_SCALE);
         backStyle.fontColor = Color.WHITE;
         backStyle.up = VisUI.getSkin().newDrawable("white", Color.valueOf("8E44ADFF"));
 
         VisTextButton back = new VisTextButton("Regresar", backStyle);
-        back.setSize(w * BACK_BUTTON_WIDTH, h * BACK_BUTTON_HEIGHT);
-        back.setPosition(w * BACK_BUTTON_POS_X, h * BACK_BUTTON_POS_Y);
+        back.setSize(w * Constants.BACK_BUTTON_WIDTH, h * Constants.BACK_BUTTON_HEIGHT);
+        back.setPosition(w * Constants.BACK_BUTTON_POS_X, h * Constants.BACK_BUTTON_POS_Y);
         stage.addActor(back);
 
         back.addListener(event -> {
@@ -106,13 +79,13 @@ public class MyTroopSkinsScreen extends ScreenAdapter {
                 );
 
         cannonSkinStyle.font = new BitmapFont();
-        cannonSkinStyle.font.getData().setScale(h * CANNON_BUTTON_FONT_SCALE);
+        cannonSkinStyle.font.getData().setScale(h * Constants.CANNON_BUTTON_FONT_SCALE);
         cannonSkinStyle.fontColor = Color.WHITE;
         cannonSkinStyle.up = VisUI.getSkin().newDrawable("white", Color.valueOf("2980B9FF"));
 
         VisTextButton cannonButton = new VisTextButton("Skins de Cañones", cannonSkinStyle);
-        cannonButton.setSize(w * CANNON_BUTTON_WIDTH, h * CANNON_BUTTON_HEIGHT);
-        cannonButton.setPosition(w * CANNON_BUTTON_POS_X, h * (CANNON_BUTTON_POS_Y - 0.12f));
+        cannonButton.setSize(w * Constants.CANNON_BUTTON_WIDTH, h * Constants.CANNON_BUTTON_HEIGHT);
+        cannonButton.setPosition(w * Constants.CANNON_BUTTON_POS_X, h * (Constants.CANNON_BUTTON_POS_Y - 0.12f));
         stage.addActor(cannonButton);
 
         cannonButton.addListener(event -> {
@@ -128,10 +101,10 @@ public class MyTroopSkinsScreen extends ScreenAdapter {
         VisTextButton[] equipButtons = new VisTextButton[skins.length];
 
         for (int i = 0; i < skins.length; i++) {
-            float x = w * SKIN_START_X + i * w * SKIN_OFFSET_X;
+            float x = w * Constants.SKIN_START_X + i * w * Constants.SKIN_OFFSET_X;
 
             Label skinLabel = new Label(skins[i], skinStyle);
-            skinLabel.setPosition(x + w * SKIN_LABEL_OFFSET_X, h * SKIN_LABEL_Y);
+            skinLabel.setPosition(x + w * Constants.SKIN_LABEL_OFFSET_X, h * Constants.SKIN_LABEL_Y);
             stage.addActor(skinLabel);
 
             VisTextButton.VisTextButtonStyle equipStyle =
@@ -140,13 +113,13 @@ public class MyTroopSkinsScreen extends ScreenAdapter {
                     );
 
             equipStyle.font = new BitmapFont();
-            equipStyle.font.getData().setScale(h * EQUIP_BUTTON_FONT_SCALE);
+            equipStyle.font.getData().setScale(h * Constants.EQUIP_BUTTON_FONT_SCALE);
             equipStyle.fontColor = Color.WHITE;
             equipStyle.up = VisUI.getSkin().newDrawable("white", Color.valueOf("2C3E50FF"));
 
             VisTextButton equipBtn = new VisTextButton("", equipStyle);
-            equipBtn.setSize(w * EQUIP_BUTTON_WIDTH, h * EQUIP_BUTTON_HEIGHT);
-            equipBtn.setPosition(x + w * EQUIP_BUTTON_OFFSET_X, h * EQUIP_BUTTON_Y);
+            equipBtn.setSize(w * Constants.EQUIP_BUTTON_WIDTH, h * Constants.EQUIP_BUTTON_HEIGHT);
+            equipBtn.setPosition(x + w * Constants.EQUIP_BUTTON_OFFSET_X, h * Constants.EQUIP_BUTTON_Y);
 
             equipBtn.setText(i == equippedIndex[0] ? "Equipado" : "Equipar");
             equipButtons[i] = equipBtn;
