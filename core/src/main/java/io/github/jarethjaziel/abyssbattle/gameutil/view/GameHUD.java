@@ -106,9 +106,6 @@ public class GameHUD implements Disposable {
         pauseMenu = new VisTable();
         pauseMenu.setFillParent(true);
         pauseMenu.setVisible(false);
-        // ... (Copia aquí tu código de creación de botones de pausa)
-        // Fondo negro transparente
-
         // Título
         BitmapFont titleFont = new BitmapFont();
         titleFont.getData().setScale(3f);

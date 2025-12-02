@@ -113,7 +113,7 @@ public class MainMenuScreen implements Screen {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                  if (SessionManager.getInstance().isLoggedIn()) {
-                    game.setScreen(new GameScreenRefactor(game));
+                    game.setScreen(new GameScreen(game));
                     showLoginWarning();
                 }
             }
