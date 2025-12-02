@@ -1,111 +1,96 @@
 package io.github.jarethjaziel.abyssbattle.database.systems;
 
-import java.sql.SQLException;
-
 import com.j256.ormlite.dao.Dao;
+import com.j256.ormlite.misc.TransactionManager; // Importante para transacciones seguras
+
+import java.sql.SQLException;
+import java.util.Collections;
+import java.util.List;
 
 import io.github.jarethjaziel.abyssbattle.database.DatabaseManager;
 import io.github.jarethjaziel.abyssbattle.database.entities.Skin;
 import io.github.jarethjaziel.abyssbattle.database.entities.User;
-import io.github.jarethjaziel.abyssbattle.database.entities.UserLoadout;
-import io.github.jarethjaziel.abyssbattle.database.entities.UserSkin;
+import io.github.jarethjaziel.abyssbattle.util.PurchaseResult;
+import io.github.jarethjaziel.abyssbattle.util.SkinType;
 
 public class ShopSystem {
 
     private final DatabaseManager dbManager;
+    private final UserInventorySystem inventorySystem;
+    private Dao<Skin, Integer> skinDao;
+    private Dao<User, Integer> userDao;
 
     public ShopSystem(DatabaseManager dbManager) {
         this.dbManager = dbManager;
+        this.inventorySystem = new UserInventorySystem(dbManager);
+        this.skinDao = dbManager.getSkinDao();
+        this.userDao = dbManager.getUserDao();
     }
 
-    public boolean purchaseSkin(User user, String type, String color) throws SQLException {
+    /**
+     * Intenta comprar una skin para un usuario.
+     * Maneja automáticamente el descuento de monedas y la asignación del item.
+     * 
+     * @param user   El usuario que compra (debe tener el objeto actualizado con sus
+     *               monedas)
+     * @param skinId El ID de la skin que quiere comprar
+     * @return PurchaseResult indicando el resultado
+     */
+    public PurchaseResult buySkin(User user, int skinId) {
+        try {
+            Skin skinToBuy = skinDao.queryForId(skinId);
+            if (skinToBuy == null) return PurchaseResult.SKIN_NOT_FOUND;
 
-        String fileName = generateSkinFilename(type, color);
-        Skin skin = findSkinByFilename(fileName);
+            // Delegamos la verificación al experto (InventorySystem)
+            if (inventorySystem.doesUserOwnSkin(user, skinId)) {
+                return PurchaseResult.ALREADY_OWNED;
+            }
 
-        if (skin == null) {
-            throw new RuntimeException("Skin not found in DB: " + fileName);
-        }
+            if (user.getCoins() < skinToBuy.getPrice()) {
+                return PurchaseResult.INSUFFICIENT_FUNDS;
+            }
 
-        if (userOwnsSkin(user, skin)) {
-            return false; 
-        }
+            // TRANSACCIÓN
+            TransactionManager.callInTransaction(dbManager.getConnectionSource(), () -> {
+                // 1. Cobrar (Responsabilidad del Shop)
+                user.purchase(skinToBuy.getPrice());;
+                userDao.update(user);
 
-        Dao<UserSkin, Integer> userSkinDao = dbManager.getUserSkinDao();
-        UserSkin ownership = new UserSkin(user, skin);
-        userSkinDao.create(ownership);
+                // 2. Entregar (Responsabilidad delegada al Inventory)
+                inventorySystem.grantSkin(user, skinToBuy);
+                
+                return null;
+            });
 
-        return true;
-    }
+            return PurchaseResult.SUCCESS;
 
-    public void equipSkin(User user, String type, String color) throws SQLException {
-        String fileName = generateSkinFilename(type, color);
-        Skin skin = findSkinByFilename(fileName);
-
-        if (skin == null)
-            throw new RuntimeException("Skin not found: " + fileName);
-
-        if (!userOwnsSkin(user, skin))
-            throw new RuntimeException("User does not own this skin: " + fileName);
-
-        Dao<UserLoadout, Integer> loadoutDao = dbManager.getUserLoadoutDao();
-
-        UserLoadout existingLoadout = loadoutDao.queryBuilder()
-            .where()
-            .eq("user_id", user.getId())
-            .and()
-            .eq("skin_type", skin.getType())
-            .queryForFirst();
-
-        if (existingLoadout != null) {
-            existingLoadout.setActiveSkin(skin);
-            loadoutDao.update(existingLoadout);
-        } else {
-            UserLoadout newLoadout = new UserLoadout(user, skin);
-            loadoutDao.create(newLoadout);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return PurchaseResult.ERROR;
         }
     }
-
-    private boolean userOwnsSkin(User user, Skin skin) throws SQLException {
-        Dao<UserSkin, Integer> userSkinDao = dbManager.getUserSkinDao();
-
-        UserSkin ownership = userSkinDao.queryBuilder()
-                .where()
-                .eq("user_id", user.getId())
-                .and()
-                .eq("skin_id", skin.getId())
-                .queryForFirst();
-
-        return ownership != null;
-    }
-
-    private Skin findSkinByFilename(String filename) throws SQLException {
-        Dao<Skin, Integer> skinDao = dbManager.getSkinDao();
-
-        return skinDao.queryBuilder()
-                .where()
-                .eq("file_name", filename)
-                .queryForFirst();
-    }
-
-    private String generateSkinFilename(String type, String color) {
-
-        type = type.toLowerCase();
-        color = color.toLowerCase();
-
-        switch (type) {
-
-            case "cannon":
-            case "cannons":
-            case "cannon_barrel":
-                return "cannon_barrel_" + color + ".png";
-
-            case "troop":
-            case "troops":
-                return "troop_" + color + ".png";
-
-            default:
-                throw new RuntimeException("Invalid skin type: " + type);
+    /**
+     * Obtiene todas las skins disponibles en el juego
+     */
+    public List<Skin> getAllSkins() {
+        try {
+            return skinDao.queryForAll();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return Collections.emptyList();
         }
     }
+
+    /**
+     * Obtiene skins filtradas por tipo (ej: Solo CANNON o solo TROPA)
+     */
+    public List<Skin> getSkinsByType(SkinType type) {
+        try {
+            return skinDao.queryForEq("type", type);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return Collections.emptyList();
+        }
+    }
+
 }

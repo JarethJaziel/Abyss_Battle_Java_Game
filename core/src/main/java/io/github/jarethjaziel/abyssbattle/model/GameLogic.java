@@ -9,13 +9,13 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 
 import io.github.jarethjaziel.abyssbattle.util.Constants;
-import io.github.jarethjaziel.abyssbattle.util.GAME_STATE;
+import io.github.jarethjaziel.abyssbattle.util.GameState;
 
 public class GameLogic {
 
     private List<Player> players;
     private Player currentPlayer;
-    private GAME_STATE state;
+    private GameState state;
 
     private List<Projectile> activeProjectiles;
     private World world;
@@ -33,7 +33,7 @@ public class GameLogic {
         this.world = world;
         players = new ArrayList<>();
         activeProjectiles = new ArrayList<>();
-        state = GAME_STATE.INITIATED;
+        state = GameState.INITIATED;
         this.physicsFactory = new PhysicsFactory(world);
     }
 
@@ -59,7 +59,7 @@ public class GameLogic {
                 .setAngle(270);
 
         currentPlayer = players.get(0);
-        state = GAME_STATE.PLACEMENT_P1;
+        state = GameState.PLACEMENT_P1;
         troopsToPlace = Constants.MAX_PLAYER_TROOPS;
     }
 
@@ -68,7 +68,7 @@ public class GameLogic {
     }
 
     public void playerShoot(float power) {
-        if (state != GAME_STATE.PLAYER_1_TURN && state != GAME_STATE.PLAYER_2_TURN) {
+        if (state != GameState.PLAYER_1_TURN && state != GameState.PLAYER_2_TURN) {
             return;
         }
 
@@ -80,7 +80,7 @@ public class GameLogic {
     }
 
     public void playerAim(float angle) {
-        if (state == GAME_STATE.WAITING || isGameOver()) {
+        if (state == GameState.WAITING || isGameOver()) {
             return;
         }
         Cannon cannon = currentPlayer.getCannon();
@@ -88,18 +88,18 @@ public class GameLogic {
     }
 
     public void tryPlaceTroop(float x, float y) {
-        if (state != GAME_STATE.PLACEMENT_P1 && state != GAME_STATE.PLACEMENT_P2) {
+        if (state != GameState.PLACEMENT_P1 && state != GameState.PLACEMENT_P2) {
             return;
         }
 
         float screenMiddle = Constants.WORLD_HEIGHT / 2;
 
-        if (state == GAME_STATE.PLACEMENT_P1 && y > screenMiddle) {
+        if (state == GameState.PLACEMENT_P1 && y > screenMiddle) {
             Gdx.app.log("P1", "¡No puedes colocar en territorio enemigo!");
             return;
         }
 
-        if (state == GAME_STATE.PLACEMENT_P2 && y < screenMiddle) {
+        if (state == GameState.PLACEMENT_P2 && y < screenMiddle) {
             Gdx.app.log("P2", "¡No puedes colocar en territorio enemigo!");
             return;
         }
@@ -128,12 +128,12 @@ public class GameLogic {
         boolean p2AllDead = p2.getTroopList().stream().allMatch(t -> !t.isActive());
 
         if (p1AllDead && p2AllDead) {
-            state = GAME_STATE.DRAW;
+            state = GameState.DRAW;
             return true;
         }
 
         if (p1AllDead) {
-            state = GAME_STATE.PLAYER_2_WIN;
+            state = GameState.PLAYER_2_WIN;
             return true;
         }
 
@@ -146,7 +146,7 @@ public class GameLogic {
             // Si ya hay una última chance activa pendiente, no re-activarla
             if (!lastChanceActive) {
                 System.out.println("¡P2 ha perdido todas sus tropas! Activando ÚLTIMA OPORTUNIDAD.");
-                state = GAME_STATE.LAST_CHANCE;
+                state = GameState.LAST_CHANCE;
                 lastChanceActive = true;
             }
             // devolvemos false porque el juego no termina todavía — queda dar la última
@@ -159,7 +159,7 @@ public class GameLogic {
 
     public void changeTurn() {
 
-        if (state == GAME_STATE.LAST_CHANCE) {
+        if (state == GameState.LAST_CHANCE) {
             // Forzamos el turno al Jugador 2 para su tiro final
             currentPlayer = players.get(1);
             System.out.println("Turno FINAL de JUGADOR 2");
@@ -168,10 +168,10 @@ public class GameLogic {
 
         if (currentPlayer == players.get(0)) {
             currentPlayer = players.get(1);
-            state = GAME_STATE.PLAYER_2_TURN;
+            state = GameState.PLAYER_2_TURN;
         } else {
             currentPlayer = players.get(0);
-            state = GAME_STATE.PLAYER_1_TURN;
+            state = GameState.PLAYER_1_TURN;
         }
     }
 
@@ -179,7 +179,7 @@ public class GameLogic {
         return currentPlayer;
     }
 
-    public GAME_STATE getState() {
+    public GameState getState() {
         return state;
     }
 
@@ -193,12 +193,12 @@ public class GameLogic {
 
     public void registerShoot(Projectile p) {
         activeProjectiles.add(p);
-        state = GAME_STATE.WAITING;
+        state = GameState.WAITING;
     }
 
     public void update(float delta) {
 
-        if (state == GAME_STATE.TURN_TRANSITION) {
+        if (state == GameState.TURN_TRANSITION) {
             turnTimer -= delta;
 
             if (turnTimer <= 0) {
@@ -230,17 +230,17 @@ public class GameLogic {
                     return;
                 }
 
-                if (state == GAME_STATE.LAST_CHANCE && lastChanceActive) {
+                if (state == GameState.LAST_CHANCE && lastChanceActive) {
                     // Forzamos que P2 tome el turno final UNA VEZ
                     currentPlayer = players.get(1);
-                    state = GAME_STATE.PLAYER_2_TURN;
+                    state = GameState.PLAYER_2_TURN;
                     lastChanceActive = false;
                     // marcamos que la oportunidad está en proceso (evitar reactivar)
                     lastChanceUsed = true;
                     return;
                 }
 
-                state = GAME_STATE.TURN_TRANSITION;
+                state = GameState.TURN_TRANSITION;
                 turnTimer = Constants.TRANSITION_TIME_TO_WAIT;
             }
 
@@ -255,19 +255,19 @@ public class GameLogic {
         boolean p2AllDead = p2.getTroopList().stream().allMatch(t -> !t.isActive());
 
         if (p1AllDead && p2AllDead) {
-            state = GAME_STATE.DRAW; // P2 logró matar a P1 con su último tiro
+            state = GameState.DRAW; // P2 logró matar a P1 con su último tiro
         } else if (p2AllDead) {
-            state = GAME_STATE.PLAYER_1_WIN; // P2 falló su último tiro
+            state = GameState.PLAYER_1_WIN; // P2 falló su último tiro
         } else {
             // Caso raro: P2 revivió? Asumimos P1 gana si P2 sigue muerto
-            state = GAME_STATE.PLAYER_1_WIN;
+            state = GameState.PLAYER_1_WIN;
         }
     }
 
     private void handleTurnChangeLogic() {
 
         // CASO ESPECIAL: Si estábamos en "Última Oportunidad" y se acabó el tiempo
-        if (state == GAME_STATE.LAST_CHANCE) {
+        if (state == GameState.LAST_CHANCE) {
             // Ya tiró P2, revisamos si logró empatar o perdió
             finalizeGame();
             return;
@@ -280,9 +280,9 @@ public class GameLogic {
             boolean enemyHasTroops = getEnemyPlayer().getTroopList().stream().anyMatch(t -> t.isActive());
             if (enemyHasTroops) {
                 if (currentPlayer == players.get(0)) {
-                    state = GAME_STATE.PLAYER_1_TURN;
+                    state = GameState.PLAYER_1_TURN;
                 } else {
-                    state = GAME_STATE.PLAYER_2_TURN;
+                    state = GameState.PLAYER_2_TURN;
                 }
             } else {
                 changeTurn(); // o pasar turno normalmente (según flujo que quieras)
@@ -297,9 +297,9 @@ public class GameLogic {
     }
 
     public boolean isGameOver() {
-        return state == GAME_STATE.PLAYER_1_WIN ||
-                state == GAME_STATE.PLAYER_2_WIN ||
-                state == GAME_STATE.DRAW;
+        return state == GameState.PLAYER_1_WIN ||
+                state == GameState.PLAYER_2_WIN ||
+                state == GameState.DRAW;
     }
 
     private void applyAreaDamage(Vector2 explosionCenter, float radioMeters, int maxDamage) {
@@ -331,15 +331,15 @@ public class GameLogic {
     }
 
     private void advancePlacementPhase() {
-        if (state == GAME_STATE.PLACEMENT_P1) {
+        if (state == GameState.PLACEMENT_P1) {
             // Terminó P1, sigue P2
-            state = GAME_STATE.PLACEMENT_P2;
+            state = GameState.PLACEMENT_P2;
             currentPlayer = players.get(1);
             troopsToPlace = Constants.MAX_PLAYER_TROOPS; // Reiniciar contador para el P2
             System.out.println("Fase de Colocación: JUGADOR 2 (Haz click en la derecha)");
-        } else if (state == GAME_STATE.PLACEMENT_P2) {
+        } else if (state == GameState.PLACEMENT_P2) {
             // Terminó P2, ¡EMPIEZA EL JUEGO REAL!
-            state = GAME_STATE.PLAYER_1_TURN;
+            state = GameState.PLAYER_1_TURN;
             currentPlayer = players.get(0);
             System.out.println("¡Colocación terminada! INICIA EL COMBATE");
         }

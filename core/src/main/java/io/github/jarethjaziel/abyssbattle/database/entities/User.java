@@ -67,7 +67,9 @@ public class User {
         this.passwordHash = passwordHash;
     }
 
-
+    public void purchase(int amount){
+        this.coins -= amount;
+    }
 
     @Override
     public String toString() {
