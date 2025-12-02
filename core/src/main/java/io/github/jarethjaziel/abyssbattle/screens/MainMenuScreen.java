@@ -1,4 +1,5 @@
 package io.github.jarethjaziel.abyssbattle.screens;
+import io.github.jarethjaziel.abyssbattle.util.SessionManager;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
@@ -23,118 +24,165 @@ public class MainMenuScreen implements Screen{
     private AbyssBattle game;
     private Stage stage;
     private Texture background;
+    private Label userLabel;
 
     public MainMenuScreen(AbyssBattle game) {
         this.game = game;
-        
+
         stage = new Stage(new ScreenViewport());
         background = new Texture("images/MenuBackGround.png");
     }
 
     @Override
-public void show() {
-    Gdx.input.setInputProcessor(stage);
+    public void show() {
+        Gdx.input.setInputProcessor(stage);
 
-    VisTable mainTable = new VisTable();
-    mainTable.setFillParent(true);
-    stage.addActor(mainTable);
+        // tabla principal
+        VisTable mainTable = new VisTable();
+        mainTable.setFillParent(true);
+        stage.addActor(mainTable);
 
-    BitmapFont titleFont = new BitmapFont();
-    titleFont.getData().setScale(3f);
+        BitmapFont titleFont = new BitmapFont();
+        titleFont.getData().setScale(3f);
 
-    Label.LabelStyle titleStyle = new Label.LabelStyle(titleFont, Color.CYAN);
+        Label.LabelStyle titleStyle = new Label.LabelStyle(titleFont, Color.CYAN);
 
-    Label title = new Label("Abyss Battle", titleStyle);
-    mainTable.add(title).right().pad(10);
-    mainTable.add(title).padBottom(80);
-    mainTable.row();
+        Label title = new Label("Abyss Battle", titleStyle);
+        mainTable.add(title).padBottom(80);
+        mainTable.row();
 
-    VisTextButton.VisTextButtonStyle buttonStyle =
+        // Estilos de botones
+        VisTextButton.VisTextButtonStyle buttonStyle =
             new VisTextButton.VisTextButtonStyle(
-                    VisUI.getSkin().get("default", VisTextButton.VisTextButtonStyle.class)
+                VisUI.getSkin().get("default", VisTextButton.VisTextButtonStyle.class)
             );
 
-    buttonStyle.font = new BitmapFont();
-    buttonStyle.font.getData().setScale(2f);
+        buttonStyle.font = new BitmapFont();
+        buttonStyle.font.getData().setScale(2f);
 
-    buttonStyle.fontColor = Color.WHITE;
-    buttonStyle.downFontColor = YELLOW;
+        buttonStyle.fontColor = Color.WHITE;
+        buttonStyle.downFontColor = YELLOW;
 
-    buttonStyle.up = VisUI.getSkin().newDrawable("white", Color.valueOf("34495EFF"));   // Azul grisáceo
-    buttonStyle.over = VisUI.getSkin().newDrawable("white", Color.valueOf("1ABC9CFF")); // Hover
-    buttonStyle.down = VisUI.getSkin().newDrawable("white", Color.valueOf("2ECC71FF")); // Presionado
+        buttonStyle.up = VisUI.getSkin().newDrawable("white", Color.valueOf("34495EFF"));
+        buttonStyle.over = VisUI.getSkin().newDrawable("white", Color.valueOf("1ABC9CFF"));
+        buttonStyle.down = VisUI.getSkin().newDrawable("white", Color.valueOf("2ECC71FF"));
 
-    VisTextButton loginButton = new VisTextButton("Iniciar Sesion", buttonStyle);
-    mainTable.add(loginButton).top().pad(10);
-    mainTable.add(loginButton).fillX().pad(10);
-    mainTable.row();
+        VisTextButton loginButton = new VisTextButton("Iniciar Sesion", buttonStyle);
+        mainTable.add(loginButton).fillX().pad(10);
+        mainTable.row();
 
-    VisTextButton playButton = new VisTextButton("Jugar", buttonStyle);
-    mainTable.add(playButton).right().pad(10);
-    mainTable.add(playButton).fillX().pad(10);
-    mainTable.row();
+        VisTextButton playButton = new VisTextButton("Jugar", buttonStyle);
+        mainTable.add(playButton).fillX().pad(10);
+        mainTable.row();
 
-    VisTextButton shopButton = new VisTextButton("Tienda de Skins", buttonStyle);
-    mainTable.add(shopButton).right().pad(10);
-    mainTable.add(shopButton).fillX().pad(10);
-    mainTable.row();
+        VisTextButton shopButton = new VisTextButton("Tienda de Skins", buttonStyle);
+        mainTable.add(shopButton).fillX().pad(10);
+        mainTable.row();
 
-    VisTextButton mySkinsButton = new VisTextButton("Mis Skins", buttonStyle);
-    mainTable.add(mySkinsButton).right().pad(10);
-    mainTable.add(mySkinsButton).fillX().pad(10);
-    mainTable.row();
+        VisTextButton mySkinsButton = new VisTextButton("Mis Skins", buttonStyle);
+        mainTable.add(mySkinsButton).fillX().pad(10);
+        mainTable.row();
 
-    VisTextButton exitButton = new VisTextButton("Salir", buttonStyle);
-    mainTable.add(exitButton).right().pad(10);
-    mainTable.add(exitButton).fillX().pad(10);
-    mainTable.row();
+        VisTextButton exitButton = new VisTextButton("Salir", buttonStyle);
+        mainTable.add(exitButton).fillX().pad(10);
+        mainTable.row();
 
-    playButton.addListener(new ChangeListener() {
-        @Override
-        public void changed(ChangeEvent event, Actor actor) {
-            game.setScreen(new GameScreen(game));
+        // label usuario
+        BitmapFont userFont = new BitmapFont();
+        userFont.getData().setScale(1.5f);
+
+        Label.LabelStyle userStyle = new Label.LabelStyle(userFont, Color.WHITE);
+
+        userLabel = new Label("", userStyle);
+        userLabel.setPosition(20, 30);
+        stage.addActor(userLabel);
+
+        // Actualizar texto del label según sesión
+        updateUserLabel();
+
+
+
+        playButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                game.setScreen(new GameScreen(game));
+            }
+        });
+
+        shopButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                game.setScreen(new ShopSkinsScreen(game));
+            }
+        });
+
+        mySkinsButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                game.setScreen(new MySkinsScreen(game));
+            }
+        });
+
+        exitButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                Gdx.app.exit();
+            }
+        });
+
+        loginButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                if (SessionManager.getInstance().isLoggedIn()) {
+                    // Si ya está logueado, cerrar sesión
+                    SessionManager.getInstance().logout();
+                    loginButton.setText("Iniciar Sesion");
+                    updateUserLabel(); //  Actualizar label al cerrar sesión
+                } else {
+                    // Si no está logueado, ir a la pantalla de login
+                    game.setScreen(new LoginScreen(game));
+                }
+            }
+        });
+
+        //  Actualizar el botón de login si ya hay sesión activa
+        if (SessionManager.getInstance().isLoggedIn()) {
+            loginButton.setText("Cerrar Sesion");
         }
-    });
+    }
 
-    shopButton.addListener(new ChangeListener() {
-        @Override
-        public void changed(ChangeEvent event, Actor actor) {
-            game.setScreen(new ShopSkinsScreen(game));
+    /**
+     * Actualiza el texto del label según el estado de la sesión
+     */
+    private void updateUserLabel() {
+        if (SessionManager.getInstance().isLoggedIn()) {
+            String username = SessionManager.getInstance().getCurrentUsername();
+            int coins = SessionManager.getInstance().getCurrentUser().getCoins();
+
+            userLabel.setText(" Usuario: " + username + "\n Monedas: " + coins);
+            userLabel.setColor(Color.LIME); // Verde brillante cuando hay sesión
+        } else {
+            userLabel.setText(" Invitado\n Monedas: 0");
+            userLabel.setColor(Color.GRAY); // Gris cuando no hay sesión
         }
-    });
-
-    mySkinsButton.addListener(new ChangeListener() {
-        @Override
-        public void changed(ChangeEvent event, Actor actor) {
-            game.setScreen(new MySkinsScreen(game));
-        }
-    });
-
-    exitButton.addListener(new ChangeListener() {
-        @Override
-        public void changed(ChangeEvent event, Actor actor) {
-            Gdx.app.exit();
-        }
-    });
-}
-
+    }
 
     @Override
     public void render(float delta) {
         Gdx.gl.glClearColor(0, 0, 0, 1);
-    Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-    stage.getBatch().begin();
-    stage.getBatch().draw(background, 0, 0, stage.getWidth(), stage.getHeight());
-    stage.getBatch().end();
+        stage.getBatch().begin();
+        stage.getBatch().draw(background, 0, 0, stage.getWidth(), stage.getHeight());
+        stage.getBatch().end();
 
-    stage.act(delta);
-    stage.draw();
+        stage.act(delta);
+        stage.draw();
     }
 
     @Override
     public void resize(int width, int height) {
-        stage.getViewport().update(width, height, true);    
+        stage.getViewport().update(width, height, true);
     }
 
     @Override
@@ -151,12 +199,12 @@ public void show() {
 
     @Override
     public void hide() {
-        Gdx.input.setInputProcessor(null);    
+        Gdx.input.setInputProcessor(null);
     }
 
     @Override
     public void dispose() {
-        stage.dispose();    
+        stage.dispose();
+        background.dispose();
     }
-
 }
