@@ -30,6 +30,8 @@ public class Skin {
         this.type = type;
     }
 
+    // getters
+
     public int getId() {
         return id;
     }
@@ -38,12 +40,27 @@ public class Skin {
         return name;
     }
 
+    public int getPrice() {
+        return price;
+    }
+
     public SkinType getType() {
         return type;
     }
+
+    // setters
 
     public void setType(SkinType type) {
         this.type = type;
     }
 
+    @Override
+    public String toString() {
+        return "Skin{" +
+            "id=" + id +
+            ", name='" + name + '\'' +
+            ", price=" + price +
+            ", type=" + type +
+            '}';
+    }
 }
