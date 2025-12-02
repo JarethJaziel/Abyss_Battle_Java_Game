@@ -17,9 +17,12 @@ import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.widget.VisTable;
 import com.kotcrab.vis.ui.widget.VisTextButton;
 
+import io.github.jarethjaziel.abyssbattle.util.Constants;
+
 import io.github.jarethjaziel.abyssbattle.AbyssBattle;
 
-public class MainMenuScreen implements Screen{
+
+public class MainMenuScreen implements Screen {
 
     private AbyssBattle game;
     private Stage stage;
@@ -38,69 +41,59 @@ public class MainMenuScreen implements Screen{
         Gdx.input.setInputProcessor(stage);
 
         // tabla principal
+        float w = stage.getViewport().getWorldWidth();
+        float h = stage.getViewport().getWorldHeight();
+
         VisTable mainTable = new VisTable();
         mainTable.setFillParent(true);
         stage.addActor(mainTable);
 
         BitmapFont titleFont = new BitmapFont();
-        titleFont.getData().setScale(3f);
+        titleFont.getData().setScale(h * Constants.TITLE_SCALE_FACTOR);
 
         Label.LabelStyle titleStyle = new Label.LabelStyle(titleFont, Color.CYAN);
-
         Label title = new Label("Abyss Battle", titleStyle);
-        mainTable.add(title).padBottom(80);
+        mainTable.add(title)
+                .padBottom(h * Constants.TITLE_BOTTOM_PADDING)
+                .left()
+                .padLeft(w * Constants.TITLE_LEFT_PADDING);
         mainTable.row();
 
-        // Estilos de botones
         VisTextButton.VisTextButtonStyle buttonStyle =
-            new VisTextButton.VisTextButtonStyle(
-                VisUI.getSkin().get("default", VisTextButton.VisTextButtonStyle.class)
-            );
+                new VisTextButton.VisTextButtonStyle(
+                        VisUI.getSkin().get("default", VisTextButton.VisTextButtonStyle.class)
+                );
 
         buttonStyle.font = new BitmapFont();
-        buttonStyle.font.getData().setScale(2f);
+        buttonStyle.font.getData().setScale(h * Constants.BUTTON_FONT_SCALE_MENU);
 
         buttonStyle.fontColor = Color.WHITE;
-        buttonStyle.downFontColor = YELLOW;
+        buttonStyle.downFontColor = Color.YELLOW;
 
         buttonStyle.up = VisUI.getSkin().newDrawable("white", Color.valueOf("34495EFF"));
         buttonStyle.over = VisUI.getSkin().newDrawable("white", Color.valueOf("1ABC9CFF"));
         buttonStyle.down = VisUI.getSkin().newDrawable("white", Color.valueOf("2ECC71FF"));
 
-        VisTextButton loginButton = new VisTextButton("Iniciar Sesion", buttonStyle);
-        mainTable.add(loginButton).fillX().pad(10);
-        mainTable.row();
+        float buttonWidth = w * Constants.BUTTON_WIDTH_PERCENT;
+        float buttonHeight = h * Constants.BUTTON_HEIGHT_PERCENT;
 
+        VisTextButton loginButton = new VisTextButton("Iniciar Sesión", buttonStyle);
         VisTextButton playButton = new VisTextButton("Jugar", buttonStyle);
-        mainTable.add(playButton).fillX().pad(10);
-        mainTable.row();
-
         VisTextButton shopButton = new VisTextButton("Tienda de Skins", buttonStyle);
-        mainTable.add(shopButton).fillX().pad(10);
-        mainTable.row();
-
         VisTextButton mySkinsButton = new VisTextButton("Mis Skins", buttonStyle);
-        mainTable.add(mySkinsButton).fillX().pad(10);
-        mainTable.row();
-
         VisTextButton exitButton = new VisTextButton("Salir", buttonStyle);
-        mainTable.add(exitButton).fillX().pad(10);
-        mainTable.row();
 
-        // label usuario
-        BitmapFont userFont = new BitmapFont();
-        userFont.getData().setScale(1.5f);
+        VisTextButton[] buttons = { loginButton, playButton, shopButton, mySkinsButton, exitButton };
 
-        Label.LabelStyle userStyle = new Label.LabelStyle(userFont, Color.WHITE);
-
-        userLabel = new Label("", userStyle);
-        userLabel.setPosition(20, 30);
-        stage.addActor(userLabel);
-
-        // Actualizar texto del label según sesión
-        updateUserLabel();
-
-
+        for (VisTextButton b : buttons) {
+            mainTable.add(b)
+                    .width(buttonWidth)
+                    .height(buttonHeight)
+                    .padBottom(h * Constants.BUTTON_BOTTOM_PADDING)
+                    .left()
+                    .padLeft(w * Constants.BUTTON_LEFT_PADDING);
+            mainTable.row();
+        }
 
         playButton.addListener(new ChangeListener() {
             @Override
@@ -129,42 +122,6 @@ public class MainMenuScreen implements Screen{
                 Gdx.app.exit();
             }
         });
-
-        loginButton.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                if (SessionManager.getInstance().isLoggedIn()) {
-                    // Si ya está logueado, cerrar sesión
-                    SessionManager.getInstance().logout();
-                    loginButton.setText("Iniciar Sesion");
-                    updateUserLabel(); //  Actualizar label al cerrar sesión
-                } else {
-                    // Si no está logueado, ir a la pantalla de login
-                    game.setScreen(new LoginScreen(game));
-                }
-            }
-        });
-
-        //  Actualizar el botón de login si ya hay sesión activa
-        if (SessionManager.getInstance().isLoggedIn()) {
-            loginButton.setText("Cerrar Sesion");
-        }
-    }
-
-    /**
-     * Actualiza el texto del label según el estado de la sesión
-     */
-    private void updateUserLabel() {
-        if (SessionManager.getInstance().isLoggedIn()) {
-            String username = SessionManager.getInstance().getCurrentUsername();
-            int coins = SessionManager.getInstance().getCurrentUser().getCoins();
-
-            userLabel.setText(" Usuario: " + username + "\n Monedas: " + coins);
-            userLabel.setColor(Color.LIME); // Verde brillante cuando hay sesión
-        } else {
-            userLabel.setText(" Invitado\n Monedas: 0");
-            userLabel.setColor(Color.GRAY); // Gris cuando no hay sesión
-        }
     }
 
     @Override
@@ -186,16 +143,10 @@ public class MainMenuScreen implements Screen{
     }
 
     @Override
-    public void pause() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'pause'");
-    }
+    public void pause() { throw new UnsupportedOperationException("Unimplemented method 'pause'"); }
 
     @Override
-    public void resume() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'resume'");
-    }
+    public void resume() { throw new UnsupportedOperationException("Unimplemented method 'resume'"); }
 
     @Override
     public void hide() {
@@ -205,6 +156,6 @@ public class MainMenuScreen implements Screen{
     @Override
     public void dispose() {
         stage.dispose();
-        background.dispose();
     }
 }
+

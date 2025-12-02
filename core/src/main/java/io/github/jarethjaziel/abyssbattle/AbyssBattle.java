@@ -23,6 +23,9 @@ public class AbyssBattle extends Game {
     // Sistema de Base de Datos
     public DatabaseManager dbManager;
     public AccountSystem accountSystem;
+    private int equippedSkinIndex = 0;
+    private int equippedTroopSkinIndex = 0;
+
 
     @Override
     public void create() {
@@ -115,4 +118,22 @@ public class AbyssBattle extends Game {
 
         System.out.println("✅ Abyss Battle cerrado correctamente");
     }
+}
+    public int getEquippedSkinIndex() {
+    return equippedSkinIndex;
+    }
+
+    public void setEquippedSkinIndex(int equippedSkinIndex) {
+        this.equippedSkinIndex = equippedSkinIndex;
+    }
+
+    public int getEquippedTroopSkinIndex() {
+        return equippedTroopSkinIndex;
+    }
+
+    public void setEquippedTroopSkinIndex(int equippedTroopSkinIndex) {
+        this.equippedTroopSkinIndex = equippedTroopSkinIndex;
+    }
+
+
 }
