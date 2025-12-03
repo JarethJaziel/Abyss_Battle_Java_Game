@@ -17,6 +17,7 @@ public class TurnManager {
 
     // Flags
     private boolean lastChanceUsed = false;
+    private boolean lastChanceActive = false;
 
     public TurnManager(List<Player> players) {
         this.players = players;
@@ -42,11 +43,18 @@ public class TurnManager {
      * Decides what to do after a shot lands.
      */
     public void handleTurnEnd(boolean troopDestroyed) {
-        if (state == GameState.LAST_CHANCE) {
-            if (!troopDestroyed) {
+        if (lastChanceActive) { 
+            
+            if (troopDestroyed) {
+                System.out.println("¡LAST CHANCE: Enemigo abatido! TIRO EXTRA.");
+                // IMPORTANTE: Debemos restaurar el estado a LAST_CHANCE para permitir el siguiente tiro
+                // (porque actualmente está en WAITING o TRANSITION)
+                state = GameState.LAST_CHANCE; 
+            } else {
+                System.out.println("hola"); // Ahora sí entrará aquí
                 lastChanceUsed = true;
             }
-            return;
+            return; 
         }
 
         // Bonus Turn Logic
@@ -74,6 +82,7 @@ public class TurnManager {
         System.out.println("Last Chance Activated for Player 2!");
         this.state = GameState.LAST_CHANCE;
         this.currentPlayer = players.get(1);
+        this.lastChanceActive = true;
     }
 
     public void advancePlacementPhase() {

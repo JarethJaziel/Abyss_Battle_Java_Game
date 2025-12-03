@@ -62,7 +62,6 @@ public class PlayerStatsSystem {
             dbStats.setLastPlayed(new Date());
 
             statsDao.update(dbStats);
-            System.out.println("Stats actualizadas correctamente.");
 
         } catch (SQLException e) {
             e.printStackTrace();

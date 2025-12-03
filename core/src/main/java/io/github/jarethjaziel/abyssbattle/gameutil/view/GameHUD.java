@@ -26,6 +26,7 @@ import com.kotcrab.vis.ui.widget.VisTextButton.VisTextButtonStyle;
 import io.github.jarethjaziel.abyssbattle.AbyssBattle;
 import io.github.jarethjaziel.abyssbattle.gameutil.manager.AudioManager;
 import io.github.jarethjaziel.abyssbattle.screens.GameScreen;
+import io.github.jarethjaziel.abyssbattle.screens.GameSetupScreen;
 import io.github.jarethjaziel.abyssbattle.screens.MainMenuScreen;
 import io.github.jarethjaziel.abyssbattle.util.Constants;
 import io.github.jarethjaziel.abyssbattle.util.GameState;
@@ -74,7 +75,7 @@ public class GameHUD implements Disposable {
         playAgainButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                game.setScreen(new GameScreen(game));
+                game.setScreen(new GameSetupScreen(game));
             }
         });
         gameOverMenu.add(playAgainButton).width(300).height(60).pad(10);
@@ -85,6 +86,7 @@ public class GameHUD implements Disposable {
         menuButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
+                AudioManager.getInstance().stopMusic();
                 game.setScreen(new MainMenuScreen(game));
             }
         });
@@ -228,7 +230,7 @@ public class GameHUD implements Disposable {
     public void showGameOver(GameState state) {
         Label title = gameOverMenu.findActor("gameOverTitle");
         if (title != null)
-            title.setText("VICTORIA: " + state);
+            title.setText("Result: " + state);
         gameOverMenu.setVisible(true);
     }
 

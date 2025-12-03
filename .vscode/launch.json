@@ -9,6 +9,13 @@
             "name": "Lwjgl3Launcher",
             "request": "launch",
             "mainClass": "io.github.jarethjaziel.abyssbattle.lwjgl3.Lwjgl3Launcher",
+            "projectName": ""
+        },
+        {
+            "type": "java",
+            "name": "Lwjgl3Launcher",
+            "request": "launch",
+            "mainClass": "io.github.jarethjaziel.abyssbattle.lwjgl3.Lwjgl3Launcher",
             "projectName": "lwjgl3"
         },
         {

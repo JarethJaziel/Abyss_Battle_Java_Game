@@ -113,7 +113,7 @@ public class MainMenuScreen implements Screen {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                  if (SessionManager.getInstance().isLoggedIn()) {
-                    game.setScreen(new GameScreen(game));
+                    game.setScreen(new GameSetupScreen(game));
                     showLoginWarning();
                 }
             }
@@ -123,7 +123,7 @@ public class MainMenuScreen implements Screen {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 if (SessionManager.getInstance().isLoggedIn()) {
-                    game.setScreen(new ShopSkinsScreen(game));
+                    game.setScreen(new ShopScreen(game));
                 } else {
                     showLoginWarning(); 
                 }
@@ -134,7 +134,7 @@ public class MainMenuScreen implements Screen {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 if (SessionManager.getInstance().isLoggedIn()) {
-                    game.setScreen(new MySkinsScreen(game));
+                    game.setScreen(new InventoryScreen(game));
                 } else {
                     showLoginWarning();
                 }

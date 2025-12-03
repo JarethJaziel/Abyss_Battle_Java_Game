@@ -2,6 +2,9 @@ package io.github.jarethjaziel.abyssbattle.database.entities;
 
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
+
+import io.github.jarethjaziel.abyssbattle.util.Constants;
+
 import java.util.Date;
 
 @DatabaseTable(tableName = "users")
@@ -26,7 +29,10 @@ public class User {
     @DatabaseField(foreign = true, foreignAutoRefresh = true, foreignAutoCreate = true)
     private Stats stats;
 
-    public User() {}
+    public User() {
+        createdAt = new Date();
+        coins = Constants.NEW_USER_INITIAL_COINS;
+    }
 
     public User(String username, String passwordHash) {
         this.username = username;

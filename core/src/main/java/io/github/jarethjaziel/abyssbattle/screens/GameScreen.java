@@ -6,26 +6,40 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 
 import io.github.jarethjaziel.abyssbattle.AbyssBattle;
+import io.github.jarethjaziel.abyssbattle.database.entities.Stats;
+import io.github.jarethjaziel.abyssbattle.database.entities.User;
+import io.github.jarethjaziel.abyssbattle.database.systems.AccountManagerSystem;
+import io.github.jarethjaziel.abyssbattle.database.systems.PlayerStatsSystem;
 import io.github.jarethjaziel.abyssbattle.gameutil.input.InputController;
 import io.github.jarethjaziel.abyssbattle.gameutil.manager.AudioManager;
 import io.github.jarethjaziel.abyssbattle.gameutil.manager.MapManager;
+import io.github.jarethjaziel.abyssbattle.gameutil.manager.SessionManager;
 import io.github.jarethjaziel.abyssbattle.gameutil.view.GameHUD;
 import io.github.jarethjaziel.abyssbattle.gameutil.view.GameRenderer;
 import io.github.jarethjaziel.abyssbattle.model.GameLogic;
+import io.github.jarethjaziel.abyssbattle.model.MatchContext;
+import io.github.jarethjaziel.abyssbattle.util.Constants;
 
 public class GameScreen implements Screen {
 
     private final AbyssBattle game;
 
     // --- COMPONENTES (MVC) ---
-    private GameLogic gameLogic; // El CEREBRO (Física, Turnos, Reglas)
-    private GameRenderer gameRenderer; // LA VISTA (Dibujo del mundo, Líneas, Explosiones)
+    private GameLogic gameLogic; // (Física, Turnos, Reglas)
+    private GameRenderer gameRenderer; // (Dibujo del mundo, Líneas, Explosiones)
     private GameHUD gameHUD; // LA UI (Botones, Textos, Menús de Pausa)
-    private MapManager mapManager; // EL MAPA (Carga TMX, Crea Paredes)
-    private InputController inputController; // EL CONTROL (Mouse/Touch)
+    private MapManager mapManager; // (Carga TMX, Crea Paredes)
+    private InputController inputController; // (Mouse/Touch)
+    private MatchContext matchContext;
 
-    public GameScreen(AbyssBattle game) {
+    private PlayerStatsSystem statsSystem; 
+    private AccountManagerSystem accountSystem;
+
+    private boolean hasSavedStats = false;
+
+    public GameScreen(AbyssBattle game, MatchContext context) {
         this.game = game;
+        this.matchContext = context;
     }
 
     @Override
@@ -34,11 +48,14 @@ public class GameScreen implements Screen {
 
         mapManager = new MapManager(gameLogic.getWorld(), "maps/game_bg_1.tmx");
 
-        gameRenderer = new GameRenderer(game.batch, game.assets, mapManager, gameLogic);
+        gameRenderer = new GameRenderer(game.batch, game.assets, mapManager, gameLogic, matchContext);
 
         gameHUD = new GameHUD(game.batch, game.assets, game);
 
         inputController = new InputController(gameLogic, gameRenderer.getViewport(), gameHUD, mapManager);
+
+        statsSystem = new PlayerStatsSystem(game.getDbManager());
+        accountSystem = new AccountManagerSystem(game.getDbManager());
 
         InputMultiplexer multiplexer = new InputMultiplexer();
         multiplexer.addProcessor(gameHUD.getStage());
@@ -66,6 +83,10 @@ public class GameScreen implements Screen {
         }
 
         if (gameLogic.isGameOver()) {
+            if (!hasSavedStats) {
+                saveGameResults(); // <--- AQUÍ OCURRE LA MAGIA
+                hasSavedStats = true; // Cerramos el candado
+            }
             gameHUD.showGameOver(gameLogic.getState());
         }
 
@@ -77,6 +98,25 @@ public class GameScreen implements Screen {
 
         gameHUD.updateInfo(gameLogic.getState(), gameLogic.getTroopsToPlace());
         gameHUD.render(delta);
+    }
+
+    private void saveGameResults() {
+        User currentUser = SessionManager.getInstance().getCurrentUser();
+
+        if (currentUser == null) {
+            return;
+        }
+
+        Stats sessionStats = gameLogic.getMatchStats();
+
+        statsSystem.updateStatsAfterMatch(currentUser, sessionStats);
+
+        currentUser.addCoins(Constants.REWARD_PER_GAME);
+
+        accountSystem.updateUser(currentUser);
+
+        SessionManager.getInstance().login(currentUser);
+
     }
 
     @Override
