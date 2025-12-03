@@ -48,7 +48,7 @@ public class ProfileScreen extends ScreenAdapter {
         // 1. Título
         Label title = new Label("PERFIL DE JUGADOR", VisUI.getSkin());
         title.setFontScale(2f);
-        title.setColor(Color.ORANGE);
+        title.setColor(Color.CYAN);
         root.add(title).padBottom(30).colspan(2).row();
 
         // 2. Información del Usuario
@@ -95,12 +95,12 @@ public class ProfileScreen extends ScreenAdapter {
     }
 
     private void addStatRow(VisTable table, String label, String value, Color valueColor) {
-        Label l = new Label(label, VisUI.getSkin());
-        Label v = new Label(value, VisUI.getSkin());
-        v.setColor(valueColor);
+        Label lbl = new Label(label, VisUI.getSkin());
+        Label val = new Label(value, VisUI.getSkin());
+        val.setColor(valueColor);
         
-        table.add(l).left().padRight(20);
-        table.add(v).right().row();
+        table.add(lbl).left().padRight(20);
+        table.add(val).right().row();
     }
 
     @Override
