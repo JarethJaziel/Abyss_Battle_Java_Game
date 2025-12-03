@@ -14,10 +14,6 @@ public class PasswordUtils {
     private static final String ALGORITHM = "SHA-256";
     private static final int SALT_LENGTH = 16;
 
-    /**
-     * Genera un hash seguro de la contraseña con salt incluido.
-     * Formato: "salt:hash"
-     */
     public static String hashPassword(String password) {
         try {
             // Generar salt aleatorio

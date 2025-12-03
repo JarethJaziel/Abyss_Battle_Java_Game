@@ -1,5 +1,6 @@
 package io.github.jarethjaziel.abyssbattle.model;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
@@ -17,16 +18,16 @@ public class PhysicsFactory {
 
     private Body createBody(float centralPosX, float centralPosY, float width, float height, BodyType bodyType) {
         BodyDef bodyBuilder = new BodyDef();
-        
+
         bodyBuilder.position.set(centralPosX / Constants.PIXELS_PER_METER,
-                                centralPosY / Constants.PIXELS_PER_METER);
-        
+                centralPosY / Constants.PIXELS_PER_METER);
+
         bodyBuilder.type = bodyType;
 
         Body body = world.createBody(bodyBuilder);
 
         PolygonShape shape = new PolygonShape();
-        
+
         shape.setAsBox((width / 2) / Constants.PIXELS_PER_METER, (height / 2) / Constants.PIXELS_PER_METER);
 
         FixtureDef fixtureDef = new FixtureDef();
@@ -41,7 +42,7 @@ public class PhysicsFactory {
     }
 
     public Cannon createCannon(float px, float py) {
-        
+
         Body cannonBody = createBody(px, py, Constants.CANNON_SIZE, Constants.CANNON_SIZE, BodyType.StaticBody);
         Cannon cannon = new Cannon(cannonBody);
         cannonBody.setUserData(cannon);
@@ -58,10 +59,10 @@ public class PhysicsFactory {
     public Projectile createProjectile(float px, float py, float angleDegrees, float power, int damage) {
 
         Body projectileBody = createBody(px, py, Constants.BULLET_SIZE, Constants.BULLET_SIZE, BodyType.DynamicBody);
-        
+
         projectileBody.setBullet(true);
         projectileBody.getFixtureList().first().setSensor(true);
-        
+
         // Ajuste de grados a radianes
         float angleRad = MathUtils.degreesToRadians * angleDegrees;
 
@@ -70,12 +71,15 @@ public class PhysicsFactory {
         float velY = MathUtils.sin(angleRad) * power;
 
         Vector2 velocity = new Vector2(velX, velY);
-        
-        float initialVerticalSpeed = power * 0.5f; 
+
+        float initialVerticalSpeed = power * 0.5f;
 
         Projectile projectile = new Projectile(projectileBody, damage, velocity, initialVerticalSpeed);
         projectileBody.setUserData(projectile);
-        
+        Gdx.app.log("PROJECTILE", "" + projectile);
+        System.out.println("CREADO EN " + projectileBody.getPosition());
+        System.out.println("VELOCIDAD " + projectileBody.getLinearVelocity());
+
         return projectile;
     }
 }

@@ -1,266 +1,168 @@
 package model;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.World;
+import io.github.jarethjaziel.abyssbattle.model.*;
+import io.github.jarethjaziel.abyssbattle.util.GameState;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import io.github.jarethjaziel.abyssbattle.model.Cannon;
-import io.github.jarethjaziel.abyssbattle.model.GameLogic;
-import io.github.jarethjaziel.abyssbattle.model.PhysicsFactory;
-import io.github.jarethjaziel.abyssbattle.model.Player;
-import io.github.jarethjaziel.abyssbattle.model.Projectile;
-import io.github.jarethjaziel.abyssbattle.model.Troop;
-import io.github.jarethjaziel.abyssbattle.util.Constants;
-import io.github.jarethjaziel.abyssbattle.util.GAME_STATE;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
 
-/**
- * GameLogicTest — único archivo, adaptado a tu GameLogic.java real.
- */
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 class GameLogicTest {
 
-    // ---------- utilidades de reflexión (privadas dentro del mismo archivo) ----------
-    private static class R {
-        static void setField(Object target, String name, Object value) {
-            try {
-                Field f = findField(target.getClass(), name);
-                f.setAccessible(true);
-                f.set(target, value);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
+    private GameLogic game;
+    private World world;
+    private PhysicsFactory physicsFactory;
+    private TurnManager turnManager;
+    private CombatManager combatManager;
 
-        static Object invoke(Object target, String name, Class<?>[] types, Object... args) {
-            try {
-                Method m = target.getClass().getDeclaredMethod(name, types);
-                m.setAccessible(true);
-                return m.invoke(target, args);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        private static Field findField(Class<?> cls, String name) throws NoSuchFieldException {
-            Class<?> cur = cls;
-            while (cur != null) {
-                try {
-                    return cur.getDeclaredField(name);
-                } catch (NoSuchFieldException ex) {
-                    cur = cur.getSuperclass();
-                }
-            }
-            throw new NoSuchFieldException(name);
-        }
-    }
-
-    // ---------- fixtures ----------
-    private World mockWorld;
-    private PhysicsFactory mockFactory;
-    private GameLogic logic;
-
-    private Player p1, p2;
-    private Cannon c1, c2;
-    private Body body1, body2;
+    private Player p1;
+    private Player p2;
 
     @BeforeEach
-    void setUp() {
-        mockWorld = mock(World.class);
-        mockFactory = mock(PhysicsFactory.class);
+    void setup() throws Exception {
+        world = mock(World.class);
+        physicsFactory = mock(PhysicsFactory.class);
+        turnManager = mock(TurnManager.class);
+        combatManager = mock(CombatManager.class);
 
-        // create GameLogic with mocked world (constructor: GameLogic(World))
-        logic = new GameLogic(mockWorld);
+        p1 = mock(Player.class);
+        p2 = mock(Player.class);
 
-        // inject mocked physicsFactory into private field physicsFactory
-        R.setField(logic, "physicsFactory", mockFactory);
+        ArrayList<Player> players = new ArrayList<>();
+        players.add(p1);
+        players.add(p2);
 
-        // prepare mocked Bodies for cannons
-        body1 = mock(Body.class);
-        body2 = mock(Body.class);
-        when(body1.getPosition()).thenReturn(new Vector2(1f, 1f));
-        when(body2.getPosition()).thenReturn(new Vector2(10f, 1f));
+        game = new GameLogic(world);
 
-        // real Cannons but with mocked Body
-        c1 = new Cannon(body1);
-        c2 = new Cannon(body2);
-
-        // real Players using your constructor Player(int) and setCannon
-        p1 = new Player(1);
-        p2 = new Player(2);
-        p1.setCannon(c1);
-        p2.setCannon(c2);
-
-        // add players to logic (uses addPlayer(Player))
-        logic.addPlayer(p1);
-        logic.addPlayer(p2);
+        setField("physicsFactory", physicsFactory);
+        setField("turnManager", turnManager);
+        setField("combatManager", combatManager);
+        setField("players", players);
+        setField("activeProjectiles", new ArrayList<Projectile>());
     }
 
-    // ---------------- TESTS ----------------
-
-    @Test
-    void testStartGame_initializesAnglesStateAndTroopsToPlace() {
-        logic.startGame();
-
-        assertEquals(GAME_STATE.PLACEMENT_P1, logic.getState());
-        assertEquals(p1, logic.getCurrentPlayer());
-        assertEquals(Constants.MAX_PLAYER_TROOPS, logic.getTroopsToPlace());
-
-        // p2 cannon angles adjusted (startGame config)
-        assertEquals(180 + Constants.MIN_SHOOT_ANGLE, p2.getCannon().getMinAngle());
-        assertEquals(180 + Constants.MAX_SHOOT_ANGLE, p2.getCannon().getMaxAngle());
-        assertEquals(270f, p2.getCannon().getAngle());
+    private void setField(String fieldName, Object value) throws Exception {
+        Field f = GameLogic.class.getDeclaredField(fieldName);
+        f.setAccessible(true);
+        f.set(game, value);
     }
 
-    @Test
-    void testPlayerAim_changesAngle_whenNotWaitingOrGameOver() {
-        logic.startGame(); // placement phase
-        float before = p1.getCannon().getAngle();
+    private Object invokePrivate(String methodName, Object... args) throws Exception {
+        for (Method m : GameLogic.class.getDeclaredMethods()) {
+            if (m.getName().equals(methodName)) {
+                m.setAccessible(true);
+                return m.invoke(game, args);
+            }
+        }
+        throw new RuntimeException("Method not found: " + methodName);
+    }
 
-        logic.playerAim(before + 12f);
-
-        assertEquals(before + 12f, p1.getCannon().getAngle());
+    @SuppressWarnings("unchecked")
+    private <T> ArrayList<T> list(String fieldName) throws Exception {
+        Field f = GameLogic.class.getDeclaredField(fieldName);
+        f.setAccessible(true);
+        return (ArrayList<T>) f.get(game);
     }
 
     @Test
-    void testPlayerAim_doesNotChangeWhenWaiting() {
-        logic.startGame();
-        // set internal state WAITING
-        R.setField(logic, "state", GAME_STATE.WAITING);
+    void tryPlaceTroop_delegatesCorrectly() throws Exception {
+        when(turnManager.getCurrentPlayer()).thenReturn(p1);
+        when(p1.getId()).thenReturn(1);
 
-        float before = p1.getCannon().getAngle();
-        logic.playerAim(before + 30f);
+        Troop t = mock(Troop.class);
+        when(physicsFactory.createTroop(10f, 200f)).thenReturn(t);
 
-        assertEquals(before, p1.getCannon().getAngle());
+        game.tryPlaceTroop(10f, 200f);
+
+        verify(physicsFactory).createTroop(10f, 200f);
+        verify(p1).addTroop(t);
+        verify(turnManager).decreaseTroopsToPlace();
     }
 
     @Test
-    void testPlayerShoot_registersProjectileAndSetsWaiting() {
-        // mock a Projectile returned by factory
-        Projectile mockProj = mock(Projectile.class);
-        when(mockFactory.createProjectile(anyFloat(), anyFloat(), anyFloat(), anyFloat(), anyInt()))
-            .thenReturn(mockProj);
+    void handleImpact_whenWin_setsState() throws Exception {
+        when(turnManager.getCurrentPlayer()).thenReturn(p1);
+        when(p1.getId()).thenReturn(1);
+        when(turnManager.getEnemyPlayer()).thenReturn(p2);
+        when(p2.getTroopList()).thenReturn(new ArrayList<>());
 
-        // set logic to player 1 turn and currentPlayer to p1
-        R.setField(logic, "state", GAME_STATE.PLAYER_1_TURN);
-        R.setField(logic, "currentPlayer", p1);
+        when(combatManager.applyAreaDamage(any(), anyFloat(), anyInt(), anyList()))
+                .thenReturn(false);
 
-        logic.playerShoot(35f);
+        when(combatManager.checkWinCondition(anyList(), anyBoolean()))
+                .thenReturn(GameState.PLAYER_1_WIN);
 
-        assertEquals(1, logic.getActiveProjectiles().size());
-        assertEquals(GAME_STATE.WAITING, logic.getState());
+        Projectile proj = mock(Projectile.class);
+        when(proj.getGroundPosition()).thenReturn(new Vector2(0, 0));
+        when(proj.getDamage()).thenReturn(50);
+        when(proj.getBody()).thenReturn(mock(Body.class));
 
-        verify(mockFactory, times(1)).createProjectile(
-                anyFloat(), anyFloat(), eq(c1.getAngle()), eq(35f), eq(Constants.BULLET_DAMAGE)
-        );
+        // invoke private handleImpact
+        invokePrivate("handleImpact", proj);
+
+        verify(turnManager).setState(GameState.PLAYER_1_WIN);
     }
 
     @Test
-    void testUpdate_whenProjectileLands_destroysBodyAndRemovesProjectile() {
-        Projectile mockP = mock(Projectile.class);
-        when(mockP.isFlying()).thenReturn(false);
-        when(mockP.getGroundPosition()).thenReturn(new Vector2(50f, 50f));
-        when(mockP.getDamage()).thenReturn(10);
-        Body projBody = mock(Body.class);
-        when(mockP.getBody()).thenReturn(projBody);
+    void update_whenProjectileLands_cleansUp() throws Exception {
+        when(turnManager.getCurrentPlayer()).thenReturn(p1);
+        when(p1.getId()).thenReturn(1);
+        when(turnManager.getEnemyPlayer()).thenReturn(p2);
+        when(p2.getTroopList()).thenReturn(new ArrayList<>());
 
-        // add projectile to active list
-        logic.getActiveProjectiles().add(mockP);
+        Projectile proj = mock(Projectile.class);
+        Body body = mock(Body.class);
 
-        // call update — should call world.destroyBody and remove projectile
-        logic.update(0.1f);
+        when(proj.isFlying()).thenReturn(false);
+        when(proj.getGroundPosition()).thenReturn(new Vector2(0, 0));
+        when(proj.getDamage()).thenReturn(50);
+        when(proj.getBody()).thenReturn(body);
 
-        verify(mockWorld, times(1)).destroyBody(projBody);
-        assertTrue(logic.getActiveProjectiles().isEmpty());
+        ArrayList<Projectile> active = list("activeProjectiles");
+        active.add(proj);
+
+        game.update(0.016f);
+
+        verify(world).destroyBody(body);
+        assertTrue(list("activeProjectiles").isEmpty());
     }
 
     @Test
-    void testApplyAreaDamage_invokesReceiveDamageOnEnemyTroops_inRange() {
-        // Ensure current player is p1 so enemy is p2
-        R.setField(logic, "currentPlayer", p1);
+    void playerShoot_registersProjectile() throws Exception {
+        when(turnManager.getState()).thenReturn(GameState.PLAYER_1_TURN);
+        when(turnManager.getCurrentPlayer()).thenReturn(p1);
+        when(p1.getId()).thenReturn(1);
 
-        Troop troop = mock(Troop.class);
-        when(troop.isActive()).thenReturn(true);
-        when(troop.getPosX()).thenReturn(2.5f);
-        when(troop.getPosY()).thenReturn(1.0f);
+        Cannon cannon = mock(Cannon.class);
+        Projectile proj = mock(Projectile.class);
 
-        p2.addTroop(troop);
+        when(p1.getCannon()).thenReturn(cannon);
+        when(cannon.shoot(any(), anyFloat(), anyInt())).thenReturn(proj);
 
-        Vector2 explosion = new Vector2(2.5f * Constants.PIXELS_PER_METER, 1f * Constants.PIXELS_PER_METER);
+        game.playerShoot(0.9f);
 
-        // call private applyAreaDamage
-        R.invoke(logic, "applyAreaDamage", new Class[]{Vector2.class, float.class, int.class},
-                explosion, Constants.EXPLOSION_RATIO, 100);
-
-        verify(troop, atLeastOnce()).receiveDamage(anyInt());
+        assertTrue(list("activeProjectiles").contains(proj));
+        verify(turnManager).setWaitingState();
     }
 
     @Test
-    void testCheckWinner_setsPlayer2Win_whenP1AllDead() {
-        Troop dead = mock(Troop.class);
-        when(dead.isActive()).thenReturn(false);
-        p1.addTroop(dead);
+    void playerAim_setsAngle() {
+        when(turnManager.getState()).thenReturn(GameState.PLAYER_1_TURN);
+        when(turnManager.getCurrentPlayer()).thenReturn(p1);
 
-        Troop alive = mock(Troop.class);
-        when(alive.isActive()).thenReturn(true);
-        p2.addTroop(alive);
+        Cannon cannon = mock(Cannon.class);
+        when(p1.getCannon()).thenReturn(cannon);
 
-        boolean ended = logic.checkWinner();
+        game.playerAim(40);
 
-        assertTrue(ended);
-        assertEquals(GAME_STATE.PLAYER_2_WIN, logic.getState());
-    }
-
-    @Test
-    void testCheckWinner_draw_whenBothDead() {
-        Troop d1 = mock(Troop.class);
-        when(d1.isActive()).thenReturn(false);
-        Troop d2 = mock(Troop.class);
-        when(d2.isActive()).thenReturn(false);
-
-        p1.addTroop(d1);
-        p2.addTroop(d2);
-
-        boolean ended = logic.checkWinner();
-
-        assertTrue(ended);
-        assertEquals(GAME_STATE.DRAW, logic.getState());
-    }
-
-    @Test
-    void testCheckWinner_activatesLastChance_whenP2AllDead_once() {
-        Troop alive = mock(Troop.class);
-        when(alive.isActive()).thenReturn(true);
-        p1.addTroop(alive);
-
-        Troop dead = mock(Troop.class);
-        when(dead.isActive()).thenReturn(false);
-        p2.addTroop(dead);
-
-        boolean ended = logic.checkWinner();
-
-        assertFalse(ended);
-        assertEquals(GAME_STATE.LAST_CHANCE, logic.getState());
-    }
-
-    @Test
-    void testChangeTurn_respectsLastChance_and_normalAlternation() {
-        logic.startGame(); // sets currentPlayer = p1 and placement phase
-        logic.changeTurn();
-        assertEquals(p2, logic.getCurrentPlayer());
-        logic.changeTurn();
-        assertEquals(p1, logic.getCurrentPlayer());
-
-        // Last chance case forces currentPlayer to p2
-        R.setField(logic, "state", GAME_STATE.LAST_CHANCE);
-        logic.changeTurn();
-        assertEquals(p2, logic.getCurrentPlayer());
+        verify(cannon).setAngle(40);
     }
 }

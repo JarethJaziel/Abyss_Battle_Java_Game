@@ -1,6 +1,6 @@
 package io.github.jarethjaziel.abyssbattle.util;
 
-public enum GAME_STATE {
+public enum GameState {
     INITIATED,
     PLACEMENT_P1,
     PLACEMENT_P2,

@@ -1,5 +1,7 @@
 package model;
 
+import com.badlogic.gdx.Application;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.Box2D;
@@ -8,6 +10,7 @@ import io.github.jarethjaziel.abyssbattle.model.Cannon;
 import io.github.jarethjaziel.abyssbattle.model.PhysicsFactory;
 import io.github.jarethjaziel.abyssbattle.model.Projectile;
 import io.github.jarethjaziel.abyssbattle.util.Constants;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,20 +32,23 @@ class CannonTest {
     @Mock
     Projectile mockProjectile;
 
+    @Mock
+    Application mockApp;
+
     Cannon cannon;
     AutoCloseable closeable;
 
     @BeforeEach
     void setUp() {
-        // Iniciar Box2D para evitar problemas con librerías nativas
         Box2D.init();
-
         closeable = MockitoAnnotations.openMocks(this);
 
-        // Simular posicion del body (usada por shoot)
+        // Mock necesario para permitir el uso de Gdx.app.log durante las pruebas
+        Gdx.app = mockApp;
+
+        // Posición simulada usada por el método shoot
         when(mockBody.getPosition()).thenReturn(new Vector2(2f, 3f));
 
-        // Crear la instancia real con el Body mockeado (constructor correcto)
         cannon = new Cannon(mockBody);
     }
 
@@ -52,33 +58,32 @@ class CannonTest {
     }
 
     @Test
-    void testInitialAngleIsMidpoint() {
+    void initialAngleIsMidpointOfLimits() {
         float expected = (Constants.MIN_SHOOT_ANGLE + Constants.MAX_SHOOT_ANGLE) / 2f;
         assertEquals(expected, cannon.getAngle());
     }
 
     @Test
-    void testSetAngleWithinLimits() {
+    void setAngleWithinBounds() {
         float target = Constants.MIN_SHOOT_ANGLE + 10f;
         cannon.setAngle(target);
         assertEquals(target, cannon.getAngle());
     }
 
     @Test
-    void testSetAngleClampsBelowMin() {
-        cannon.setAngle(Constants.MIN_SHOOT_ANGLE - 100f);
+    void angleClampsBelowMinimum() {
+        cannon.setAngle(Constants.MIN_SHOOT_ANGLE - 50f);
         assertEquals(Constants.MIN_SHOOT_ANGLE, cannon.getAngle());
     }
 
     @Test
-    void testSetAngleClampsAboveMax() {
-        cannon.setAngle(Constants.MAX_SHOOT_ANGLE + 100f);
+    void angleClampsAboveMaximum() {
+        cannon.setAngle(Constants.MAX_SHOOT_ANGLE + 50f);
         assertEquals(Constants.MAX_SHOOT_ANGLE, cannon.getAngle());
     }
 
     @Test
-    void testChangeMinMaxAngleAffectsClamping() {
-        // Cambiamos los límites
+    void updatedMinMaxLimitsAffectClamping() {
         cannon.setMinAngle(30f);
         cannon.setMaxAngle(150f);
 
@@ -90,11 +95,10 @@ class CannonTest {
     }
 
     @Test
-    void testShootCreatesProjectileWithCorrectParams() {
+    void shootCreatesProjectileAtCorrectPosition() {
         float power = 20f;
         int damage = 15;
 
-        // Configurar factory para devolver el mock de projectile
         when(mockFactory.createProjectile(anyFloat(), anyFloat(), anyFloat(), anyFloat(), anyInt()))
                 .thenReturn(mockProjectile);
 
@@ -103,32 +107,30 @@ class CannonTest {
         assertNotNull(result);
         assertEquals(mockProjectile, result);
 
-        // Verificamos que createProjectile fue llamado con:
-        // (tipX, tipY, angle, power, damage)
-        verify(mockFactory, times(1))
-                .createProjectile(anyFloat(), anyFloat(), eq(cannon.getAngle()), eq(power), eq(damage));
+        verify(mockFactory, times(1)).createProjectile(
+                anyFloat(),
+                anyFloat(),
+                eq(cannon.getAngle()),
+                eq(power),
+                eq(damage)
+        );
     }
 
     @Test
-    void testShootUsesCurrentAngleAndPowerOrder() {
-        // Ajustamos ángulo
+    void shootUsesCurrentAngleAndProvidedPowerDamage() {
         cannon.setAngle(Constants.MIN_SHOOT_ANGLE + 5);
-
 
         when(mockFactory.createProjectile(anyFloat(), anyFloat(), anyFloat(), anyFloat(), anyInt()))
                 .thenReturn(mockProjectile);
 
         cannon.shoot(mockFactory, 70f, 80);
 
-        // Verificamos llamada con power y angle en sus posiciones correctas:
-        // createProjectile(tipX, tipY, angle, power, damage)
         verify(mockFactory).createProjectile(
-            anyFloat(),
-            anyFloat(),
-            eq(Constants.MIN_SHOOT_ANGLE + 5),
-            eq(70f),
-            eq(80)
+                anyFloat(),
+                anyFloat(),
+                eq(Constants.MIN_SHOOT_ANGLE + 5),
+                eq(70f),
+                eq(80)
         );
-
     }
 }

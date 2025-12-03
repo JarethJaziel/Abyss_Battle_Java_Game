@@ -5,6 +5,13 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "type": "java",
+            "name": "Lwjgl3Launcher",
+            "request": "launch",
+            "mainClass": "io.github.jarethjaziel.abyssbattle.lwjgl3.Lwjgl3Launcher",
+            "projectName": "lwjgl3"
+        },
+        {
             "type": "jdk",
             "request": "launch",
             "name": "Launch Java App"

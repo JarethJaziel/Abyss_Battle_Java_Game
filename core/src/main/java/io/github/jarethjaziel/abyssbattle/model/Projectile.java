@@ -51,6 +51,7 @@ public class Projectile extends Entity {
             body.setLinearVelocity(0, 0); // Detener el cuerpo de Box2D
             destroy();
         }
+        System.out.println("body linear:" + body.getLinearVelocity());
     }
     
     public float getHeight() { return height; }
@@ -61,6 +62,12 @@ public class Projectile extends Entity {
     @Override
     public boolean isActive() {
         return active;
+    }
+
+    @Override
+    public String toString() {
+        return "Projectile [DAMAGE=" + DAMAGE + ", active=" + active + ", height=" + height + ", verticalSpeed="
+                + verticalSpeed + ", hasLanded=" + hasLanded + ", groundPosition=" + groundPosition + "]";
     }
 
     public void destroy() {

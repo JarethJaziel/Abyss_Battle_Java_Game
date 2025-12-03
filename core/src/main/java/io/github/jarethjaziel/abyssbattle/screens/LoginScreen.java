@@ -18,11 +18,13 @@ import com.kotcrab.vis.ui.widget.VisTextField;
 
 import io.github.jarethjaziel.abyssbattle.AbyssBattle;
 import io.github.jarethjaziel.abyssbattle.database.entities.User;
-import io.github.jarethjaziel.abyssbattle.util.SessionManager;
+import io.github.jarethjaziel.abyssbattle.database.systems.AccountManagerSystem;
+import io.github.jarethjaziel.abyssbattle.gameutil.manager.SessionManager;
 
 public class LoginScreen implements Screen {
 
     private AbyssBattle game;
+    private AccountManagerSystem accManager;
     private Stage stage;
     private Texture background;
 
@@ -34,6 +36,7 @@ public class LoginScreen implements Screen {
 
     public LoginScreen(AbyssBattle game) {
         this.game = game;
+        this.accManager = new AccountManagerSystem(game.getDbManager());
         stage = new Stage(new ScreenViewport());
         background = new Texture("images/MenuBackGround.png");
     }
@@ -147,7 +150,7 @@ public class LoginScreen implements Screen {
 
         if (isLoginMode) {
             // modo loggin
-            User user = game.accountSystem.login(username, password);
+            User user = accManager.login(username, password);
 
             if (user != null) {
                 SessionManager.getInstance().login(user);
@@ -170,7 +173,7 @@ public class LoginScreen implements Screen {
 
         } else {
             // modo de registro
-            boolean success = game.accountSystem.registerUser(username, password);
+            boolean success = accManager.registerUser(username, password);
 
             if (success) {
                 showMessage("¡Cuenta creada! Ya puedes iniciar sesión", Color.GREEN);

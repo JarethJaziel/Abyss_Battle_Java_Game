@@ -4,349 +4,199 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import com.badlogic.gdx.Gdx;
+
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.utils.Disposable;
 
 import io.github.jarethjaziel.abyssbattle.util.Constants;
-import io.github.jarethjaziel.abyssbattle.util.GAME_STATE;
+import io.github.jarethjaziel.abyssbattle.util.GameState;
 
-public class GameLogic {
+public class GameLogic implements Disposable {
 
-    private List<Player> players;
-    private Player currentPlayer;
-    private GAME_STATE state;
-
-    private List<Projectile> activeProjectiles;
-    private World world;
-    private PhysicsFactory physicsFactory;
-
-    private float turnTimer = 0f;
+    private final World world;
+    private final PhysicsFactory physicsFactory;
+    private final List<Player> players;
+    private final List<Projectile> activeProjectiles;
+    
+    // Sub-Systems
+    private final TurnManager turnManager;
+    private final CombatManager combatManager;
+    
+    // State for Renderer
     private Vector2 lastImpactPosition = new Vector2();
-
-    private int troopsToPlace = 0;
-    private boolean troopDestroyedInShot = false;
-    private boolean lastChanceActive = false;
-    private boolean lastChanceUsed = false;
+    //private final MatchStats currentMatchStats; 
 
     public GameLogic(World world) {
         this.world = world;
-        players = new ArrayList<>();
-        activeProjectiles = new ArrayList<>();
-        state = GAME_STATE.INITIATED;
         this.physicsFactory = new PhysicsFactory(world);
+        this.players = new ArrayList<>();
+        this.activeProjectiles = new ArrayList<>();
+        
+        // Initialize Managers
+        this.turnManager = new TurnManager(players);
+        this.combatManager = new CombatManager();
+        //this.currentMatchStats = new MatchStats();
     }
 
-    public void addPlayer(Player p) {
-        players.add(p);
+    public GameLogic() {
+        this.world = new World(new Vector2(0, 0), true);
+        this.physicsFactory = new PhysicsFactory(world);
+        this.players = new ArrayList<>();
+        this.activeProjectiles = new ArrayList<>();
+        
+        // Initialize Managers
+        this.turnManager = new TurnManager(players);
+        this.combatManager = new CombatManager();
+        //this.currentMatchStats = new MatchStats();
     }
 
     public void startGame() {
-        if (players.size() != 2)
-            return;
+        // Setup Players & Cannons
+        Player p1 = new Player(1);
+        Player p2 = new Player(2);
+        
+        Cannon c1 = physicsFactory.createCannon(Constants.CANNON_X, Constants.PLAYER_1_CANNON_Y);
+        Cannon c2 = physicsFactory.createCannon(Constants.CANNON_X, Constants.PLAYER_2_CANNON_Y);
+        
+        // P2 Config (Mirrored)
+        c2.setMinAngle(180 + Constants.MIN_SHOOT_ANGLE);
+        c2.setMaxAngle(180 + Constants.MAX_SHOOT_ANGLE);
+        c2.setAngle(270);
 
-        // Configurar dirección del cañón del segundo jugador.
-        players.get(1)
-                .getCannon()
-                .setMinAngle(180 + Constants.MIN_SHOOT_ANGLE);
+        p1.setCannon(c1);
+        p2.setCannon(c2);
+        
+        addPlayer(p1);
+        addPlayer(p2);
 
-        players.get(1)
-                .getCannon()
-                .setMaxAngle(180 + Constants.MAX_SHOOT_ANGLE);
-
-        players.get(1)
-                .getCannon()
-                .setAngle(270);
-
-        currentPlayer = players.get(0);
-        state = GAME_STATE.PLACEMENT_P1;
-        troopsToPlace = Constants.MAX_PLAYER_TROOPS;
-    }
-
-    public void onCollision(int a, int b) {
-
-    }
-
-    public void playerShoot(float power) {
-        if (state != GAME_STATE.PLAYER_1_TURN && state != GAME_STATE.PLAYER_2_TURN) {
-            return;
-        }
-
-        Cannon cannon = currentPlayer.getCannon();
-
-        Projectile newBullet = cannon.shoot(physicsFactory, power, Constants.BULLET_DAMAGE);
-
-        registerShoot(newBullet);
-    }
-
-    public void playerAim(float angle) {
-        if (state == GAME_STATE.WAITING || isGameOver()) {
-            return;
-        }
-        Cannon cannon = currentPlayer.getCannon();
-        cannon.setAngle(angle);
-    }
-
-    public void tryPlaceTroop(float x, float y) {
-        if (state != GAME_STATE.PLACEMENT_P1 && state != GAME_STATE.PLACEMENT_P2) {
-            return;
-        }
-
-        float screenMiddle = Constants.WORLD_HEIGHT / 2;
-
-        if (state == GAME_STATE.PLACEMENT_P1 && y > screenMiddle) {
-            Gdx.app.log("P1", "¡No puedes colocar en territorio enemigo!");
-            return;
-        }
-
-        if (state == GAME_STATE.PLACEMENT_P2 && y < screenMiddle) {
-            Gdx.app.log("P2", "¡No puedes colocar en territorio enemigo!");
-            return;
-        }
-
-        Troop t = physicsFactory.createTroop(x, y);
-        currentPlayer.addTroop(t);
-        troopsToPlace--;
-
-        System.out.println("Tropa colocada. Restan: " + troopsToPlace);
-
-        if (troopsToPlace <= 0) {
-            advancePlacementPhase();
-        }
-    }
-
-    public int getTroopsToPlace() {
-        return troopsToPlace;
-    }
-
-    public boolean checkWinner() {
-
-        Player p1 = players.get(0);
-        Player p2 = players.get(1);
-
-        boolean p1AllDead = p1.getTroopList().stream().allMatch(t -> !t.isActive());
-        boolean p2AllDead = p2.getTroopList().stream().allMatch(t -> !t.isActive());
-
-        if (p1AllDead && p2AllDead) {
-            state = GAME_STATE.DRAW;
-            return true;
-        }
-
-        if (p1AllDead) {
-            state = GAME_STATE.PLAYER_2_WIN;
-            return true;
-        }
-
-        if (p2AllDead) {
-            // Si ya se usó la última oportunidad: finalizar
-            if (lastChanceUsed) {
-                finalizeGame();
-                return true;
-            }
-            // Si ya hay una última chance activa pendiente, no re-activarla
-            if (!lastChanceActive) {
-                System.out.println("¡P2 ha perdido todas sus tropas! Activando ÚLTIMA OPORTUNIDAD.");
-                state = GAME_STATE.LAST_CHANCE;
-                lastChanceActive = true;
-            }
-            // devolvemos false porque el juego no termina todavía — queda dar la última
-            // chance
-            return false;
-        }
-
-        return false;
-    }
-
-    public void changeTurn() {
-
-        if (state == GAME_STATE.LAST_CHANCE) {
-            // Forzamos el turno al Jugador 2 para su tiro final
-            currentPlayer = players.get(1);
-            System.out.println("Turno FINAL de JUGADOR 2");
-            return;
-        }
-
-        if (currentPlayer == players.get(0)) {
-            currentPlayer = players.get(1);
-            state = GAME_STATE.PLAYER_2_TURN;
-        } else {
-            currentPlayer = players.get(0);
-            state = GAME_STATE.PLAYER_1_TURN;
-        }
-    }
-
-    public Player getCurrentPlayer() {
-        return currentPlayer;
-    }
-
-    public GAME_STATE getState() {
-        return state;
-    }
-
-    public List<Projectile> getActiveProjectiles() {
-        return activeProjectiles;
-    }
-
-    public List<Player> getPlayers() {
-        return players;
-    }
-
-    public void registerShoot(Projectile p) {
-        activeProjectiles.add(p);
-        state = GAME_STATE.WAITING;
+        turnManager.startPlacementPhase();
     }
 
     public void update(float delta) {
-
-        if (state == GAME_STATE.TURN_TRANSITION) {
-            turnTimer -= delta;
-
-            if (turnTimer <= 0) {
-                handleTurnChangeLogic();
-            }
-            return;
-        }
+        world.step(1/60f, 6, 2);
+        turnManager.update(delta);
 
         Iterator<Projectile> iter = activeProjectiles.iterator();
-
         while (iter.hasNext()) {
             Projectile p = iter.next();
-
             p.update(delta);
 
             if (!p.isFlying()) {
-                System.out.println("¡Impacto en " + p.getGroundPosition());
-                lastImpactPosition = p.getGroundPosition();
-
-                troopDestroyedInShot = false;
-
-                applyAreaDamage(lastImpactPosition, Constants.EXPLOSION_RATIO, p.getDamage());
-
-                world.destroyBody(p.getBody());
-
+                handleImpact(p);
                 iter.remove();
-
-                if (checkWinner()) {
-                    return;
-                }
-
-                if (state == GAME_STATE.LAST_CHANCE && lastChanceActive) {
-                    // Forzamos que P2 tome el turno final UNA VEZ
-                    currentPlayer = players.get(1);
-                    state = GAME_STATE.PLAYER_2_TURN;
-                    lastChanceActive = false;
-                    // marcamos que la oportunidad está en proceso (evitar reactivar)
-                    lastChanceUsed = true;
-                    return;
-                }
-
-                state = GAME_STATE.TURN_TRANSITION;
-                turnTimer = Constants.TRANSITION_TIME_TO_WAIT;
             }
-
         }
     }
 
-    private void finalizeGame() {
-        Player p1 = players.get(0);
-        Player p2 = players.get(1);
+    private void handleImpact(Projectile p) {
+        lastImpactPosition = p.getGroundPosition();
+        Player enemy = turnManager.getEnemyPlayer();
 
-        boolean p1AllDead = p1.getTroopList().stream().allMatch(t -> !t.isActive());
-        boolean p2AllDead = p2.getTroopList().stream().allMatch(t -> !t.isActive());
-
-        if (p1AllDead && p2AllDead) {
-            state = GAME_STATE.DRAW; // P2 logró matar a P1 con su último tiro
-        } else if (p2AllDead) {
-            state = GAME_STATE.PLAYER_1_WIN; // P2 falló su último tiro
-        } else {
-            // Caso raro: P2 revivió? Asumimos P1 gana si P2 sigue muerto
-            state = GAME_STATE.PLAYER_1_WIN;
+        // 1. Apply Damage
+        boolean troopKilled = combatManager.applyAreaDamage(
+                lastImpactPosition, 
+                Constants.EXPLOSION_RATIO, 
+                p.getDamage(), 
+                enemy.getTroopList()
+        );
+        
+        // Track Stats (Damage) - Simplified
+        if (turnManager.getCurrentPlayer().getId() == 1) {
+             // You can calculate specific damage here if needed for precise stats
+            //currentMatchStats.addDamage(p.getDamage()); // Estimation
         }
-    }
 
-    private void handleTurnChangeLogic() {
+        // 2. Cleanup Physics
+        world.destroyBody(p.getBody());
 
-        // CASO ESPECIAL: Si estábamos en "Última Oportunidad" y se acabó el tiempo
-        if (state == GAME_STATE.LAST_CHANCE) {
-            // Ya tiró P2, revisamos si logró empatar o perdió
-            finalizeGame();
+        // 3. Check Win Conditions
+        GameState winState = combatManager.checkWinCondition(players, turnManager.isLastChanceUsed());
+
+        if (winState != null) {
+            // Logic for triggering Last Chance specific transition
+            if (winState == GameState.LAST_CHANCE) {
+                if (turnManager.getState() != GameState.LAST_CHANCE) {
+                    turnManager.activateLastChance();
+                }
+            } else {
+                // Actual Win/Draw
+                turnManager.setState(winState);
+            }
             return;
         }
 
-        if (troopDestroyedInShot) {
-            System.out.println("¡TROPA DESTRUIDA! TIRO DE BONIFICACIÓN.");
+        // 4. Continue Game (Switch Turn)
+        turnManager.handleTurnEnd(troopKilled);
+    }
 
-            // Solo conceder bono si el enemigo aún tiene tropas activas
-            boolean enemyHasTroops = getEnemyPlayer().getTroopList().stream().anyMatch(t -> t.isActive());
-            if (enemyHasTroops) {
-                if (currentPlayer == players.get(0)) {
-                    state = GAME_STATE.PLAYER_1_TURN;
-                } else {
-                    state = GAME_STATE.PLAYER_2_TURN;
-                }
-            } else {
-                changeTurn(); // o pasar turno normalmente (según flujo que quieras)
-            }
-        } else {
-            changeTurn();
+    // --- Actions called by InputController ---
+
+    public void playerShoot(float power) {
+        // Validate State
+        GameState s = turnManager.getState();
+        if (s != GameState.PLAYER_1_TURN && s != GameState.PLAYER_2_TURN && s != GameState.LAST_CHANCE) {
+            return;
+        }
+
+        Cannon cannon = turnManager.getCurrentPlayer().getCannon();
+        Projectile newBullet = cannon.shoot(physicsFactory, power, Constants.BULLET_DAMAGE);
+        
+        activeProjectiles.add(newBullet);
+        turnManager.setWaitingState();
+        
+        // Track Stats (Shots)
+        if (turnManager.getCurrentPlayer().getId() == 1) {
+            //currentMatchStats.addShot();
         }
     }
 
-    public Vector2 getLastImpactPosition() {
-        return lastImpactPosition;
+    public void playerAim(float angle) {
+        if (isGameOver() || turnManager.getState() == GameState.WAITING) return;
+        turnManager.getCurrentPlayer().getCannon().setAngle(angle);
     }
 
+    public void tryPlaceTroop(float x, float y) {
+        // Delegate placement validation logic to GameScreen/MapManager mostly, 
+        // here we just create the body.
+        
+        // Validating territory
+        float screenMiddle = Constants.WORLD_HEIGHT / 2;
+        GameState s = turnManager.getState();
+        
+        if (s == GameState.PLACEMENT_P1 && y > screenMiddle) return;
+        if (s == GameState.PLACEMENT_P2 && y < screenMiddle) return;
+
+        Troop t = physicsFactory.createTroop(x, y);
+        turnManager.getCurrentPlayer().addTroop(t);
+        turnManager.decreaseTroopsToPlace();
+    }
+
+    // --- Getters & Helpers ---
+    
+    public void addPlayer(Player p) { players.add(p); }
+    public World getWorld() { return world; }
+    public GameState getState() { return turnManager.getState(); }
+    public Player getCurrentPlayer() { return turnManager.getCurrentPlayer(); }
+    public List<Player> getPlayers() { return players; }
+    public List<Projectile> getActiveProjectiles() { return activeProjectiles; }
+    public Vector2 getLastImpactPosition() { return lastImpactPosition; }
+    public int getTroopsToPlace() { return turnManager.getTroopsToPlace(); }
+    //public MatchStats getMatchStats() { return currentMatchStats; }
+    
     public boolean isGameOver() {
-        return state == GAME_STATE.PLAYER_1_WIN ||
-                state == GAME_STATE.PLAYER_2_WIN ||
-                state == GAME_STATE.DRAW;
+        GameState s = turnManager.getState();
+        return s == GameState.PLAYER_1_WIN || s == GameState.PLAYER_2_WIN || s == GameState.DRAW;
+    }
+    
+    public String getWinner() {
+        if (turnManager.getState() == GameState.PLAYER_1_WIN) return "PLAYER 1";
+        if (turnManager.getState() == GameState.PLAYER_2_WIN) return "PLAYER 2";
+        return "DRAW";
     }
 
-    private void applyAreaDamage(Vector2 explosionCenter, float radioMeters, int maxDamage) {
-        float radioPixeles = radioMeters * Constants.PIXELS_PER_METER;
-        for (Troop t : getEnemyPlayer().getTroopList()) {
-            if (t.isActive()) {
-
-                Vector2 posTropa = new Vector2(
-                        t.getPosX() * Constants.PIXELS_PER_METER,
-                        t.getPosY() * Constants.PIXELS_PER_METER);
-                float distancia = posTropa.dst(explosionCenter);
-                if (distancia <= radioPixeles) {
-                    float damageFactor = 1.0f - (distancia / radioPixeles);
-                    // Asegurar que el daño sea al menos 1 si está en rango
-                    if (damageFactor < 0)
-                        damageFactor = 0;
-
-                    int finalDamage = (int) (maxDamage * damageFactor);
-                    t.receiveDamage(finalDamage);
-
-                    System.out.println("Tropa dañada: " + finalDamage);
-                    if (!t.isActive()) {
-                        troopDestroyedInShot = true;
-                        System.out.println("¡Enemigo abatido!");
-                    }
-                }
-            }
-        }
+    @Override
+    public void dispose() {
+        world.dispose();
     }
-
-    private void advancePlacementPhase() {
-        if (state == GAME_STATE.PLACEMENT_P1) {
-            // Terminó P1, sigue P2
-            state = GAME_STATE.PLACEMENT_P2;
-            currentPlayer = players.get(1);
-            troopsToPlace = Constants.MAX_PLAYER_TROOPS; // Reiniciar contador para el P2
-            System.out.println("Fase de Colocación: JUGADOR 2 (Haz click en la derecha)");
-        } else if (state == GAME_STATE.PLACEMENT_P2) {
-            // Terminó P2, ¡EMPIEZA EL JUEGO REAL!
-            state = GAME_STATE.PLAYER_1_TURN;
-            currentPlayer = players.get(0);
-            System.out.println("¡Colocación terminada! INICIA EL COMBATE");
-        }
-    }
-
-    private Player getEnemyPlayer() {
-        return (currentPlayer == players.get(0)) ? players.get(1) : players.get(0);
-    }
-
 }

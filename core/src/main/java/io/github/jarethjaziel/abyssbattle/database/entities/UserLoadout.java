@@ -21,6 +21,7 @@ public class UserLoadout {
 
     @DatabaseField(foreign = true, foreignAutoRefresh = true, columnName = "skin_id")
     private Skin activeSkin;
+    
 
     public UserLoadout() {}
 
@@ -33,5 +34,17 @@ public class UserLoadout {
     public void setActiveSkin(Skin skin) {
         this.activeSkin = skin;
         this.skinType = skin.getType();
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public SkinType getSkinType() {
+        return skinType;
+    }
+
+    public Skin getActiveSkin() {
+        return activeSkin;
     }
 }

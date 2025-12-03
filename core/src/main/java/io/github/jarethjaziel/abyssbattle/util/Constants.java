@@ -30,8 +30,11 @@ public class Constants {
     public static final float AIM_DEADZONE = 10;
     public static final float MAX_AIM_VISION = 150;
     public static final float MAX_DRAG_DISTANCE = 300f;
-    public static final int DEFAULT_TROOP_SKIN_ID = 1;
-    public static final int DEFAULT_CANNON_SKIN_ID = 2;
+    public static final GameSkins DEFAULT_TROOP_SKIN = GameSkins.TROOP_BLUE;
+    public static final GameSkins DEFAULT_ENEMY_TROOP_SKIN = GameSkins.TROOP_RED;
+    public static final GameSkins DEFAULT_CANNON_SKIN = GameSkins.CANNON_DEFAULT;
+
+
 
     public static final int DEFAULT_TROOP_SKIN_ID = 0;
     public static final int DEFAULT_CANNON_SKIN_ID = 0;
