@@ -22,6 +22,7 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import io.github.jarethjaziel.abyssbattle.gameutil.manager.MapManager;
 import io.github.jarethjaziel.abyssbattle.model.Cannon;
 import io.github.jarethjaziel.abyssbattle.model.GameLogic;
+import io.github.jarethjaziel.abyssbattle.model.MatchContext;
 import io.github.jarethjaziel.abyssbattle.model.Player;
 import io.github.jarethjaziel.abyssbattle.model.Projectile;
 import io.github.jarethjaziel.abyssbattle.model.Troop;
@@ -39,13 +40,13 @@ public class GameRenderer implements Disposable {
     private final MapManager mapManager;
 
     // Texturas Cacheadas (Para rendimiento)
-    private final Texture cannonBase, cannonBarrel, troopBlue, troopRed, projectileTex, shadowTex, blankTexture;
+    private final Texture cannonBase, cannonBarrelTex, p1TroopTex, p2TroopTex, projectileTex, shadowTex, blankTexture;
     private final Animation<TextureRegion> explosionAnim;
 
     private float currentCameraAngle = 0f;
     private float explosionTimer = 0f;
 
-    public GameRenderer(SpriteBatch batch, AssetManager assets, MapManager mapManager, GameLogic logic) {
+    public GameRenderer(SpriteBatch batch, AssetManager assets, MapManager mapManager, GameLogic logic, MatchContext ctx) {
         this.batch = batch;
         this.logic = logic;
         this.mapManager = mapManager;
@@ -61,10 +62,16 @@ public class GameRenderer implements Disposable {
         this.b2dr = new Box2DDebugRenderer();
 
         // Cargar texturas una sola vez
+        String p1Path = "sprites/troop_skin/" + ctx.player1TroopSkin.getName() + ".png";
+        String p2Path = "sprites/troop_skin/" + ctx.player2TroopSkin.getName() + ".png";
+        String cannonPath = "sprites/cannon_skin/" + ctx.cannonSkin.getName() + ".png";
+
+        // Importante: Asegúrate que estos assets estén cargados o cárgalos al vuelo (no recomendado en render)
+        // Lo ideal es que el AssetManager ya los tenga, o usar Texture directo si son pocos.
+        this.p1TroopTex = new Texture(Gdx.files.internal(p1Path)); 
+        this.p2TroopTex = new Texture(Gdx.files.internal(p2Path));
+        this.cannonBarrelTex = new Texture(Gdx.files.internal(cannonPath));
         this.cannonBase = assets.get("sprites/cannon_base.png");
-        this.cannonBarrel = assets.get("sprites/cannon_skin/cannon_barrel_default.png");
-        this.troopBlue = assets.get("sprites/troop_skin/troop_blue.png");
-        this.troopRed = assets.get("sprites/troop_skin/troop_red.png");
         this.projectileTex = assets.get("sprites/projectile.png");
         this.shadowTex = assets.get("sprites/shadow.png");
 
@@ -116,7 +123,7 @@ public class GameRenderer implements Disposable {
                     c.getPosY() * Constants.PIXELS_PER_METER - Constants.CANNON_SIZE / 2,
                     Constants.CANNON_SIZE, Constants.CANNON_SIZE);
 
-            Sprite s = new Sprite(cannonBarrel);
+            Sprite s = new Sprite(cannonBarrelTex);
             s.setSize(Constants.CANNON_SIZE, Constants.CANNON_SIZE / 3);
             s.setOrigin(0, s.getHeight() / 2);
             s.setPosition(c.getPosX() * Constants.PIXELS_PER_METER,
@@ -124,7 +131,7 @@ public class GameRenderer implements Disposable {
             s.setRotation(c.getAngle());
             s.draw(batch);
 
-            Texture troopTex = (p.getId() == 1) ? troopBlue : troopRed;
+            Texture troopTex = (p.getId() == 1) ? p1TroopTex : p2TroopTex;
             for (Troop t : p.getTroopList()) {
                 if (t.isActive()) {
                     float troopX = t.getPosX() * Constants.PIXELS_PER_METER - Constants.TROOP_SIZE / 2;

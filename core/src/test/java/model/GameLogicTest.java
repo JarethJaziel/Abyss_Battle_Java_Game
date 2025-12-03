@@ -94,7 +94,7 @@ class GameLogicTest {
         when(turnManager.getEnemyPlayer()).thenReturn(p2);
         when(p2.getTroopList()).thenReturn(new ArrayList<>());
 
-        when(combatManager.applyAreaDamage(any(), anyFloat(), anyInt(), anyList()))
+        when(combatManager.applyAreaDamage(any(), anyFloat(), anyInt(), anyList()).killOccurred())
                 .thenReturn(false);
 
         when(combatManager.checkWinCondition(anyList(), anyBoolean()))

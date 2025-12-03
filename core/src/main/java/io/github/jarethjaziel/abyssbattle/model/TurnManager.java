@@ -5,19 +5,19 @@ import java.util.List;
 import io.github.jarethjaziel.abyssbattle.util.Constants;
 import io.github.jarethjaziel.abyssbattle.util.GameState;
 
-
 public class TurnManager {
 
     private GameState state;
     private Player currentPlayer;
     private final List<Player> players;
-    
+
     // Timer & Counters
     private float turnTimer = 0f;
     private int troopsToPlace = 0;
-    
+
     // Flags
     private boolean lastChanceUsed = false;
+    private boolean lastChanceActive = false;
 
     public TurnManager(List<Player> players) {
         this.players = players;
@@ -43,9 +43,17 @@ public class TurnManager {
      * Decides what to do after a shot lands.
      */
     public void handleTurnEnd(boolean troopDestroyed) {
-        if (state == GameState.LAST_CHANCE) {
-            lastChanceUsed = true;
-            // The GameLogic will check for win/loss immediately after this
+        if (lastChanceActive) { 
+            
+            if (troopDestroyed) {
+                System.out.println("¡LAST CHANCE: Enemigo abatido! TIRO EXTRA.");
+                // IMPORTANTE: Debemos restaurar el estado a LAST_CHANCE para permitir el siguiente tiro
+                // (porque actualmente está en WAITING o TRANSITION)
+                state = GameState.LAST_CHANCE; 
+            } else {
+                System.out.println("hola"); // Ahora sí entrará aquí
+                lastChanceUsed = true;
+            }
             return; 
         }
 
@@ -74,6 +82,7 @@ public class TurnManager {
         System.out.println("Last Chance Activated for Player 2!");
         this.state = GameState.LAST_CHANCE;
         this.currentPlayer = players.get(1);
+        this.lastChanceActive = true;
     }
 
     public void advancePlacementPhase() {
@@ -87,26 +96,44 @@ public class TurnManager {
             System.out.println("Combat Started!");
         }
     }
-    
+
     public void decreaseTroopsToPlace() {
         troopsToPlace--;
-        if (troopsToPlace <= 0) advancePlacementPhase();
+        if (troopsToPlace <= 0)
+            advancePlacementPhase();
     }
 
-    public void setWaitingState() { this.state = GameState.WAITING; }
+    public void setWaitingState() {
+        this.state = GameState.WAITING;
+    }
 
     private void startTransitionTimer() {
         this.state = GameState.TURN_TRANSITION;
         this.turnTimer = Constants.TRANSITION_TIME_TO_WAIT;
     }
-    
+
     // --- Getters ---
     public Player getEnemyPlayer() {
         return (currentPlayer == players.get(0)) ? players.get(1) : players.get(0);
     }
-    public GameState getState() { return state; }
-    public void setState(GameState state) { this.state = state; }
-    public Player getCurrentPlayer() { return currentPlayer; }
-    public int getTroopsToPlace() { return troopsToPlace; }
-    public boolean isLastChanceUsed() { return lastChanceUsed; }
+
+    public GameState getState() {
+        return state;
+    }
+
+    public void setState(GameState state) {
+        this.state = state;
+    }
+
+    public Player getCurrentPlayer() {
+        return currentPlayer;
+    }
+
+    public int getTroopsToPlace() {
+        return troopsToPlace;
+    }
+
+    public boolean isLastChanceUsed() {
+        return lastChanceUsed;
+    }
 }

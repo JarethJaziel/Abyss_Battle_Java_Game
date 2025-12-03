@@ -1,3 +1,7 @@
 {
-    "java.configuration.updateBuildConfiguration": "interactive"
+    "java.configuration.updateBuildConfiguration": "interactive",
+    "sonarlint.connectedMode.project": {
+        "connectionId": "jarethjaziel",
+        "projectKey": "JarethJaziel_Abyss_Battle_Java_Game"
+    }
 }

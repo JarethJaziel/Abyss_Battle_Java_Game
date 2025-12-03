@@ -15,6 +15,7 @@ public class Constants {
     public static final float EXPLOSION_SIZE = EXPLOSION_RATIO*PIXELS_PER_METER;
 
     //Game constants
+    public static final int REWARD_PER_GAME = 100; 
     public static final int MAX_PLAYER_TROOPS = 3;
     public static final int TROOP_INITIAL_HEALTH = 100;
     public static final float MIN_SHOOT_ANGLE = 60f;
@@ -119,5 +120,7 @@ public class Constants {
     public static final float TROP_BUTTON2_WIDTH = 0.13f;
     public static final float TROP_BUTTON2_HEIGHT = 0.075f;
     public static final float TROP_BUTTON2_POS_X = 0.84f;
-    public static final float TROP_BUTTON2_POS_Y = 0.86f; 
+    public static final float TROP_BUTTON2_POS_Y = 0.86f;
+    public static final int NEW_USER_INITIAL_COINS = 100;
+    
 }

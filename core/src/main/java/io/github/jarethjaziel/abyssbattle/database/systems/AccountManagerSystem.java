@@ -3,7 +3,6 @@ package io.github.jarethjaziel.abyssbattle.database.systems;
 import java.sql.SQLException;
 import java.util.List;
 
-
 import com.j256.ormlite.dao.Dao;
 
 import io.github.jarethjaziel.abyssbattle.database.DatabaseManager;
@@ -105,6 +104,15 @@ public class AccountManagerSystem {
             System.err.println("Error al registrar usuario: " + e.getMessage());
             e.printStackTrace();
             return false;
+        }
+    }
+
+    public void updateUser(User user) {
+        try {
+            userDao.update(user);
+        } catch (SQLException e) {
+            System.err.println("Error actualizando usuario: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 

@@ -2,6 +2,7 @@ package io.github.jarethjaziel.abyssbattle.model;
 
 import java.util.List;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
 
 import io.github.jarethjaziel.abyssbattle.util.Constants;
@@ -13,8 +14,10 @@ public class CombatManager {
      * Applies damage to troops within a radius.
      * @return true if at least one troop was destroyed (for bonus turn logic).
      */
-    public boolean applyAreaDamage(Vector2 explosionCenter, float radiusMeters, int maxDamage, List<Troop> targets) {
+    public DamageReport applyAreaDamage(Vector2 explosionCenter, float radiusMeters, int maxDamage, List<Troop> targets) {
         boolean anyTroopKilled = false;
+        int totalRealDamage = 0;
+
         float radiusPixels = radiusMeters * Constants.PIXELS_PER_METER;
 
         for (Troop t : targets) {
@@ -34,14 +37,15 @@ public class CombatManager {
                 if (finalDamage < 1 && maxDamage > 0) finalDamage = 1;
 
                 t.receiveDamage(finalDamage);
-                System.out.println("Damage applied: " + finalDamage);
+                totalRealDamage += finalDamage;
+                Gdx.app.log("DAMAGE: ", ""+finalDamage);
 
                 if (!t.isActive()) {
                     anyTroopKilled = true;
                 }
             }
         }
-        return anyTroopKilled;
+        return new DamageReport(anyTroopKilled, totalRealDamage);
     }
 
     /**
