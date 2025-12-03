@@ -20,28 +20,57 @@ import io.github.jarethjaziel.abyssbattle.model.GameLogic;
 import io.github.jarethjaziel.abyssbattle.model.MatchContext;
 import io.github.jarethjaziel.abyssbattle.util.Constants;
 
+/**
+ * Pantalla principal del juego (Gameplay).
+ * <p>
+ * Actúa como el controlador principal (Orquestador) en el patrón MVC. Su responsabilidad es
+ * inicializar y coordinar los diferentes subsistemas del juego: Lógica, Vista, Input y Persistencia.
+ */
 public class GameScreen implements Screen {
+
+    private static final String TAG = GameScreen.class.getSimpleName();
 
     private final AbyssBattle game;
 
     // --- COMPONENTES (MVC) ---
-    private GameLogic gameLogic; // (Física, Turnos, Reglas)
-    private GameRenderer gameRenderer; // (Dibujo del mundo, Líneas, Explosiones)
-    private GameHUD gameHUD; // LA UI (Botones, Textos, Menús de Pausa)
-    private MapManager mapManager; // (Carga TMX, Crea Paredes)
-    private InputController inputController; // (Mouse/Touch)
+    /** Modelo: Gestiona la física, turnos y reglas del juego. */
+    private GameLogic gameLogic; 
+    
+    /** Vista: Se encarga de dibujar el mundo del juego (mapa, entidades, proyectiles). */
+    private GameRenderer gameRenderer; 
+    
+    /** Vista (UI): Gestiona la interfaz de usuario superpuesta (HUD, menús). */
+    private GameHUD gameHUD; 
+    
+    /** Gestor del Mapa: Carga el nivel y genera las colisiones físicas. */
+    private MapManager mapManager; 
+    
+    /** Controlador: Procesa la entrada del usuario y la traduce en acciones del juego. */
+    private InputController inputController; 
+    
+    /** Contexto de la partida: Skins seleccionadas por los jugadores. */
     private MatchContext matchContext;
 
     private PlayerStatsSystem statsSystem; 
     private AccountManagerSystem accountSystem;
 
+    /** Bandera para asegurar que las estadísticas se guarden una única vez al terminar la partida. */
     private boolean hasSavedStats = false;
 
+    /**
+     * Constructor de la pantalla de juego.
+     * @param game Instancia principal del juego.
+     * @param context Configuración de la partida (skins, etc.).
+     */
     public GameScreen(AbyssBattle game, MatchContext context) {
         this.game = game;
         this.matchContext = context;
     }
 
+    /**
+     * Se llama cuando esta pantalla se convierte en la pantalla actual.
+     * Inicializa todos los componentes y prepara la partida.
+     */
     @Override
     public void show() {
         gameLogic = new GameLogic();
@@ -67,11 +96,18 @@ public class GameScreen implements Screen {
         setupGameStart();
     }
 
+    /**
+     * Configura el estado inicial de la lógica y la UI.
+     */
     private void setupGameStart() {
         gameLogic.startGame();
         gameHUD.updateInfo(gameLogic.getState(), gameLogic.getTroopsToPlace()); // Actualizar texto inicial
     }
 
+    /**
+     * Ciclo principal de renderizado y actualización (Game Loop).
+     * @param delta Tiempo en segundos desde el último frame.
+     */
     @Override
     public void render(float delta) {
         Gdx.gl.glClearColor(0, 0, 0, 1);
@@ -100,6 +136,9 @@ public class GameScreen implements Screen {
         gameHUD.render(delta);
     }
 
+    /**
+     * Guarda las estadísticas de la sesión en la base de datos y otorga recompensas.
+     */
     private void saveGameResults() {
         User currentUser = SessionManager.getInstance().getCurrentUser();
 

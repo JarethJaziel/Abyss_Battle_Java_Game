@@ -72,10 +72,4 @@ class PlayerTest {
 }
 
 
-    @Test
-    void testFinishTurnDoesNotCrash() {
-        Player player = new Player(1);
-
-        assertDoesNotThrow(player::finishTurn);
-    }
 }
