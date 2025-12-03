@@ -110,7 +110,6 @@ public class GameScreen implements Screen {
             gameHUD.dispose();
         if (mapManager != null)
             mapManager.dispose();
-
         // No hacemos dispose de 'game' ni 'assets' porque son globales
     }
 }

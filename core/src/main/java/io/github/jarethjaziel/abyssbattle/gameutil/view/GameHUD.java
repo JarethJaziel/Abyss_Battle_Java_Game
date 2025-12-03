@@ -18,11 +18,13 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.kotcrab.vis.ui.VisUI;
+import com.kotcrab.vis.ui.widget.VisSlider;
 import com.kotcrab.vis.ui.widget.VisTable;
 import com.kotcrab.vis.ui.widget.VisTextButton;
 import com.kotcrab.vis.ui.widget.VisTextButton.VisTextButtonStyle;
 
 import io.github.jarethjaziel.abyssbattle.AbyssBattle;
+import io.github.jarethjaziel.abyssbattle.gameutil.manager.AudioManager;
 import io.github.jarethjaziel.abyssbattle.screens.GameScreen;
 import io.github.jarethjaziel.abyssbattle.screens.MainMenuScreen;
 import io.github.jarethjaziel.abyssbattle.util.Constants;
@@ -103,6 +105,7 @@ public class GameHUD implements Disposable {
     }
 
     private void createPauseMenu() {
+        AudioManager.getInstance().pauseMusic();
         pauseMenu = new VisTable();
         pauseMenu.setFillParent(true);
         pauseMenu.setVisible(false);
@@ -114,6 +117,29 @@ public class GameHUD implements Disposable {
         pauseMenu.add(title).padBottom(40);
         pauseMenu.row();
 
+        // Etiqueta "Música"
+        Label musicLabel = new Label("Volumen Música", new Label.LabelStyle(new BitmapFont(), Color.WHITE));
+        pauseMenu.add(musicLabel).padBottom(5);
+        pauseMenu.row();
+
+        // Slider (Min: 0, Max: 1, Step: 0.1, Vertical: false)
+        VisSlider musicSlider = new VisSlider(0f, 1f, 0.05f, false);
+
+        musicSlider.setValue(AudioManager.getInstance().getVolume()); // Valor por defecto si no tienes el getter
+
+        musicSlider.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                float newVolume = musicSlider.getValue();
+                // Actualizar volumen en tiempo real
+                AudioManager.getInstance().setMusicVolume(newVolume);
+            }
+        });
+
+        // Añadir slider a la tabla (Ancho de 300px para que se vea bien)
+        pauseMenu.add(musicSlider).width(300).padBottom(30);
+        pauseMenu.row();
+
         // Estilo de botones
         VisTextButtonStyle buttonStyle = createButtonStyle();
 
@@ -122,6 +148,7 @@ public class GameHUD implements Disposable {
         resumeButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
+                AudioManager.getInstance().resumeMusic();
                 togglePause(false);
             }
         });
@@ -133,6 +160,7 @@ public class GameHUD implements Disposable {
         menuButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
+                AudioManager.getInstance().stopMusic();
                 game.setScreen(new MainMenuScreen(game));
             }
         });
@@ -156,8 +184,7 @@ public class GameHUD implements Disposable {
 
     private VisTextButtonStyle createButtonStyle() {
         VisTextButtonStyle style = new VisTextButton.VisTextButtonStyle(
-            VisUI.getSkin().get("default", VisTextButtonStyle.class)
-        );
+                VisUI.getSkin().get("default", VisTextButtonStyle.class));
 
         style.font = new BitmapFont();
         style.font.getData().setScale(1.5f);
@@ -190,8 +217,13 @@ public class GameHUD implements Disposable {
         stage.addActor(table);
     }
 
-    public Stage getStage() { return overlayStage; } // Para input processor (prioridad botones)
-    public boolean isPaused() { return isPaused; }
+    public Stage getStage() {
+        return overlayStage;
+    } // Para input processor (prioridad botones)
+
+    public boolean isPaused() {
+        return isPaused;
+    }
 
     public void showGameOver(GameState state) {
         Label title = gameOverMenu.findActor("gameOverTitle");

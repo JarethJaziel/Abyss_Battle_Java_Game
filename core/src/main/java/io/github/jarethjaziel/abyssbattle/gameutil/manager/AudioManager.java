@@ -118,4 +118,8 @@ public class AudioManager {
             currentMusic.play();
         }
     }
+
+    public float getVolume() {
+        return currentMusic != null? currentMusic.getVolume():0.5f;    
+    }
 }
