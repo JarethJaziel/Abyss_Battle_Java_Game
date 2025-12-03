@@ -69,4 +69,15 @@ subprojects {
   }
 }
 
+plugins {
+  id "org.sonarqube" version "7.1.0.6387"
+}
+
+sonar {
+  properties {
+    property "sonar.projectKey", "JarethJaziel_Abyss_Battle_Java_Game"
+    property "sonar.organization", "jarethjaziel"
+  }
+}
+
 eclipse.project.name = 'Abyss_Battle' + '-parent'
