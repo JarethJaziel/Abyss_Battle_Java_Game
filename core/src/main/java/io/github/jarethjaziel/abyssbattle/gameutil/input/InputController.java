@@ -61,7 +61,9 @@ public class InputController extends InputAdapter {
         }
 
         // 2. Disparo (Detectar click cerca del cañón)
-        if (state != GameState.PLAYER_1_TURN && state != GameState.PLAYER_2_TURN)
+        if (state != GameState.PLAYER_1_TURN && 
+            state != GameState.PLAYER_2_TURN && 
+            state != GameState.LAST_CHANCE)
             return false;
 
         Player currentPlayer = logic.getCurrentPlayer();
