@@ -62,9 +62,9 @@ public class GameRenderer implements Disposable {
         this.b2dr = new Box2DDebugRenderer();
 
         // Cargar texturas una sola vez
-        String p1Path = "sprites/troop_skin/" + ctx.player1TroopSkin.getName() + ".png";
-        String p2Path = "sprites/troop_skin/" + ctx.player2TroopSkin.getName() + ".png";
-        String cannonPath = "sprites/cannon_skin/" + ctx.cannonSkin.getName() + ".png";
+        String p1Path = "sprites/troop_skin/" + ctx.getPlayer1TroopSkin().getName() + ".png";
+        String p2Path = "sprites/troop_skin/" + ctx.getPlayer2TroopSkin().getName() + ".png";
+        String cannonPath = "sprites/cannon_skin/" + ctx.getCannonSkin().getName() + ".png";
 
         // Importante: Asegúrate que estos assets estén cargados o cárgalos al vuelo (no recomendado en render)
         // Lo ideal es que el AssetManager ya los tenga, o usar Texture directo si son pocos.

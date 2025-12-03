@@ -8,11 +8,25 @@ import com.badlogic.gdx.math.Vector2;
 import io.github.jarethjaziel.abyssbattle.util.Constants;
 import io.github.jarethjaziel.abyssbattle.util.GameState;
 
+/**
+ * Gestor de lógica de combate puro.
+ * <p>
+ * Esta clase se encarga de realizar cálculos matemáticos relacionados con el daño,
+ * las áreas de efecto y la verificación de condiciones de victoria.
+ * No mantiene estado del juego, solo procesa datos.
+ */
 public class CombatManager {
 
     /**
-     * Applies damage to troops within a radius.
-     * @return true if at least one troop was destroyed (for bonus turn logic).
+     * Aplica daño de área a una lista de tropas basada en un punto de explosión.
+     * <p>
+     * El daño disminuye linealmente desde el centro de la explosión hacia afuera.
+     *
+     * @param explosionCenter Coordenada (Píxeles/Mundo) donde ocurrió la explosión.
+     * @param radiusMeters    Radio de la explosión en metros (se convertirá a píxeles).
+     * @param maxDamage       Daño máximo en el epicentro.
+     * @param targets         Lista de tropas que pueden recibir daño.
+     * @return Un objeto {@link DamageReport} con el resumen del daño total y si hubo bajas.
      */
     public DamageReport applyAreaDamage(Vector2 explosionCenter, float radiusMeters, int maxDamage, List<Troop> targets) {
         boolean anyTroopKilled = false;
@@ -49,31 +63,36 @@ public class CombatManager {
     }
 
     /**
-     * Determines the game state based on troop health.
-     * @return The new GameState (Win/Draw/LastChance) or NULL if the game continues.
+     * Determina el estado del juego basado en la salud de las tropas.
+     *
+     * @param players        Lista de jugadores en la partida.
+     * @param lastChanceUsed Indica si el jugador 2 ya gastó su "Última Oportunidad".
+     * @return El nuevo {@link GameState} (Victoria, Empate, LastChance) o {@code null} si el juego continúa.
      */
     public GameState checkWinCondition(List<Player> players, boolean lastChanceUsed) {
         boolean p1Dead = areAllTroopsDead(players.get(0));
         boolean p2Dead = areAllTroopsDead(players.get(1));
 
-        // 1. Draw
         if (p1Dead && p2Dead) return GameState.DRAW;
 
-        // 2. P2 Wins
         if (p1Dead) return GameState.PLAYER_2_WIN;
 
-        // 3. P2 Died... check Last Chance
         if (p2Dead) {
             if (lastChanceUsed) {
                 return GameState.PLAYER_1_WIN;
             } else {
-                return GameState.LAST_CHANCE; // Signal to activate Last Chance
+                return GameState.LAST_CHANCE;
             }
         }
 
-        return null; // Game continues
+        return null;
     }
-    
+    /**
+     * Verifica si todas las tropas de un jugador están inactivas.
+     *
+     * @param p El jugador a verificar.
+     * @return {@code true} si todas las tropas tienen vida <= 0.
+     */
     public boolean areAllTroopsDead(Player p) {
         return p.getTroopList().stream().noneMatch(Troop::isActive);
     }

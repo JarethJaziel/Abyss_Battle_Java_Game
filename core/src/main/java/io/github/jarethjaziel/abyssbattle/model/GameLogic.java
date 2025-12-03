@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Disposable;
@@ -12,7 +13,20 @@ import io.github.jarethjaziel.abyssbattle.database.entities.Stats;
 import io.github.jarethjaziel.abyssbattle.util.Constants;
 import io.github.jarethjaziel.abyssbattle.util.GameState;
 
+/**
+ * Controlador principal de la lógica del juego (Core/Brain).
+ * <p>
+ * Esta clase actúa como un orquestador (Facade Pattern) que conecta:
+ * <ul>
+ * <li>El mundo físico (Box2D).</li>
+ * <li>La gestión de turnos ({@link TurnManager}).</li>
+ * <li>Las reglas de combate ({@link CombatManager}).</li>
+ * <li>Las entidades del juego (Jugadores, Proyectiles).</li>
+ * </ul>
+ */
 public class GameLogic implements Disposable {
+
+    private static final String TAG = GameLogic.class.getSimpleName();
 
     private final World world;
     private final PhysicsFactory physicsFactory;
@@ -27,6 +41,12 @@ public class GameLogic implements Disposable {
     private Vector2 lastImpactPosition = new Vector2();
     private Stats currentMatchStats;
 
+    /**
+     * Constructor principal que permite inyectar un mundo físico existente.
+     * Ideal para pruebas o cuando el mundo se gestiona externamente.
+     *
+     * @param world El mundo de Box2D donde ocurrirá la simulación.
+     */
     public GameLogic(World world) {
         this.world = world;
         this.physicsFactory = new PhysicsFactory(world);
@@ -39,40 +59,50 @@ public class GameLogic implements Disposable {
         this.currentMatchStats = new Stats();
     }
 
+     /**
+     * Constructor por defecto. Crea un nuevo mundo físico con gravedad estándar.
+     */
     public GameLogic() {
         this.world = new World(new Vector2(0, 0), true);
         this.physicsFactory = new PhysicsFactory(world);
         this.players = new ArrayList<>();
         this.activeProjectiles = new ArrayList<>();
 
-        // Initialize Managers
         this.turnManager = new TurnManager(players);
         this.combatManager = new CombatManager();
         this.currentMatchStats = new Stats();
     }
 
+    /**
+     * Configura el inicio de la partida: crea jugadores, cañones y establece el estado inicial.
+     */
     public void startGame() {
         // Setup Players & Cannons
-        Player p1 = new Player(1);
-        Player p2 = new Player(2);
+        Player player1 = new Player(1);
+        Player player2 = new Player(2);
 
-        Cannon c1 = physicsFactory.createCannon(Constants.CANNON_X, Constants.PLAYER_1_CANNON_Y);
-        Cannon c2 = physicsFactory.createCannon(Constants.CANNON_X, Constants.PLAYER_2_CANNON_Y);
+        Cannon cannonP1 = physicsFactory.createCannon(Constants.CANNON_X, Constants.PLAYER_1_CANNON_Y);
+        Cannon cannonP2 = physicsFactory.createCannon(Constants.CANNON_X, Constants.PLAYER_2_CANNON_Y);
 
         // P2 Config (Mirrored)
-        c2.setMinAngle(180 + Constants.MIN_SHOOT_ANGLE);
-        c2.setMaxAngle(180 + Constants.MAX_SHOOT_ANGLE);
-        c2.setAngle(270);
+        cannonP2.setMinAngle(180 + Constants.MIN_SHOOT_ANGLE);
+        cannonP2.setMaxAngle(180 + Constants.MAX_SHOOT_ANGLE);
+        cannonP2.setAngle(270);
 
-        p1.setCannon(c1);
-        p2.setCannon(c2);
+        player1.setCannon(cannonP1);
+        player2.setCannon(cannonP2);
 
-        addPlayer(p1);
-        addPlayer(p2);
+        addPlayer(player1);
+        addPlayer(player2);
 
         turnManager.startPlacementPhase();
     }
 
+    /**
+     * Actualiza la lógica del juego en cada frame.
+     *
+     * @param delta Tiempo transcurrido desde el último frame (segundos).
+     */
     public void update(float delta) {
         world.step(1 / 60f, 6, 2);
         turnManager.update(delta);
@@ -89,18 +119,19 @@ public class GameLogic implements Disposable {
         }
     }
 
+    /**
+     * Procesa el impacto de un proyectil: daño, limpieza y condiciones de victoria.
+     */
     private void handleImpact(Projectile p) {
         lastImpactPosition = p.getGroundPosition();
         Player enemy = turnManager.getEnemyPlayer();
 
-        // 1. Apply Damage
         DamageReport dmgReport = combatManager.applyAreaDamage(
                 lastImpactPosition,
                 Constants.EXPLOSION_RATIO,
                 p.getDamage(),
                 enemy.getTroopList());
 
-        // Track Stats (Damage) - Simplified
         if (turnManager.getCurrentPlayer().getId() == 1) {
             currentMatchStats.addDamage(dmgReport.getTotalDamageDealt());
 
@@ -111,15 +142,12 @@ public class GameLogic implements Disposable {
             }
         }
 
-        // 2. Cleanup Physics
         world.destroyBody(p.getBody());
 
-        // 3. Check Win Conditions
         turnManager.handleTurnEnd(dmgReport.killOccurred());
         GameState winState = combatManager.checkWinCondition(players, turnManager.isLastChanceUsed());
 
         if (winState != null) {
-            // Logic for triggering Last Chance specific transition
             if (winState == GameState.LAST_CHANCE) {
                 if (turnManager.getState() != GameState.LAST_CHANCE) {
                     turnManager.activateLastChance();
@@ -132,17 +160,21 @@ public class GameLogic implements Disposable {
                 } else {
                     currentMatchStats.addLoss();
                 }
+                Gdx.app.log(TAG, "Juego Terminado. Resultado: " + winState);
             }
         }
 
     }
 
     // --- Actions called by InputController ---
-
+    /**
+     * Intenta realizar un disparo con el cañón del jugador actual.
+     *
+     * @param power Potencia del disparo.
+     */
     public void playerShoot(float power) {
-        // Validate State
-        GameState s = turnManager.getState();
-        if (s != GameState.PLAYER_1_TURN && s != GameState.PLAYER_2_TURN && s != GameState.LAST_CHANCE) {
+        GameState state = turnManager.getState();
+        if (state != GameState.PLAYER_1_TURN && state != GameState.PLAYER_2_TURN && state != GameState.LAST_CHANCE) {
             return;
         }
 
@@ -154,17 +186,20 @@ public class GameLogic implements Disposable {
 
     }
 
+    /**
+     * Ajusta el ángulo del cañón del jugador actual.
+     * @param angle Nuevo ángulo en grados.
+     */
     public void playerAim(float angle) {
         if (isGameOver() || turnManager.getState() == GameState.WAITING)
             return;
         turnManager.getCurrentPlayer().getCannon().setAngle(angle);
     }
 
+    /**
+     * Intenta colocar una tropa en el mapa durante la fase de preparación.
+     */
     public void tryPlaceTroop(float x, float y) {
-        // Delegate placement validation logic to GameScreen/MapManager mostly,
-        // here we just create the body.
-
-        // Validating territory
         float screenMiddle = Constants.WORLD_HEIGHT / 2;
         GameState s = turnManager.getState();
 
@@ -176,6 +211,7 @@ public class GameLogic implements Disposable {
         Troop t = physicsFactory.createTroop(x, y);
         turnManager.getCurrentPlayer().addTroop(t);
         turnManager.decreaseTroopsToPlace();
+        Gdx.app.log(TAG, "Tropa colocada. Restantes: " + turnManager.getTroopsToPlace());
     }
 
     // --- Getters & Helpers ---

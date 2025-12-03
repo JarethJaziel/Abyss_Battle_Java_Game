@@ -5,16 +5,30 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.physics.box2d.Body;
 
 import io.github.jarethjaziel.abyssbattle.util.Constants;
-
+/**
+ * Representa el cañón de un jugador en el mundo físico.
+ * <p>
+ * Esta entidad gestiona el ángulo de disparo, las restricciones de movimiento (clamp)
+ * y el cálculo de la posición de salida del proyectil.
+ */
 public class Cannon extends Entity {
 
+    /** Ángulo actual del cañón en grados. */
     private float angle;
-    
-    private float barrelLength; 
-    
+
+    /** Longitud del cañón visual/físico, usado para calcular el punto de origen del disparo (tip). */
+    private float barrelLength;
+
+    /** Ángulo mínimo permitido para este cañón (restricción de rotación). */
     private float minAngle;
+
+    /** Ángulo máximo permitido para este cañón (restricción de rotación). */
     private float maxAngle;
 
+    /**
+     * Crea una nueva instancia de Cannon asociada a un cuerpo físico de Box2D.
+     * * @param body El cuerpo físico (Box2D) que representa la base del cañón.
+     */
     public Cannon(Body body) {
         super(body);
         this.angle = (Constants.MIN_SHOOT_ANGLE + Constants.MAX_SHOOT_ANGLE) / 2;
@@ -23,6 +37,10 @@ public class Cannon extends Entity {
         this.maxAngle = Constants.MAX_SHOOT_ANGLE;
     }
 
+    /**
+     * Establece el ángulo del cañón, respetando los límites definidos.
+     * * @param angle El nuevo ángulo deseado en grados.
+     */
     public void setAngle(float angle) {
         this.angle = MathUtils.clamp(angle, minAngle, maxAngle);
     }
@@ -48,7 +66,11 @@ public class Cannon extends Entity {
     }
 
     /**
-     * Este método calcula la posición de la punta y pide a la fábrica crear la bala
+     * Calcula la posición exacta de la punta del cañón y solicita la creación de un proyectil.
+     * * @param factory La fábrica de física encargada de instanciar el cuerpo del proyectil.
+     * @param power   La fuerza o potencia del disparo (0-100).
+     * @param damage  El daño que infligirá el proyectil.
+     * @return El objeto {@link Projectile} creado y activo.
      */
     public Projectile shoot(PhysicsFactory factory, float power, int damage) {
         
