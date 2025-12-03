@@ -29,6 +29,13 @@ import io.github.jarethjaziel.abyssbattle.model.Troop;
 import io.github.jarethjaziel.abyssbattle.util.Constants;
 import io.github.jarethjaziel.abyssbattle.util.GameState;
 
+/**
+ * Responsable de la renderización gráfica del juego (La "Vista").
+ * <p>
+ * Esta clase se encarga de dibujar todas las entidades del juego, el mapa,
+ * los efectos visuales (explosiones) y las ayudas visuales (línea de mira).
+ * No debe contener lógica de juego, solo lógica de presentación.
+ */
 public class GameRenderer implements Disposable {
 
     private final SpriteBatch batch;
@@ -40,12 +47,27 @@ public class GameRenderer implements Disposable {
     private final MapManager mapManager;
 
     // Texturas Cacheadas (Para rendimiento)
-    private final Texture cannonBase, cannonBarrelTex, p1TroopTex, p2TroopTex, projectileTex, shadowTex, blankTexture;
+    private final Texture cannonBase;
+    private final Texture cannonBarrelTex;
+    private final Texture p1TroopTex;
+    private final Texture p2TroopTex;
+    private final Texture projectileTex;
+    private final Texture shadowTex;
+    private final Texture blankTexture;
     private final Animation<TextureRegion> explosionAnim;
-
+    // --- Estado Visual ---
     private float currentCameraAngle = 0f;
     private float explosionTimer = 0f;
 
+    /**
+     * Constructor del renderizador. Inicializa la cámara, carga texturas dinámicas y prepara los recursos.
+     *
+     * @param batch      El SpriteBatch compartido para dibujar.
+     * @param assets     El AssetManager para obtener recursos globales.
+     * @param mapManager El gestor del mapa para dibujar el fondo.
+     * @param logic      Referencia a la lógica del juego para saber qué dibujar.
+     * @param ctx        Contexto de la partida (skins seleccionadas).
+     */
     public GameRenderer(SpriteBatch batch, AssetManager assets, MapManager mapManager, GameLogic logic, MatchContext ctx) {
         this.batch = batch;
         this.logic = logic;
@@ -96,6 +118,11 @@ public class GameRenderer implements Disposable {
         return viewport;
     }
 
+    /**
+     * Actualiza la posición y rotación de la cámara suavemente.
+     * Rota la cámara 180 grados si es el turno del Jugador 2.
+     * @param delta Tiempo transcurrido.
+     */
     public void updateCamera(float delta) {
         float targetAngle = (logic.getCurrentPlayer().getId() == 2) ? 180f : 0f;
         currentCameraAngle = MathUtils.lerp(currentCameraAngle, targetAngle, delta * 2f);
@@ -114,7 +141,9 @@ public class GameRenderer implements Disposable {
     public void resize(int width, int height) {
         viewport.update(width, height);
     }
-
+    /**
+     * Dibuja todas las entidades dinámicas: Cañones, Tropas, Proyectiles y Efectos.
+     */
     private void drawEntities(float delta) {
         for (Player p : logic.getPlayers()) {
             Cannon c = p.getCannon();
@@ -194,18 +223,14 @@ public class GameRenderer implements Disposable {
     }
 
     public void drawAimLine(Vector2 start, Vector2 current) {
-        // 1. Configurar ShapeRenderer
         shapeRenderer.setProjectionMatrix(camera.combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
-        // 2. Obtener datos de la lógica (La verdad absoluta del ángulo)
         Cannon cannon = logic.getCurrentPlayer().getCannon();
         float clampedAngle = cannon.getAngle();
 
-        // 3. Calcular distancia usando los PARÁMETROS (no dragStart/dragCurrent)
         float visualLength = start.dst(current);
 
-        // 4. Determinar color y clampear longitud visual
         if (visualLength > Constants.MAX_AIM_VISION) {
             shapeRenderer.setColor(Color.RED);
             visualLength = Constants.MAX_AIM_VISION;
@@ -213,21 +238,20 @@ public class GameRenderer implements Disposable {
             shapeRenderer.setColor(Color.YELLOW);
         }
 
-        // 5. Calcular punto final basado en el ángulo del cañón
-        // Usamos MathUtils de LibGDX
         float endX = start.x + MathUtils.cosDeg(clampedAngle) * visualLength;
         float endY = start.y + MathUtils.sinDeg(clampedAngle) * visualLength;
 
-        // 6. Dibujar línea
-        // Grosor de 5 pixeles (ajusta según necesites, o usa una constante)
         shapeRenderer.rectLine(start.x, start.y, endX, endY, 5f);
 
         shapeRenderer.end();
     }
 
+    /**
+     * Método principal de dibujo. Se llama en cada frame.
+     * @param delta Tiempo transcurrido.
+     */
     public void render(float delta) {
         mapManager.render(camera);
-        //b2dr.render(logic.getWorld(), camera.combined.cpy().scl(Constants.PIXELS_PER_METER));
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
         drawEntities(delta);

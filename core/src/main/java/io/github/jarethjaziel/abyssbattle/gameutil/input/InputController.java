@@ -15,7 +15,15 @@ import io.github.jarethjaziel.abyssbattle.model.Player;
 import io.github.jarethjaziel.abyssbattle.util.Constants;
 import io.github.jarethjaziel.abyssbattle.util.GameState;
 
+/**
+ * Controlador de entrada del usuario (Mouse/Touch/Teclado).
+ * <p>
+ * Se encarga de traducir las interacciones físicas del jugador (clics, arrastres, teclas)
+ * en acciones lógicas del juego, como colocar tropas, apuntar el cañón o disparar.
+ */
 public class InputController extends InputAdapter {
+
+    private static final String TAG = InputController.class.getSimpleName();
 
     private final GameLogic logic;
     private final Viewport viewport;
@@ -27,6 +35,14 @@ public class InputController extends InputAdapter {
     private final Vector2 dragStart = new Vector2();
     private final Vector2 dragCurrent = new Vector2();
 
+    /**
+     * Constructor del controlador.
+     *
+     * @param logic      Referencia a la lógica principal para ejecutar acciones.
+     * @param viewport   Viewport para traducir coordenadas de pantalla a mundo.
+     * @param hud        HUD para gestionar pausas y bloqueos de UI.
+     * @param mapManager Gestor del mapa para validar colocación de tropas.
+     */
     public InputController(GameLogic logic, Viewport viewport, GameHUD hud, MapManager mapManager) {
         this.logic = logic;
         this.viewport = viewport;
@@ -34,6 +50,10 @@ public class InputController extends InputAdapter {
         this.mapManager = mapManager;
     }
 
+    /**
+     * Maneja la pulsación de teclas físicas.
+     * Utilizado principalmente para pausar el juego con ESC o BACK (Android).
+     */
     @Override
     public boolean keyDown(int keycode) {
         if (keycode == Input.Keys.ESCAPE) {
@@ -43,6 +63,10 @@ public class InputController extends InputAdapter {
         return false;
     }
 
+    /**
+     * Maneja el evento de tocar la pantalla o hacer clic.
+     * Decide si se está intentando colocar una tropa o iniciar un disparo según el estado del juego.
+     */
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
         if (hud.isPaused() || logic.isGameOver())
@@ -83,6 +107,9 @@ public class InputController extends InputAdapter {
         return false;
     }
 
+    /**
+     * Maneja el arrastre del dedo/mouse para apuntar.
+     */
     @Override
     public boolean touchDragged(int screenX, int screenY, int pointer) {
         if (!isDragging)
@@ -90,12 +117,15 @@ public class InputController extends InputAdapter {
         Vector2 worldCoords = viewport.unproject(new Vector2(screenX, screenY));
         dragCurrent.set(worldCoords);
 
-        // Calcular ángulo y mandar a logic
         Vector2 force = new Vector2(dragStart).sub(dragCurrent);
         logic.playerAim(force.angleDeg());
         return true;
     }
 
+    /**
+     * Maneja el evento de levantar el dedo/mouse.
+     * Ejecuta el disparo si se estaba arrastrando.
+     */
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
         if (!isDragging)
@@ -104,11 +134,10 @@ public class InputController extends InputAdapter {
         isDragging = false;
 
         float distance = dragStart.dst(dragCurrent);
-        Gdx.app.log("DISTANCE", ""+distance);
 
         float power = (distance / Constants.MAX_DRAG_DISTANCE) * 100;
-        Gdx.app.log("POWER",""+ power);
         if (power < Constants.AIM_DEADZONE) {
+            Gdx.app.log(TAG, "Disparo cancelado (Deadzone)");
             return true;
         }
 
@@ -119,7 +148,7 @@ public class InputController extends InputAdapter {
         if (power > Constants.MAX_AIM_POWER) {
             power = Constants.MAX_AIM_POWER;
         }
-        Gdx.app.log("POWER",""+ power);
+        Gdx.app.log(TAG, "DISPARO -> Potencia: " + power + " | Distancia Drag: " + distance);
 
 
         logic.playerShoot(power);
