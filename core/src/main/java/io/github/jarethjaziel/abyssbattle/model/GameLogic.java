@@ -109,8 +109,9 @@ public class GameLogic implements Disposable {
 
         // 2. Cleanup Physics
         world.destroyBody(p.getBody());
-
+        
         // 3. Check Win Conditions
+        turnManager.handleTurnEnd(troopKilled);
         GameState winState = combatManager.checkWinCondition(players, turnManager.isLastChanceUsed());
 
         if (winState != null) {
@@ -125,9 +126,7 @@ public class GameLogic implements Disposable {
             }
             return;
         }
-
-        // 4. Continue Game (Switch Turn)
-        turnManager.handleTurnEnd(troopKilled);
+        
     }
 
     // --- Actions called by InputController ---

@@ -5,17 +5,16 @@ import java.util.List;
 import io.github.jarethjaziel.abyssbattle.util.Constants;
 import io.github.jarethjaziel.abyssbattle.util.GameState;
 
-
 public class TurnManager {
 
     private GameState state;
     private Player currentPlayer;
     private final List<Player> players;
-    
+
     // Timer & Counters
     private float turnTimer = 0f;
     private int troopsToPlace = 0;
-    
+
     // Flags
     private boolean lastChanceUsed = false;
 
@@ -44,9 +43,10 @@ public class TurnManager {
      */
     public void handleTurnEnd(boolean troopDestroyed) {
         if (state == GameState.LAST_CHANCE) {
-            lastChanceUsed = true;
-            // The GameLogic will check for win/loss immediately after this
-            return; 
+            if (!troopDestroyed) {
+                lastChanceUsed = true;
+            }
+            return;
         }
 
         // Bonus Turn Logic
@@ -87,26 +87,44 @@ public class TurnManager {
             System.out.println("Combat Started!");
         }
     }
-    
+
     public void decreaseTroopsToPlace() {
         troopsToPlace--;
-        if (troopsToPlace <= 0) advancePlacementPhase();
+        if (troopsToPlace <= 0)
+            advancePlacementPhase();
     }
 
-    public void setWaitingState() { this.state = GameState.WAITING; }
+    public void setWaitingState() {
+        this.state = GameState.WAITING;
+    }
 
     private void startTransitionTimer() {
         this.state = GameState.TURN_TRANSITION;
         this.turnTimer = Constants.TRANSITION_TIME_TO_WAIT;
     }
-    
+
     // --- Getters ---
     public Player getEnemyPlayer() {
         return (currentPlayer == players.get(0)) ? players.get(1) : players.get(0);
     }
-    public GameState getState() { return state; }
-    public void setState(GameState state) { this.state = state; }
-    public Player getCurrentPlayer() { return currentPlayer; }
-    public int getTroopsToPlace() { return troopsToPlace; }
-    public boolean isLastChanceUsed() { return lastChanceUsed; }
+
+    public GameState getState() {
+        return state;
+    }
+
+    public void setState(GameState state) {
+        this.state = state;
+    }
+
+    public Player getCurrentPlayer() {
+        return currentPlayer;
+    }
+
+    public int getTroopsToPlace() {
+        return troopsToPlace;
+    }
+
+    public boolean isLastChanceUsed() {
+        return lastChanceUsed;
+    }
 }

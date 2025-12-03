@@ -39,6 +39,17 @@ dependencies {
   implementation 'com.j256.ormlite:ormlite-jdbc:6.1'
 }
 
+plugins {
+  id "org.sonarqube" version "7.1.0.6387"
+}
+
+sonar {
+  properties {
+    property "sonar.projectKey", "JarethJaziel_Abyss_Battle_Java_Game"
+    property "sonar.organization", "jarethjaziel"
+  }
+}
+
 // Configuración de JUnit 5 (JUnit Platform)
 test {
   useJUnitPlatform()

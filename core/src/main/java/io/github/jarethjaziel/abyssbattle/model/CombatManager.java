@@ -63,6 +63,7 @@ public class CombatManager {
             if (lastChanceUsed) {
                 return GameState.PLAYER_1_WIN;
             } else {
+                System.out.println("losasdoasndoasnd");
                 return GameState.LAST_CHANCE; // Signal to activate Last Chance
             }
         }
