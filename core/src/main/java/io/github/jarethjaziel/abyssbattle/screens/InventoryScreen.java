@@ -70,7 +70,7 @@ public class InventoryScreen extends ScreenAdapter {
         // --- LAYOUT PRINCIPAL (TABLA RAÍZ) ---
         VisTable rootTable = new VisTable();
         rootTable.setFillParent(true);
-        rootTable.top(); // Alinear todo arriba
+        rootTable.top();
         
         // 1. Cabecera (Título y Botón Regresar)
         VisTable headerTable = new VisTable();

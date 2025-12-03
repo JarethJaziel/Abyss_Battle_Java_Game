@@ -12,6 +12,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 
 import io.github.jarethjaziel.abyssbattle.model.CombatManager;
+import io.github.jarethjaziel.abyssbattle.model.DamageReport;
 import io.github.jarethjaziel.abyssbattle.model.Player;
 import io.github.jarethjaziel.abyssbattle.model.Troop;
 import io.github.jarethjaziel.abyssbattle.util.GameState;
@@ -51,19 +52,19 @@ class CombatManagerTest {
         float radiusMeters = 2f;
         int maxDamage = 30;
 
-        boolean killed = cm.applyAreaDamage(explosion, radiusMeters, maxDamage, Arrays.asList(t1, t2, t3));
+        DamageReport report = cm.applyAreaDamage(explosion, radiusMeters, maxDamage, Arrays.asList(t1, t2, t3));
 
         assertTrue(t1.getHealth() < 30);
         assertTrue(t2.getHealth() < 30);
         assertEquals(100, t3.getHealth());
-        assertTrue(killed);
+        assertTrue(report.killOccurred());
     }
 
     @Test
     void applyAreaDamage_returnsFalseIfNoTroopDies() {
         Troop t = mockTroop(5, 5, 100);
-        boolean killed = cm.applyAreaDamage(new Vector2(0, 0), 1, 10, Arrays.asList(t));
-        assertFalse(killed);
+        DamageReport report = cm.applyAreaDamage(new Vector2(0, 0), 1, 10, Arrays.asList(t));
+        assertFalse(report.killOccurred());
     }
 
     @Test
