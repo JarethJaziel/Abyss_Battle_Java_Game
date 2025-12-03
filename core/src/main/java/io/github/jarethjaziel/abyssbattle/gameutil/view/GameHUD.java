@@ -25,7 +25,6 @@ import com.kotcrab.vis.ui.widget.VisTextButton.VisTextButtonStyle;
 
 import io.github.jarethjaziel.abyssbattle.AbyssBattle;
 import io.github.jarethjaziel.abyssbattle.gameutil.manager.AudioManager;
-import io.github.jarethjaziel.abyssbattle.screens.GameScreen;
 import io.github.jarethjaziel.abyssbattle.screens.GameSetupScreen;
 import io.github.jarethjaziel.abyssbattle.screens.MainMenuScreen;
 import io.github.jarethjaziel.abyssbattle.util.Constants;
@@ -65,6 +64,13 @@ public class GameHUD implements Disposable {
         Label title = new Label("FIN DEL JUEGO", titleStyle);
         title.setName("gameOverTitle");
         gameOverMenu.add(title).padBottom(40);
+        gameOverMenu.row();
+
+        LabelStyle coinStyle = new LabelStyle(new BitmapFont(), Color.YELLOW);
+        Label coinsLabel = new Label("", coinStyle); // Texto vacío por defecto
+        coinsLabel.setName("coinsLabel"); // Nombre clave para buscarlo luego
+        coinsLabel.setFontScale(1.5f);
+        gameOverMenu.add(coinsLabel).padBottom(30);
         gameOverMenu.row();
 
         // Estilo de botones
@@ -227,10 +233,19 @@ public class GameHUD implements Disposable {
         return isPaused;
     }
 
-    public void showGameOver(GameState state) {
+    public void showGameOver(GameState state, int coinsEarned) {
         Label title = gameOverMenu.findActor("gameOverTitle");
         if (title != null)
             title.setText("Result: " + state);
+        Label coinsLabel = gameOverMenu.findActor("coinsLabel");
+        if (coinsLabel != null) {
+            if (coinsEarned > 0) {
+                coinsLabel.setText("+" + coinsEarned + " Monedas");
+                coinsLabel.setVisible(true);
+            } else {
+                coinsLabel.setVisible(false); // Ocultar si no ganó nada (ej. invitado)
+            }
+        }
         gameOverMenu.setVisible(true);
     }
 

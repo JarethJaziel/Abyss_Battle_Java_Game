@@ -38,7 +38,7 @@ public class LoginScreen implements Screen {
         this.game = game;
         this.accManager = new AccountManagerSystem(game.getDbManager());
         stage = new Stage(new ScreenViewport());
-        background = new Texture("images/MenuBackGround.png");
+        background = new Texture("images/menu_background.png");
     }
 
     @Override

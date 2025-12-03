@@ -87,7 +87,7 @@ public class GameScreen implements Screen {
                 saveGameResults(); // <--- AQUÍ OCURRE LA MAGIA
                 hasSavedStats = true; // Cerramos el candado
             }
-            gameHUD.showGameOver(gameLogic.getState());
+            gameHUD.showGameOver(gameLogic.getState(), Constants.REWARD_PER_GAME);
         }
 
         gameRenderer.render(delta);

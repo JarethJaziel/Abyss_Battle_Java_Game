@@ -49,7 +49,7 @@ public class GameSetupScreen extends ScreenAdapter {
         this.currentUser = SessionManager.getInstance().getCurrentUser();
 
         stage = new Stage(new ScreenViewport());
-        background = new Texture("images/MenuBackGround.png"); // Reusa tu fondo
+        background = new Texture("images/menu_background.png"); // Reusa tu fondo
     }
 
     @Override

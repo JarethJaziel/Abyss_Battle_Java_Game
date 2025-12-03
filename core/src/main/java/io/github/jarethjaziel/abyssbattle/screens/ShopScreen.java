@@ -55,7 +55,7 @@ public class ShopScreen extends ScreenAdapter {
         this.currentUser = SessionManager.getInstance().getCurrentUser();
 
         stage = new Stage(new ScreenViewport());
-        background = new Texture("images/ShopSkins.png");
+        background = new Texture("images/shop_background.png");
     }
 
     @Override

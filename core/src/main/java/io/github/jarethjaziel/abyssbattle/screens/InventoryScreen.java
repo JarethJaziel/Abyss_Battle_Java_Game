@@ -57,7 +57,7 @@ public class InventoryScreen extends ScreenAdapter {
         this.currentUser = SessionManager.getInstance().getCurrentUser();
 
         stage = new Stage(new ScreenViewport());
-        background = new Texture("images/ShopSkins.png"); // Fondo genérico
+        background = new Texture("images/inventory_background.png"); // Fondo genérico
     }
 
     @Override

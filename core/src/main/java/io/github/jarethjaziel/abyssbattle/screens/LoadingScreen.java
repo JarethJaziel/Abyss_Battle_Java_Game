@@ -54,9 +54,9 @@ public class LoadingScreen implements Screen {
         game.assets.load("vfx/explosion3.png", Texture.class);
 
         // Images
-        game.assets.load("images/MenuBackGround.png", Texture.class);
-        game.assets.load("images/ShopSkins.png", Texture.class);
-        game.assets.load("images/SkinsStock.png", Texture.class);
+        game.assets.load("images/menu_background.png", Texture.class);
+        game.assets.load("images/inventory_background.png", Texture.class);
+        game.assets.load("images/shop_background.png", Texture.class);
         game.assets.load("images/game_bg_1.png", Texture.class);
 
         // Audio
