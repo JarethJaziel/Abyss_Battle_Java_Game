@@ -34,7 +34,7 @@ public class ProfileScreen extends ScreenAdapter {
         this.currentUser = SessionManager.getInstance().getCurrentUser();
         
         stage = new Stage(new ScreenViewport());
-        background = new Texture("images/MenuBackGround.png");
+        background = new Texture("images/menu_background.png");
     }
 
     @Override

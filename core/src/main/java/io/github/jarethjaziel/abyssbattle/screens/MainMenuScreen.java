@@ -34,7 +34,7 @@ public class MainMenuScreen implements Screen {
     public MainMenuScreen(AbyssBattle game) {
         this.game = game;
         stage = new Stage(new ScreenViewport());
-        background = new Texture("images/MenuBackGround.png");
+        background = new Texture("images/menu_background.png");
     }
 
     @Override

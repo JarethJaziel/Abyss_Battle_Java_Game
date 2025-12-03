@@ -5,7 +5,6 @@ public enum GameSkins {
     TROOP_RED("troop_red", 0, SkinType.TROOP),
     
     TROOP_GREEN("troop_green", 500, SkinType.TROOP),
-    TROOP_BRONZE("troop_bronze", 1000, SkinType.TROOP),
     TROOP_SILVER("troop_silver", 2500, SkinType.TROOP),
     TROOP_ULTRA("troop_ultra", 5000, SkinType.TROOP), 
 
