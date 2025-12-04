@@ -1,7 +1,6 @@
 package io.github.jarethjaziel.abyssbattle.gameutil.view;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
@@ -30,7 +29,21 @@ import io.github.jarethjaziel.abyssbattle.screens.MainMenuScreen;
 import io.github.jarethjaziel.abyssbattle.util.Constants;
 import io.github.jarethjaziel.abyssbattle.util.GameState;
 
+
+/**
+ * Heads-Up Display (HUD) y Gestor de UI superpuesta para el juego.
+ * <p>
+ * Esta clase maneja todos los elementos de interfaz gráfica que se dibujan sobre el mundo del juego,
+ * incluyendo:
+ * <ul>
+ * <li>Etiquetas de estado (turno actual, mensajes).</li>
+ * <li>Menú de Pausa (con control de volumen).</li>
+ * <li>Pantalla de Fin de Juego (GameOver) con resumen de recompensas.</li>
+ * </ul>
+ */
 public class GameHUD implements Disposable {
+
+    private static final String TAG = GameHUD.class.getSimpleName();
 
     private final Stage stage;
     private final Stage overlayStage;
@@ -41,14 +54,19 @@ public class GameHUD implements Disposable {
     private VisTable gameOverMenu;
     private boolean isPaused = false;
 
-    public GameHUD(SpriteBatch batch, AssetManager assets, AbyssBattle game) {
+    /**
+     * Constructor del HUD. Inicializa los stages y construye los menús.
+     *
+     * @param batch  SpriteBatch compartido para renderizar.
+     * @param assets Gestor de assets (no utilizado directamente aquí, pero útil para consistencia).
+     * @param game   Referencia al juego principal para la navegación entre pantallas.
+     */
+    public GameHUD(SpriteBatch batch, AbyssBattle game) {
         this.game = game;
 
-        // 1. Stage Principal (Información)
         stage = new Stage(new FitViewport(Constants.WORLD_WIDTH, Constants.WORLD_HEIGHT), batch);
         createStatusUI();
 
-        // 2. Stage Overlay (Pausa/Menu)
         overlayStage = new Stage(new FitViewport(Constants.WORLD_WIDTH, Constants.WORLD_HEIGHT), batch);
         createPauseMenu();
         createGameOverMenu();
@@ -113,7 +131,6 @@ public class GameHUD implements Disposable {
     }
 
     private void createPauseMenu() {
-        AudioManager.getInstance().pauseMusic();
         pauseMenu = new VisTable();
         pauseMenu.setFillParent(true);
         pauseMenu.setVisible(false);
@@ -156,7 +173,6 @@ public class GameHUD implements Disposable {
         resumeButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                AudioManager.getInstance().resumeMusic();
                 togglePause(false);
             }
         });
@@ -198,10 +214,10 @@ public class GameHUD implements Disposable {
         style.font.getData().setScale(1.5f);
         style.fontColor = Color.WHITE;
         style.downFontColor = Color.YELLOW;
-
-        style.up = VisUI.getSkin().newDrawable("white", Color.valueOf("34495EFF"));
-        style.over = VisUI.getSkin().newDrawable("white", Color.valueOf("1ABC9CFF"));
-        style.down = VisUI.getSkin().newDrawable("white", Color.valueOf("2ECC71FF"));
+        final String color = "white";
+        style.up = VisUI.getSkin().newDrawable(color, Color.valueOf("34495EFF"));
+        style.over = VisUI.getSkin().newDrawable(color, Color.valueOf("1ABC9CFF"));
+        style.down = VisUI.getSkin().newDrawable(color, Color.valueOf("2ECC71FF"));
 
         return style;
     }
@@ -225,9 +241,9 @@ public class GameHUD implements Disposable {
         stage.addActor(table);
     }
 
-    public Stage getStage() {
+    public Stage getOverlayStage() {
         return overlayStage;
-    } // Para input processor (prioridad botones)
+    }
 
     public boolean isPaused() {
         return isPaused;
@@ -249,9 +265,22 @@ public class GameHUD implements Disposable {
         gameOverMenu.setVisible(true);
     }
 
+    /**
+     * Alterna el estado de pausa del juego.
+     * Gestiona automáticamente la música de fondo.
+     *
+     * @param paused {@code true} para pausar, {@code false} para reanudar.
+     */
     public void togglePause(boolean paused) {
         this.isPaused = paused;
         pauseMenu.setVisible(paused);
+        if (paused) {
+            AudioManager.getInstance().pauseMusic();
+            Gdx.app.log(TAG, "Juego Pausado");
+        } else {
+            AudioManager.getInstance().resumeMusic();
+            Gdx.app.log(TAG, "Juego Reanudado");
+        }
     }
 
     @Override
@@ -260,6 +289,12 @@ public class GameHUD implements Disposable {
         overlayStage.dispose();
     }
 
+    /**
+     * Actualiza la etiqueta de información inferior según el estado actual de la lógica.
+     *
+     * @param state         Estado actual del juego.
+     * @param troopsToPlace Cantidad de tropas restantes por colocar (si aplica).
+     */
     public void updateInfo(GameState state, int troopsToPlace) {
         if (state == GameState.WAITING) {
             statusLabel.setText("Proyectil en el aire...");

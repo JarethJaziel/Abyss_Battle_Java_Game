@@ -5,6 +5,13 @@ import java.util.Date;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable; 
 
+/**
+ * Entidad que representa las estadísticas de combate de un jugador.
+ * <p>
+ * Esta clase cumple un doble rol en la arquitectura actual:
+ * 1. <b>Persistencia:</b> Mapea la tabla "stats" para guardar el historial del jugador.
+ * 2. <b>Sesión (DTO):</b> Se usa en memoria (GameLogic) para acumular los datos de la partida en curso.
+ */
 @DatabaseTable(tableName = "stats")
 public class Stats {
 
@@ -32,6 +39,9 @@ public class Stats {
     @DatabaseField 
     private Date lastPlayed;
 
+    /**
+     * Constructor por defecto. Inicializa todos los contadores a 0 y la fecha al momento actual.
+     */
     public Stats() {
         this.lastPlayed = new Date();
         this.played = 0;
