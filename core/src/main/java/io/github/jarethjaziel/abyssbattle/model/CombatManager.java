@@ -91,7 +91,7 @@ public class CombatManager {
      * Verifica si todas las tropas de un jugador están inactivas.
      *
      * @param p El jugador a verificar.
-     * @return {@code true} si todas las tropas tienen vida <= 0.
+     * @return {@code true} si todas las tropas tienen vida &lt;= 0.
      */
     public boolean areAllTroopsDead(Player p) {
         return p.getTroopList().stream().noneMatch(Troop::isActive);
