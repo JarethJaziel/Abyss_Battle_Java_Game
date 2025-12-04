@@ -79,7 +79,7 @@ public class GameScreen implements Screen {
 
         gameRenderer = new GameRenderer(game.batch, game.assets, mapManager, gameLogic, matchContext);
 
-        gameHUD = new GameHUD(game.batch, game.assets, game);
+        gameHUD = new GameHUD(game.batch, game);
 
         inputController = new InputController(gameLogic, gameRenderer.getViewport(), gameHUD, mapManager);
 
@@ -87,7 +87,7 @@ public class GameScreen implements Screen {
         accountSystem = new AccountManagerSystem(game.getDbManager());
 
         InputMultiplexer multiplexer = new InputMultiplexer();
-        multiplexer.addProcessor(gameHUD.getStage());
+        multiplexer.addProcessor(gameHUD.getOverlayStage());
         multiplexer.addProcessor(inputController);
         Gdx.input.setInputProcessor(multiplexer);
 

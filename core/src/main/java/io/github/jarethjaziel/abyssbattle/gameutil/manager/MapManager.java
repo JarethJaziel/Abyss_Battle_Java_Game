@@ -1,5 +1,6 @@
 package io.github.jarethjaziel.abyssbattle.gameutil.manager;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
@@ -13,28 +14,60 @@ import com.badlogic.gdx.utils.Disposable;
 
 import io.github.jarethjaziel.abyssbattle.util.Constants;
 
+/**
+ * Gestor del mapa de juego (Nivel).
+ * <p>
+ * Se encarga de cargar el archivo de mapa (.tmx), renderizarlo en pantalla
+ * y generar los cuerpos físicos estáticos (colisiones) para Box2D basados en
+ * las
+ * celdas del mapa.
+ */
 public class MapManager implements Disposable {
+
+    private static final String TAG = MapManager.class.getSimpleName();
+    private static final String COLLISION_LAYER_NAME = "collision";
 
     private TiledMap map;
     private final OrthogonalTiledMapRenderer renderer;
 
+    /**
+     * Constructor del gestor de mapa.
+     * <p>
+     * Carga el mapa y genera las colisiones físicas inmediatamente.
+     *
+     * @param world   El mundo físico de Box2D donde se crearán los obstáculos.
+     * @param mapPath Ruta del archivo .tmx en los assets.
+     */
     public MapManager(World world, String mapPath) {
-        // 1. Cargar Mapa
         map = new TmxMapLoader().load(mapPath);
         renderer = new OrthogonalTiledMapRenderer(map, 1);
 
-        // 2. Crear Colisiones
         createMapCollisions(world);
     }
 
+    /**
+     * Renderiza las capas visuales del mapa.
+     *
+     * @param camera La cámara del juego para determinar qué parte del mapa dibujar.
+     */
     public void render(OrthographicCamera camera) {
         renderer.setView(camera);
         renderer.render();
     }
 
+    /**
+     * Lee la capa de colisiones del mapa y crea cuerpos estáticos en Box2D
+     * para cada celda ocupada.
+     *
+     * @param world El mundo físico donde añadir los cuerpos.
+     */
     private void createMapCollisions(World world) {
-        TiledMapTileLayer layer = (TiledMapTileLayer) map.getLayers().get("collision");
-
+        TiledMapTileLayer layer = (TiledMapTileLayer) map.getLayers().get(COLLISION_LAYER_NAME);
+        
+        if (layer == null) {
+            Gdx.app.error(TAG, "No se encontró la capa de colisión: " + COLLISION_LAYER_NAME);
+            return;
+        }
         float tileSize = layer.getTileWidth();
 
         for (int x = 0; x < layer.getWidth(); x++) {
@@ -57,8 +90,17 @@ public class MapManager implements Disposable {
         }
     }
 
+    /**
+     * Verifica si una coordenada (en Píxeles/Mundo visual) es válida para colocar
+     * una tropa.
+     *
+     * @param x Coordenada X en píxeles.
+     * @param y Coordenada Y en píxeles.
+     * @return {@code true} si la posición está libre de obstáculos y dentro del
+     *         mapa.
+     */
     public boolean isValidPlacement(float x, float y) {
-        TiledMapTileLayer layer = (TiledMapTileLayer) map.getLayers().get("collision");
+        TiledMapTileLayer layer = (TiledMapTileLayer) map.getLayers().get(COLLISION_LAYER_NAME);
         if (layer == null)
             return true;
 
