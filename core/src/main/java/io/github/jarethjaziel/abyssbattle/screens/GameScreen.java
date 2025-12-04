@@ -75,9 +75,9 @@ public class GameScreen implements Screen {
 
         mapManager = new MapManager(gameLogic.getWorld(), "maps/game_bg_1.tmx");
 
-        gameRenderer = new GameRenderer(AbyssBattle.batch, AbyssBattle.assets, mapManager, gameLogic, matchContext);
+        gameRenderer = new GameRenderer(game.batch, game.assets, mapManager, gameLogic, matchContext);
 
-        gameHUD = new GameHUD(AbyssBattle.batch, game);
+        gameHUD = new GameHUD(game.batch, game);
 
         inputController = new InputController(gameLogic, gameRenderer.getViewport(), gameHUD, mapManager);
 
