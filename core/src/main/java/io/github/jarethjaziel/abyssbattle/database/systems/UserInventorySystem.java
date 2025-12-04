@@ -25,7 +25,6 @@ public class UserInventorySystem {
 
     private static final String TAG = UserInventorySystem.class.getSimpleName();
 
-    private DatabaseManager dbManager;
     private Dao<UserSkin, Integer> userSkinDao;
     private Dao<Skin, Integer> skinDao;
     private Dao<UserLoadout, Integer> loadoutDao;
@@ -35,7 +34,6 @@ public class UserInventorySystem {
      * @param dbManager Gestor de base de datos para obtener los DAOs.
      */
     public UserInventorySystem(DatabaseManager dbManager) {
-        this.dbManager = dbManager;
         this.userSkinDao = dbManager.getUserSkinDao();
         this.skinDao = dbManager.getSkinDao();
         this.loadoutDao = dbManager.getUserLoadoutDao();

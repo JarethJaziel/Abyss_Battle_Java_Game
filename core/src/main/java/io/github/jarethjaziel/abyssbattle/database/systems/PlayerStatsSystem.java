@@ -18,7 +18,6 @@ public class PlayerStatsSystem {
 
     private static final String TAG = PlayerStatsSystem.class.getSimpleName();
 
-    private DatabaseManager dbManager;
     private Dao<Stats, Integer> statsDao;
     private Dao<User, Integer> userDao;
 
@@ -27,7 +26,6 @@ public class PlayerStatsSystem {
      * @param dbManager Gestor de base de datos para obtener los DAOs.
      */
     public PlayerStatsSystem(DatabaseManager dbManager) {
-        this.dbManager = dbManager;
         this.statsDao = dbManager.getStatsDao(); // Asumo que creas este método en DBManager
         this.userDao = dbManager.getUserDao();
     }
