@@ -7,6 +7,12 @@ import io.github.jarethjaziel.abyssbattle.util.Constants;
 
 import java.util.Date;
 
+/**
+ * Entidad que representa a un jugador registrado en el sistema.
+ * <p>
+ * Almacena las credenciales, el progreso económico (monedas) y mantiene
+ * una relación con sus estadísticas de combate.
+ */
 @DatabaseTable(tableName = "users")
 public class User {
 
@@ -22,32 +28,45 @@ public class User {
     @DatabaseField
     private Date createdAt;
 
-    @DatabaseField(defaultValue = "0")
+    @DatabaseField
     private int coins;
 
-    // RELACIÓN UNO A UNO:
     @DatabaseField(foreign = true, foreignAutoRefresh = true, foreignAutoCreate = true)
     private Stats stats;
 
+    /**
+     * Constructor vacío requerido por ORMLite.
+     */
     public User() {
         createdAt = new Date();
         coins = Constants.NEW_USER_INITIAL_COINS;
     }
 
+    /**
+     * Crea un nuevo usuario con credenciales.
+     *
+     * @param username     Nombre único del usuario.
+     * @param passwordHash Contraseña ya encriptada (Hash).
+     */
     public User(String username, String passwordHash) {
         this.username = username;
         this.passwordHash = passwordHash;
         this.createdAt = new Date();
         this.stats = new Stats(); // Stats vacías al inicio
-        final int INITIAL_COINS = 100;
-        this.coins = INITIAL_COINS;
+        coins = Constants.NEW_USER_INITIAL_COINS;
     }
 
     public void setStats(Stats stats) { this.stats = stats; }
     public Stats getStats() { return stats; }
 
     public int getCoins(){ return coins;  }
-    public void addCoins(int amount){ this.coins += amount; }
+    /**
+     * Añade monedas al saldo del usuario.
+     * @param amount Cantidad a añadir (debe ser positiva).
+     */
+    public void addCoins(int amount){ 
+        this.coins += amount;
+    }
 
     public int getId() {
         return id;
@@ -73,6 +92,11 @@ public class User {
         this.passwordHash = passwordHash;
     }
 
+    /**
+     * Descuenta monedas por una compra.
+     * NO verifica fondos negativos aquí (eso debe hacerlo el ShopSystem).
+     * @param amount Cantidad a restar.
+     */
     public void purchase(int amount){
         this.coins -= amount;
     }
