@@ -28,8 +28,6 @@ import io.github.jarethjaziel.abyssbattle.util.Constants;
  */
 public class GameScreen implements Screen {
 
-    private static final String TAG = GameScreen.class.getSimpleName();
-
     private final AbyssBattle game;
 
     // --- COMPONENTES (MVC) ---
@@ -77,9 +75,9 @@ public class GameScreen implements Screen {
 
         mapManager = new MapManager(gameLogic.getWorld(), "maps/game_bg_1.tmx");
 
-        gameRenderer = new GameRenderer(game.batch, game.assets, mapManager, gameLogic, matchContext);
+        gameRenderer = new GameRenderer(AbyssBattle.batch, AbyssBattle.assets, mapManager, gameLogic, matchContext);
 
-        gameHUD = new GameHUD(game.batch, game);
+        gameHUD = new GameHUD(AbyssBattle.batch, game);
 
         inputController = new InputController(gameLogic, gameRenderer.getViewport(), gameHUD, mapManager);
 
@@ -169,8 +167,10 @@ public class GameScreen implements Screen {
         gameHUD.togglePause(true); // Auto-pausar si la app se minimiza
     }
 
+    
     @Override
     public void resume() {
+        //resumes game
     }
 
     @Override

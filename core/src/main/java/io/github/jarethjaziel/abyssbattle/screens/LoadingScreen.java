@@ -44,25 +44,25 @@ public class LoadingScreen implements Screen {
 
         stage.addActor(table);
         // Sprites
-        game.assets.load("sprites/cannon_base.png", Texture.class);
-        game.assets.load("sprites/projectile.png", Texture.class);
-        game.assets.load("sprites/shadow.png", Texture.class);
+        AbyssBattle.assets.load("sprites/cannon_base.png", Texture.class);
+        AbyssBattle.assets.load("sprites/projectile.png", Texture.class);
+        AbyssBattle.assets.load("sprites/shadow.png", Texture.class);
 
         // VFX
-        game.assets.load("vfx/explosion1.png", Texture.class);
-        game.assets.load("vfx/explosion2.png", Texture.class);
-        game.assets.load("vfx/explosion3.png", Texture.class);
+        AbyssBattle.assets.load("vfx/explosion1.png", Texture.class);
+        AbyssBattle.assets.load("vfx/explosion2.png", Texture.class);
+        AbyssBattle.assets.load("vfx/explosion3.png", Texture.class);
 
         // Images
-        game.assets.load("images/menu_background.png", Texture.class);
-        game.assets.load("images/inventory_background.png", Texture.class);
-        game.assets.load("images/shop_background.png", Texture.class);
-        game.assets.load("images/game_bg_1.png", Texture.class);
+        AbyssBattle.assets.load("images/menu_background.png", Texture.class);
+        AbyssBattle.assets.load("images/inventory_background.png", Texture.class);
+        AbyssBattle.assets.load("images/shop_background.png", Texture.class);
+        AbyssBattle.assets.load("images/game_bg_1.png", Texture.class);
 
         // Audio
-        game.assets.load("sfx/shoot.mp3", Sound.class);
-        game.assets.load("sfx/boom.mp3", Sound.class);
-        game.assets.load("music/game_music.mp3", Music.class);
+        AbyssBattle.assets.load("sfx/shoot.mp3", Sound.class);
+        AbyssBattle.assets.load("sfx/boom.mp3", Sound.class);
+        AbyssBattle.assets.load("music/game_music.mp3", Music.class);
 
         for (GameSkins skinDef : GameSkins.values()) {
 
@@ -76,10 +76,10 @@ public class LoadingScreen implements Screen {
 
             String path = folder + skinDef.getName() + ".png";
 
-            game.assets.load(path, Texture.class);
+            AbyssBattle.assets.load(path, Texture.class);
         }
 
-        AudioManager.getInstance().initialize(game.assets);
+        AudioManager.getInstance().initialize(AbyssBattle.assets);
     }
 
     @Override
@@ -87,12 +87,12 @@ public class LoadingScreen implements Screen {
         Gdx.gl.glClearColor(0.1f, 0.1f, 0.1f, 1); // Gris oscuro
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        if (game.assets.update()) {
-            game.assets.finishLoading();
+        if (AbyssBattle.assets.update()) {
+            AbyssBattle.assets.finishLoading();
             game.setScreen(new MainMenuScreen(game));
             dispose();
         } else {
-            float progress = game.assets.getProgress();
+            float progress = AbyssBattle.assets.getProgress();
             progressBar.setValue(progress);
             loadingLabel.setText("Cargando... " + (int) (progress * 100) + "%");
         }

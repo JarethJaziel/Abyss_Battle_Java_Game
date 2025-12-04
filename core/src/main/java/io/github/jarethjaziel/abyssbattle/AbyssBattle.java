@@ -11,73 +11,74 @@ import io.github.jarethjaziel.abyssbattle.screens.LoadingScreen;
 
 import java.sql.SQLException;
 
+/**
+ * Clase principal del juego (Entry Point).
+ * <p>
+ * Extiende de {@link Game} y actúa como el gestor central del ciclo de vida de la aplicación.
+ * Es responsable de inicializar y mantener los recursos globales (Assets, Base de Datos, Batch)
+ * y delegar la lógica de renderizado a la pantalla activa (Screen).
+ */
 public class AbyssBattle extends Game {
 
-    public SpriteBatch batch;
-    public AssetManager assets;
+    /** Etiqueta para filtrar logs en la consola. */
+    private static final String TAG = AbyssBattle.class.getSimpleName();
 
-    // Sistema de Base de Datos
+    /**
+     * Batch compartido para dibujar texturas de manera eficiente.
+     * <p>
+     * <b>Nota:</b> Es público por conveniencia en LibGDX, pero debería accederse con cuidado.
+     */
+    public static final SpriteBatch batch = new SpriteBatch();
+
+    /**
+     * Gestor central de recursos (imágenes, sonidos, skins) para carga asíncrona.
+     */
+    public static final AssetManager assets = new AssetManager();
+
+    /** Gestor de la conexión a la base de datos local. */
     private DatabaseManager dbManager;
-
 
     @Override
     public void create() {
-        // 1. Inicializar VisUI primero
         if (!VisUI.isLoaded()) {
             VisUI.load();
         }
 
-        System.out.println("Iniciando Abyss Battle...");
-
-        // 2. Inicializar Base de Datos y Sistema de Cuentas
+        Gdx.app.log(TAG, "Iniciando Abyss Battle...");
         try {
             dbManager = new DatabaseManager();
             dbManager.connect();
-            System.out.println("Sistema de base de datos inicializado correctamente");
+            Gdx.app.log(TAG, "Sistema de base de datos inicializado correctamente");
         } catch (SQLException e) {
-            System.err.println("ERROR FATAL: No se pudo conectar a la base de datos");
-            e.printStackTrace();
+            Gdx.app.error(TAG, "ERROR FATAL: No se pudo conectar a la base de datos", e);
             Gdx.app.exit();
             return;
         }
 
-        // 3. Cargar Assets
-        assets = new AssetManager();
-
-        batch = new SpriteBatch();
-
         setScreen(new LoadingScreen(this));
     }
 
-    @Override
-    public void render() {
-        super.render();
-    }
-
+    /**
+     * Libera los recursos al cerrar la aplicación para evitar fugas de memoria.
+     */
     @Override
     public void dispose() {
-        System.out.println("Cerrando Abyss Battle...");
+        Gdx.app.log(TAG, "Cerrando Abyss Battle...");
         super.dispose();
 
-        if (batch != null) {
-            batch.dispose();
-        }
-
-        if (assets != null) {
-            assets.dispose();
-        }
+        batch.dispose();
+        assets.dispose();
 
         if (VisUI.isLoaded()) {
             VisUI.dispose();
         }
 
-        // Cerrar conexión a base de datos
         if (dbManager != null) {
             dbManager.close();
-            System.out.println("Base de datos cerrada correctamente");
+            Gdx.app.log(TAG, "Base de datos cerrada correctamente");
         }
 
-        System.out.println("Abyss Battle cerrado correctamente");
+        Gdx.app.log(TAG, "Abyss Battle cerrado correctamente");
     }
 
     
