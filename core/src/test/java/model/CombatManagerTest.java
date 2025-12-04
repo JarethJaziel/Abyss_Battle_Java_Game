@@ -8,6 +8,8 @@ import java.util.Arrays;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.badlogic.gdx.Application;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 
@@ -23,6 +25,10 @@ class CombatManagerTest {
 
     @BeforeEach
     void setup() {
+        // Mock necesario para que Gdx.app.log() no truene
+        Application mockApp = mock(Application.class);
+        Gdx.app = mockApp;
+
         cm = new CombatManager();
     }
 
@@ -30,7 +36,6 @@ class CombatManagerTest {
         Body body = mock(Body.class);
         Troop troop = spy(new Troop(body, health));
 
-        // Mock position: body.getPosition()
         when(body.getPosition()).thenReturn(new Vector2(x, y));
 
         return troop;
@@ -46,7 +51,7 @@ class CombatManagerTest {
     void applyAreaDamage_appliesDamageAndDetectsKilled() {
         Troop t1 = mockTroop(0, 0, 30);
         Troop t2 = mockTroop(0.5f, 0, 30);
-        Troop t3 = mockTroop(10, 10, 100); // fuera del rango
+        Troop t3 = mockTroop(10, 10, 100);
 
         Vector2 explosion = new Vector2(0, 0);
         float radiusMeters = 2f;
@@ -89,55 +94,40 @@ class CombatManagerTest {
 
     @Test
     void checkWinCondition_drawWhenBothDead() {
-        Troop t1 = mockTroop(0, 0, 0);
-        Troop t2 = mockTroop(1, 1, 0);
-
-        Player p1 = mockPlayer(t1);
-        Player p2 = mockPlayer(t2);
+        Player p1 = mockPlayer(mockTroop(0, 0, 0));
+        Player p2 = mockPlayer(mockTroop(1, 1, 0));
 
         assertEquals(GameState.DRAW, cm.checkWinCondition(Arrays.asList(p1, p2), false));
     }
 
     @Test
     void checkWinCondition_p2WinsIfP1Dead() {
-        Troop deadP1 = mockTroop(0, 0, 0);
-        Troop aliveP2 = mockTroop(1, 1, 50);
-
-        Player p1 = mockPlayer(deadP1);
-        Player p2 = mockPlayer(aliveP2);
+        Player p1 = mockPlayer(mockTroop(0, 0, 0));
+        Player p2 = mockPlayer(mockTroop(1, 1, 50));
 
         assertEquals(GameState.PLAYER_2_WIN, cm.checkWinCondition(Arrays.asList(p1, p2), false));
     }
 
     @Test
     void checkWinCondition_lastChanceIfP2DeadAndNotUsed() {
-        Troop aliveP1 = mockTroop(0, 0, 50);
-        Troop deadP2 = mockTroop(1, 1, 0);
-
-        Player p1 = mockPlayer(aliveP1);
-        Player p2 = mockPlayer(deadP2);
+        Player p1 = mockPlayer(mockTroop(0, 0, 50));
+        Player p2 = mockPlayer(mockTroop(1, 1, 0));
 
         assertEquals(GameState.LAST_CHANCE, cm.checkWinCondition(Arrays.asList(p1, p2), false));
     }
 
     @Test
     void checkWinCondition_p1WinsIfP2DeadAndLastChanceUsed() {
-        Troop aliveP1 = mockTroop(0, 0, 50);
-        Troop deadP2 = mockTroop(1, 1, 0);
-
-        Player p1 = mockPlayer(aliveP1);
-        Player p2 = mockPlayer(deadP2);
+        Player p1 = mockPlayer(mockTroop(0, 0, 50));
+        Player p2 = mockPlayer(mockTroop(1, 1, 0));
 
         assertEquals(GameState.PLAYER_1_WIN, cm.checkWinCondition(Arrays.asList(p1, p2), true));
     }
 
     @Test
     void checkWinCondition_returnsNullIfGameContinues() {
-        Troop alive1 = mockTroop(0, 0, 50);
-        Troop alive2 = mockTroop(1, 1, 50);
-
-        Player p1 = mockPlayer(alive1);
-        Player p2 = mockPlayer(alive2);
+        Player p1 = mockPlayer(mockTroop(0, 0, 50));
+        Player p2 = mockPlayer(mockTroop(1, 1, 50));
 
         assertNull(cm.checkWinCondition(Arrays.asList(p1, p2), false));
     }
