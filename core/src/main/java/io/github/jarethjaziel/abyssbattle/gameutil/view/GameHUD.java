@@ -58,7 +58,6 @@ public class GameHUD implements Disposable {
      * Constructor del HUD. Inicializa los stages y construye los menús.
      *
      * @param batch  SpriteBatch compartido para renderizar.
-     * @param assets Gestor de assets (no utilizado directamente aquí, pero útil para consistencia).
      * @param game   Referencia al juego principal para la navegación entre pantallas.
      */
     public GameHUD(SpriteBatch batch, AbyssBattle game) {

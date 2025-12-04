@@ -38,6 +38,11 @@ dependencies {
   implementation 'com.j256.ormlite:ormlite-core:6.1'
   implementation 'com.j256.ormlite:ormlite-jdbc:6.1'
 }
+
+javadoc {
+    options.encoding = 'UTF-8'
+    options.charSet = 'UTF-8'
+}
 // Configuración de JUnit 5 (JUnit Platform)
 test {
   useJUnitPlatform()
