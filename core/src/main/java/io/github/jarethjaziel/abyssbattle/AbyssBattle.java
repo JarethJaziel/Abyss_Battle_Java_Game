@@ -14,8 +14,10 @@ import java.sql.SQLException;
 /**
  * Clase principal del juego (Entry Point).
  * <p>
- * Extiende de {@link Game} y actúa como el gestor central del ciclo de vida de la aplicación.
- * Es responsable de inicializar y mantener los recursos globales (Assets, Base de Datos, Batch)
+ * Extiende de {@link Game} y actúa como el gestor central del ciclo de vida de
+ * la aplicación.
+ * Es responsable de inicializar y mantener los recursos globales (Assets, Base
+ * de Datos, Batch)
  * y delegar la lógica de renderizado a la pantalla activa (Screen).
  */
 public class AbyssBattle extends Game {
@@ -26,14 +28,15 @@ public class AbyssBattle extends Game {
     /**
      * Batch compartido para dibujar texturas de manera eficiente.
      * <p>
-     * <b>Nota:</b> Es público por conveniencia en LibGDX, pero debería accederse con cuidado.
+     * <b>Nota:</b> Es público por conveniencia en LibGDX, pero debería accederse
+     * con cuidado.
      */
-    public static final SpriteBatch batch = new SpriteBatch();
+    public SpriteBatch batch;
 
     /**
      * Gestor central de recursos (imágenes, sonidos, skins) para carga asíncrona.
      */
-    public static final AssetManager assets = new AssetManager();
+    public AssetManager assets;
 
     /** Gestor de la conexión a la base de datos local. */
     private DatabaseManager dbManager;
@@ -55,6 +58,10 @@ public class AbyssBattle extends Game {
             return;
         }
 
+        assets = new AssetManager();
+
+        batch = new SpriteBatch();
+
         setScreen(new LoadingScreen(this));
     }
 
@@ -66,8 +73,13 @@ public class AbyssBattle extends Game {
         Gdx.app.log(TAG, "Cerrando Abyss Battle...");
         super.dispose();
 
-        batch.dispose();
-        assets.dispose();
+        if (batch != null) {
+            batch.dispose();
+        }
+
+        if (assets != null) {
+            assets.dispose();
+        }
 
         if (VisUI.isLoaded()) {
             VisUI.dispose();
@@ -80,8 +92,6 @@ public class AbyssBattle extends Game {
 
         Gdx.app.log(TAG, "Abyss Battle cerrado correctamente");
     }
-
-    
 
     public DatabaseManager getDbManager() {
         return dbManager;
